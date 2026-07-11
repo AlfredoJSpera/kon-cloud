@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model Administrator {
+  AdministratorID  String        @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
+  EntraID_ObjectID String?       @unique @db.NVarChar(255)
+  FirstName        String        @db.NVarChar(100)
+  LastName         String        @db.NVarChar(100)
+  Email            String        @unique @db.NVarChar(255)
+  PasswordHash     String?       @db.NVarChar(255)
+  RegistrationDate DateTime      @default(now()) @db.DateTime2
+  Condominiums     Condominium[]
+}
+
+model Condominium {
+  CondominiumID   Int           @id @default(autoincrement())
+  AdministratorID String        @db.UniqueIdentifier
+  Name            String        @db.NVarChar(150)
+  Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
+}
