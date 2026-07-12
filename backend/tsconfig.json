@@ -1,5 +1,12 @@
 {
 	"compilerOptions": {
+		//! TypeScript paths shorthand
+		"baseUrl": ".",
+		"paths": {
+			"@lib/*": ["lib/*"],
+			"@generated/*": ["generated/*"]
+		},
+
 		"types": ["node"],
 
 		//! Required by Prisma

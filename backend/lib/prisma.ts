@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { env } from "prisma/config";
 import { PrismaMssql } from "@prisma/adapter-mssql";
-import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaClient } from "@generated/prisma/client";
 
 const config = {
 	server: env("DB_HOST"),
