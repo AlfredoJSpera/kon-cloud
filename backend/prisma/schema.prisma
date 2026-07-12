@@ -1,12 +1,15 @@
+// https://www.prisma.io/docs/orm/prisma-schema/overview/generators
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
+// https://www.prisma.io/docs/orm/prisma-schema/overview/data-sources
 datasource db {
   provider = "sqlserver"
 }
 
+// https://www.prisma.io/docs/orm/prisma-schema/data-model/models
 model Administrator {
   AdministratorID  String        @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
   EntraID_ObjectID String?       @unique @db.NVarChar(255)

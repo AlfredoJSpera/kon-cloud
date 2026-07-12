@@ -1,5 +1,16 @@
 # Backend
 
+## Project structure
+
+[Prisma](https://www.prisma.io/docs/orm) files:
+
+- `prisma/migrations/`: Database migration files.
+- `prisma/schema.prisma`: Database schema.
+- `lib/prisma.ts`: ORM client for interacting with the Database. Reads the Database credentials from the `.env`.
+- `prisma.config.ts`: Reads the Database credentials from the `.env` and turns them into a Database connection string.
+
+## Making it work
+
 Copy `.env.example` into `.env` and edit it.
 
 Delete any previous database docker volume if necessary:

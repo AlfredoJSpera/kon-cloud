@@ -1,11 +1,13 @@
 {
 	"compilerOptions": {
+		"types": ["node"],
+
+		//! Required by Prisma
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"target": "es2025",
 		"strict": true,
 		"esModuleInterop": true,
-		"ignoreDeprecations": "6.0",
-		"types": ["node"]
+		"ignoreDeprecations": "6.0"
 	}
 }
