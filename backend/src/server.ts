@@ -62,9 +62,9 @@ app.post(
 		});
 
 		if (!result) {
-			return res.status(404).json({
+			return res.status(401).json({
 				error: true,
-				message: "Account not found.",
+				message: "Invalid credentials.",
 			});
 		}
 
