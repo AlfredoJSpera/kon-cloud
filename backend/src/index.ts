@@ -1,4 +1,5 @@
 import { prisma } from "@lib/prisma";
+import { logger } from "./logger";
 
 async function main() {
 	const administrator = await prisma.administrator.create({
@@ -16,16 +17,13 @@ async function main() {
 			Condominiums: true,
 		},
 	});
-	console.log("Created administrator:", administrator);
+	logger.info({ administrator }, "Created administrator successfully");
 
 	const allAdministrators = await prisma.administrator.findMany({
 		include: { Condominiums: true },
 	});
 
-	console.log(
-		"All administrators:",
-		JSON.stringify(allAdministrators, null, 2),
-	);
+	logger.info({ allAdministrators }, "All administrators");
 }
 
 main()

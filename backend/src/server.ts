@@ -1,17 +1,16 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
-import morgan from "morgan";
 import { prisma } from "@lib/prisma";
-import { Prisma } from "@generated/prisma/client";
 import { catchError, prismaErrorHandler } from "./errorHandler";
+import { loggerHttp, logger } from "./logger";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(morgan("tiny"));
+app.use(loggerHttp);
 app.use(express.json());
 
 // Endpoints
@@ -41,9 +40,10 @@ app.post(
 );
 
 // Automatic error handling
+//! Must be directly below the endpoints
 app.use(prismaErrorHandler);
 
 // Run server
 app.listen(port, () => {
-	console.log(`Express is running on port ${port}`);
+	logger.info(`Express is running on port ${port}`);
 });

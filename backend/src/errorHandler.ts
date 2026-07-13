@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Prisma } from "@generated/prisma/client";
+import { logger } from "./logger";
 
 export const prismaErrorHandler = (
 	err: any,
@@ -25,7 +26,7 @@ export const prismaErrorHandler = (
 				});
 
 			default:
-				console.error("Unhandled Prisma error:", err.code);
+				logger.error(`Unhandled Prisma error: ${err.code}`);
 				return res.status(400).json({
 					error: true,
 					message: "Bad request.",
@@ -34,7 +35,7 @@ export const prismaErrorHandler = (
 	}
 
 	// Unknown Error
-	console.error("Unhandled Error:", err);
+	logger.error({ err }, "Unhandled Error");
 	return res.status(500).json({
 		error: true,
 		message: "An unexpected error occurred on the server.",

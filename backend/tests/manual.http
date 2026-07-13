@@ -8,9 +8,3 @@ Content-Type: application/json
   "email": "mario.rossi@example.com",
   "password": "PasswordSicura123!"
 }
-
-### List all condominiums
-GET http://localhost:3000/condominiums
-
-### List one condominium
-GET http://localhost:3000/condominiums/bnel
