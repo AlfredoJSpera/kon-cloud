@@ -1,8 +1,16 @@
-### List all administrators
-GET http://localhost:3000/administrators
+### Register a new administrator
+POST http://localhost:3000/administrators/register
+Content-Type: application/json
+
+{
+  "firstName": "Mario",
+  "lastName": "Rossi",
+  "email": "mario.rossi@example.com",
+  "password": "PasswordSicura123!"
+}
 
 ### List all condominiums
 GET http://localhost:3000/condominiums
 
 ### List one condominium
-GET http://localhost:3000/condominiums/2
+GET http://localhost:3000/condominiums/bnel

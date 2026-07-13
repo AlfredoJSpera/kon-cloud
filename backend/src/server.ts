@@ -1,8 +1,10 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { prisma } from "@lib/prisma";
+import { Prisma } from "@generated/prisma/client";
+import { catchError, prismaErrorHandler } from "./errorHandler";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
@@ -13,23 +15,33 @@ app.use(morgan("tiny"));
 app.use(express.json());
 
 // Endpoints
-app.get("/administrators", async (req, res) => {
-	const administrators = await prisma.administrator.findMany();
-	res.json(administrators);
-});
+app.post(
+	"/administrators/register",
+	catchError(async (req: Request, res: Response) => {
+		const { firstName, lastName, email, password } = req.body;
 
-app.get("/condominiums", async (req, res) => {
-	const condominiums = await prisma.condominium.findMany();
-	res.json(condominiums);
-});
+		if (!firstName || !lastName || !email || !password) {
+			return res.status(400).json({
+				error: true,
+				message: "Missing required fields.",
+			});
+		}
 
-app.get("/condominiums/:id", async (req, res) => {
-	const { id } = req.params;
-	const condominiums = await prisma.condominium.findUnique({
-		where: { CondominiumID: Number(id) },
-	});
-	res.json(condominiums);
-});
+		const result = await prisma.administrator.create({
+			data: {
+				FirstName: firstName,
+				LastName: lastName,
+				Email: email,
+				PasswordHash: password,
+			},
+		});
+
+		res.status(201).json(result.AdministratorID);
+	}),
+);
+
+// Automatic error handling
+app.use(prismaErrorHandler);
 
 // Run server
 app.listen(port, () => {
