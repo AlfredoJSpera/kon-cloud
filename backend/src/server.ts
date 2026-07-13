@@ -6,10 +6,15 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@lib/prisma";
 import { catchError, prismaErrorHandler } from "./errorHandler";
 import { loggerHttp, logger } from "./logger";
-import { access_token_secret, authenticateToken } from "./authenticateToken";
+import {
+	access_token_secret,
+	authenticateToken,
+	refresh_token_secret,
+} from "./authenticateToken";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
+let refreshTokens = [];
 
 // Middleware
 app.use(cors());
@@ -97,12 +102,13 @@ app.post(
 			email: result.Email,
 		};
 
-		const token = jwt.sign(tokenPayload, access_token_secret, {
-			expiresIn: "1h",
-		});
+		const accessToken = generateAccessToken(tokenPayload);
+		const refreshToken = generateRefreshToken(tokenPayload);
+		refreshTokens.push(refreshToken);
 
 		res.status(200).json({
-			token,
+			accessToken,
+			refreshToken,
 			profile: {
 				administratorId: result.AdministratorID,
 				firstName: result.FirstName,
@@ -114,6 +120,45 @@ app.post(
 					name: c.Name,
 				})),
 			},
+		});
+	}),
+);
+
+app.post(
+	"/refresh-token",
+	catchError(async (req: Request, res: Response) => {
+		const { refreshToken } = req.body;
+
+		if (!refreshToken) {
+			return res.status(401).json({
+				error: true,
+				message: "Missing token.",
+			});
+		}
+
+		if (!refreshTokens.includes(refreshToken)) {
+			return res.status(403).json({
+				error: true,
+				message: "Invalid token.",
+			});
+		}
+		jwt.verify(refreshToken, refresh_token_secret, (err, decoded: any) => {
+			if (err) {
+				logger.debug({ err });
+				return res.status(401).json({
+					error: true,
+					message: "Invalid or expired token.",
+				});
+			}
+
+			const tokenPayload = {
+				administratorId: decoded.administratorId,
+				email: decoded.email,
+			};
+
+			const accessToken = generateAccessToken(tokenPayload);
+
+			res.status(200).json({ accessToken });
 		});
 	}),
 );
@@ -157,6 +202,16 @@ app.get(
 // Automatic error handling
 //! Must be directly below the endpoints
 app.use(prismaErrorHandler);
+
+function generateAccessToken(tokenPayload: any) {
+	return jwt.sign(tokenPayload, access_token_secret, {
+		expiresIn: "15s",
+	});
+}
+
+function generateRefreshToken(tokenPayload: any) {
+	return jwt.sign(tokenPayload, refresh_token_secret);
+}
 
 // Run server
 app.listen(port, () => {
