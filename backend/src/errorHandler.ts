@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { Prisma } from "@generated/prisma/client";
 import { logger } from "./logger";
 
-export const prismaErrorHandler = (
+export function prismaErrorHandler(
 	err: any,
 	req: Request,
 	res: Response,
 	next: NextFunction,
-) => {
+) {
 	// Prisma Errors
 	if (err instanceof Prisma.PrismaClientKnownRequestError) {
 		logger.debug({ err }, "An Error has occurred:");
@@ -41,10 +41,10 @@ export const prismaErrorHandler = (
 		error: true,
 		message: "An unexpected error occurred on the server.",
 	});
-};
+}
 
-export const catchError = (fn: Function) => {
+export function catchError(fn: Function) {
 	return (req: Request, res: Response, next: NextFunction) => {
 		fn(req, res, next).catch(next);
 	};
-};
+}

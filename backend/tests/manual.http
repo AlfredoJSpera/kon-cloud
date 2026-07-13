@@ -29,3 +29,17 @@ Content-Type: application/json
   "email": "mario.rossi@example.com",
   "password": "PasswordSicura123!"
 }
+
+### Login as the second administrator
+POST http://localhost:3000/administrators/login
+Content-Type: application/json
+
+{
+  "email": "luigi.verdi@example.com",
+  "password": "PasswordSicura123!"
+}
+
+### View my data
+GET http://localhost:3000/administrators/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbmlzdHJhdG9ySWQiOiJlZGM3YzY3Ny01ODMwLTQwZTMtYTRiYS0yODY0NzNmOTAyZjYiLCJlbWFpbCI6Imx1aWdpLnZlcmRpQGV4YW1wbGUuY29tIiwiaWF0IjoxNzgzOTUzOTgyLCJleHAiOjE3ODM5NTc1ODJ9.5cypuBbuPrQdr7QvEh8V9jGiEMiS8qvAln7A7exgSoo
+

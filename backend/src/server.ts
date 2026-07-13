@@ -2,9 +2,11 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { prisma } from "@lib/prisma";
 import { catchError, prismaErrorHandler } from "./errorHandler";
 import { loggerHttp, logger } from "./logger";
+import { access_token_secret, authenticateToken } from "./authenticateToken";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
@@ -90,8 +92,17 @@ app.post(
 			});
 		}
 
+		const tokenPayload = {
+			administratorId: result.AdministratorID,
+			email: result.Email,
+		};
+
+		const token = jwt.sign(tokenPayload, access_token_secret, {
+			expiresIn: "1h",
+		});
+
 		res.status(200).json({
-			token: "TODO JWT",
+			token,
 			profile: {
 				administratorId: result.AdministratorID,
 				firstName: result.FirstName,
@@ -103,6 +114,42 @@ app.post(
 					name: c.Name,
 				})),
 			},
+		});
+	}),
+);
+
+app.get(
+	"/administrators/me",
+	authenticateToken,
+	catchError(async (req: Request, res: Response) => {
+		const adminId = req.administrator?.administratorId;
+
+		const result = await prisma.administrator.findUnique({
+			where: {
+				AdministratorID: adminId,
+			},
+			include: {
+				Condominiums: true,
+			},
+		});
+
+		if (!result) {
+			return res.status(404).json({
+				error: true,
+				message: "Profile not found in database.",
+			});
+		}
+
+		res.status(200).json({
+			administratorId: result.AdministratorID,
+			firstName: result.FirstName,
+			lastName: result.LastName,
+			email: result.Email,
+			registrationDate: result.RegistrationDate,
+			condominiums: result.Condominiums.map((c) => ({
+				condominiumId: c.CondominiumID,
+				name: c.Name,
+			})),
 		});
 	}),
 );
