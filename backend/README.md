@@ -28,6 +28,7 @@ docker compose up -d
 Make the database migration:
 
 ```sh
+npx prisma migrate dev --create-only --name migration_name
 npx prisma migrate dev
 ```
 

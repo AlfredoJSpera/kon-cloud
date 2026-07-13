@@ -2,6 +2,7 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 // https://www.prisma.io/docs/orm/prisma-schema/overview/data-sources
@@ -12,13 +13,16 @@ datasource db {
 // https://www.prisma.io/docs/orm/prisma-schema/data-model/models
 model Administrator {
   AdministratorID  String        @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
-  EntraID_ObjectID String?       @unique @db.NVarChar(255)
+  EntraID_ObjectID String?       @db.NVarChar(255)
   FirstName        String        @db.NVarChar(100)
   LastName         String        @db.NVarChar(100)
   Email            String        @unique @db.NVarChar(255)
   PasswordHash     String?       @db.NVarChar(255)
   RegistrationDate DateTime      @default(now()) @db.DateTime2
   Condominiums     Condominium[]
+
+  // Partial index so that EntraID_ObjectID can be null on different rows
+  @@unique([EntraID_ObjectID], where: raw("EntraID_ObjectID IS NOT NULL"))
 }
 
 model Condominium {

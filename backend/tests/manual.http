@@ -9,6 +9,18 @@ Content-Type: application/json
   "password": "PasswordSicura123!"
 }
 
+### Register a second new administrator
+POST http://localhost:3000/administrators/register
+Content-Type: application/json
+
+{
+  "firstName": "Luigi",
+  "lastName": "Verdi",
+  "email": "luigi.verdi@example.com",
+  "password": "PasswordNonSicura"
+}
+
+
 ### Login as an administrator
 POST http://localhost:3000/administrators/login
 Content-Type: application/json
