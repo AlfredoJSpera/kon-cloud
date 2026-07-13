@@ -39,7 +39,9 @@ app.post(
 			},
 		});
 
-		res.status(201).json(result.AdministratorID);
+		res.status(201).json({
+			administratorId: result.AdministratorID,
+		});
 	}),
 );
 
@@ -59,6 +61,7 @@ app.post(
 			where: {
 				Email: email,
 			},
+			include: { Condominiums: true },
 		});
 
 		if (!result) {
@@ -69,13 +72,9 @@ app.post(
 		}
 
 		if (!result.PasswordHash) {
-			logger.error(
-				{ result },
-				"Account found during login, but it does not have a password.",
-			);
-			return res.status(404).json({
+			return res.status(401).json({
 				error: true,
-				message: "Account credentials not found.",
+				message: "Invalid credentials.",
 			});
 		}
 
@@ -91,7 +90,20 @@ app.post(
 			});
 		}
 
-		res.status(200).json(result);
+		res.status(200).json({
+			token: "TODO JWT",
+			profile: {
+				administratorId: result.AdministratorID,
+				firstName: result.FirstName,
+				lastName: result.LastName,
+				email: result.Email,
+				registrationDate: result.RegistrationDate,
+				condominiums: result.Condominiums.map((c) => ({
+					condominiumId: c.CondominiumID,
+					name: c.Name,
+				})),
+			},
+		});
 	}),
 );
 

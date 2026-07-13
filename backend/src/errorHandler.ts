@@ -8,9 +8,9 @@ export const prismaErrorHandler = (
 	res: Response,
 	next: NextFunction,
 ) => {
-	logger.debug({ err }, "An Error has occurred:");
 	// Prisma Errors
 	if (err instanceof Prisma.PrismaClientKnownRequestError) {
+		logger.debug({ err }, "An Error has occurred:");
 		switch (err.code) {
 			case "P2000": // Value too long for column
 				const match = err.message.match(/Column:\s*(\w+)/);
