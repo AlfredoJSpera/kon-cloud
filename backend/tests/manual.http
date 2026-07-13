@@ -8,3 +8,12 @@ Content-Type: application/json
   "email": "mario.rossi@example.com",
   "password": "PasswordSicura123!"
 }
+
+### Login as an administrator
+POST http://localhost:3000/administrators/login
+Content-Type: application/json
+
+{
+  "email": "mario.rossi@example.com",
+  "password": "PasswordSicura123!"
+}

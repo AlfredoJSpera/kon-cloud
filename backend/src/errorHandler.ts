@@ -8,6 +8,7 @@ export const prismaErrorHandler = (
 	res: Response,
 	next: NextFunction,
 ) => {
+	logger.debug({ err }, "An Error has occurred:");
 	// Prisma Errors
 	if (err instanceof Prisma.PrismaClientKnownRequestError) {
 		switch (err.code) {

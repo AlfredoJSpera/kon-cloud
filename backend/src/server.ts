@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import bcrypt from "bcrypt";
 import { prisma } from "@lib/prisma";
 import { catchError, prismaErrorHandler } from "./errorHandler";
 import { loggerHttp, logger } from "./logger";
@@ -26,16 +27,71 @@ app.post(
 			});
 		}
 
+		const saltRounds = 10;
+		const hashedPassword = await bcrypt.hash(password, saltRounds);
+
 		const result = await prisma.administrator.create({
 			data: {
 				FirstName: firstName,
 				LastName: lastName,
 				Email: email,
-				PasswordHash: password,
+				PasswordHash: hashedPassword,
 			},
 		});
 
 		res.status(201).json(result.AdministratorID);
+	}),
+);
+
+app.post(
+	"/administrators/login",
+	catchError(async (req: Request, res: Response) => {
+		const { email, password } = req.body;
+
+		if (!email || !password) {
+			return res.status(400).json({
+				error: true,
+				message: "Missing required fields.",
+			});
+		}
+
+		const result = await prisma.administrator.findFirst({
+			where: {
+				Email: email,
+			},
+		});
+
+		if (!result) {
+			return res.status(404).json({
+				error: true,
+				message: "Account not found.",
+			});
+		}
+
+		if (!result.PasswordHash) {
+			logger.error(
+				{ result },
+				"Account found during login, but it does not have a password.",
+			);
+			return res.status(404).json({
+				error: true,
+				message: "Account credentials not found.",
+			});
+		}
+
+		const isPasswordValid = await bcrypt.compare(
+			password,
+			result.PasswordHash,
+		);
+
+		if (!isPasswordValid) {
+			return res.status(401).json({
+				error: true,
+				message: "Invalid credentials.",
+			});
+		}
+
+		res.status(200).json(result);
 	}),
 );
 
