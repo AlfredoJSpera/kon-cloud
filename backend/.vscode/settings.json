@@ -3,5 +3,6 @@
 		"**/generated": true,
 		"**/node_modules": true,
 		"**/package-lock.json": true
-	}
+	},
+	"conventionalCommits.scopes": ["backend"]
 }

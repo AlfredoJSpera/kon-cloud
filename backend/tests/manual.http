@@ -1,0 +1,8 @@
+### List all administrators
+GET http://localhost:3000/administrators
+
+### List all condominiums
+GET http://localhost:3000/condominiums
+
+### List one condominium
+GET http://localhost:3000/condominiums/2
