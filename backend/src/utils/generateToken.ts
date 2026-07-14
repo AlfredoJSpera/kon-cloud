@@ -11,5 +11,7 @@ export function generateAccessToken(tokenPayload: TokenPayload) {
 	});
 }
 export function generateRefreshToken(tokenPayload: TokenPayload) {
-	return jwt.sign(tokenPayload, refresh_token_secret);
+	return jwt.sign(tokenPayload, refresh_token_secret, {
+		expiresIn: "1d",
+	});
 }

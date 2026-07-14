@@ -37,6 +37,7 @@ model RefreshToken {
   id              String        @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
   token           String        @unique @db.NVarChar(500)
   createdAt       DateTime      @default(now())
+  expiresAt		  DateTime		
   administratorId String        @db.UniqueIdentifier
   administrator   Administrator @relation(fields: [administratorId], references: [AdministratorID], onDelete: Cascade)
 }

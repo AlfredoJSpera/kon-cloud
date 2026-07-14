@@ -23,7 +23,6 @@ import {
 import {
 	KonInvalidCredentialsError,
 	KonInvalidTokenError,
-	KonMissingTokenError,
 } from "@errors/authentication";
 
 const router = Router();
@@ -78,10 +77,22 @@ router.post(
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
 
+			const expiresAt = new Date();
+			expiresAt.setDate(expiresAt.getDate() + 1);
+
+			// Delete expired tokens from the database
+			await prisma.refreshToken.deleteMany({
+				where: {
+					administratorId: result.AdministratorID,
+					expiresAt: { lt: new Date() },
+				},
+			});
+
 			await prisma.refreshToken.create({
 				data: {
 					token: refreshToken,
 					administratorId: result.AdministratorID,
+					expiresAt: expiresAt,
 				},
 			});
 
@@ -126,7 +137,13 @@ router.post(
 				},
 			});
 
-			if (!savedToken) {
+			if (!savedToken || savedToken.expiresAt < new Date()) {
+				if (savedToken) {
+					// Token exists in database but it expired
+					await prisma.refreshToken.delete({
+						where: { token: refreshToken },
+					});
+				}
 				logger.debug("Refresh token not found in the database");
 				throw new KonInvalidTokenError();
 			}
@@ -157,6 +174,9 @@ router.post(
 					const newAccessToken = generateAccessToken(tokenPayload);
 					const newRefreshToken = generateRefreshToken(tokenPayload);
 
+					const expiresAt = new Date();
+					expiresAt.setDate(expiresAt.getDate() + 1);
+
 					try {
 						await prisma.$transaction([
 							prisma.refreshToken.delete({
@@ -167,6 +187,7 @@ router.post(
 									token: newRefreshToken,
 									administratorId:
 										tokenPayload.administratorId,
+									expiresAt: expiresAt,
 								},
 							}),
 						]);
