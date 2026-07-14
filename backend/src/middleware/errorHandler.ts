@@ -46,42 +46,11 @@ export function prismaErrorHandler(
 
 	if (err instanceof KonBaseError) {
 		logger.debug({ err }, "A Kon Error has occurred:");
-		if (err instanceof KonMissingRequiredFieldsError) {
-			return res.status(400).json({
-				error: true,
-				message: "Missing required fields.",
-			});
-		}
-		if (err instanceof KonIncorrectFieldTypeError) {
-			return res.status(400).json({
-				error: true,
-				message: "Incorrect field type.",
-			});
-		}
-		if (err instanceof KonNotFoundError) {
-			return res.status(404).json({
-				error: true,
-				message: "Resource not found.",
-			});
-		}
-		if (err instanceof KonInvalidCredentialsError) {
-			return res.status(401).json({
-				error: true,
-				message: "Invalid credentials.",
-			});
-		}
-		if (err instanceof KonMissingTokenError) {
-			return res.status(401).json({
-				error: true,
-				message: "Missing token.",
-			});
-		}
-		if (err instanceof KonInvalidTokenError) {
-			return res.status(401).json({
-				error: true,
-				message: "Invalid or expired token.",
-			});
-		}
+
+		return res.status(err.statusCode).json({
+			error: true,
+			message: err.message,
+		});
 	}
 
 	// Unknown Error
