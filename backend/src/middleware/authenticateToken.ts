@@ -4,16 +4,17 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 // Get the token secrets from the .env
-const raw_access_token_secret = process.env.SV_ACCESS_TOKEN_SECRET;
-const raw_refresh_token_secret = process.env.SV_REFRESH_TOKEN_SECRET;
-if (!raw_access_token_secret || !raw_refresh_token_secret) {
+if (
+	!process.env.SV_ACCESS_TOKEN_SECRET ||
+	!process.env.SV_REFRESH_TOKEN_SECRET
+) {
 	logger.fatal(
 		"Could not read SV_ACCESS_TOKEN_SECRET or SV_REFRESH_TOKEN_SECRET from the .env file.",
 	);
 	process.exit(1);
 }
-export const access_token_secret = raw_access_token_secret;
-export const refresh_token_secret = raw_refresh_token_secret;
+export const access_token_secret = process.env.SV_ACCESS_TOKEN_SECRET;
+export const refresh_token_secret = process.env.SV_REFRESH_TOKEN_SECRET;
 
 // Extend Express' Request to include the authenticated user
 declare global {
