@@ -6,6 +6,7 @@ import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
 import { refresh_token_secret } from "@middleware/authenticateToken";
 import {
+	calculateRefreshTokenExpireDate,
 	generateAccessToken,
 	generateRefreshToken,
 } from "@utils/generateToken";
@@ -77,8 +78,7 @@ router.post(
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
 
-			const expiresAt = new Date();
-			expiresAt.setDate(expiresAt.getDate() + 1);
+			const expiresAt = calculateRefreshTokenExpireDate();
 
 			// Delete expired tokens from the database
 			await prisma.refreshToken.deleteMany({
@@ -173,9 +173,7 @@ router.post(
 
 					const newAccessToken = generateAccessToken(tokenPayload);
 					const newRefreshToken = generateRefreshToken(tokenPayload);
-
-					const expiresAt = new Date();
-					expiresAt.setDate(expiresAt.getDate() + 1);
+					const expiresAt = calculateRefreshTokenExpireDate();
 
 					try {
 						await prisma.$transaction([

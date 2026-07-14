@@ -1,5 +1,5 @@
 import "dotenv/config";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { logger } from "./logger";
 import { NextFunction, Request, Response } from "express";
 import { TokenPayload } from "@interfaces/common";
