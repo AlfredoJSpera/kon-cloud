@@ -26,7 +26,6 @@ import {
 	KonMissingTokenError,
 } from "@errors/authentication";
 
-let refreshTokens: string[] = [];
 const router = Router();
 
 type LoginApiContract = KonApiContract<IAuthLoginInput, IAuthLoginOutput>;
@@ -78,7 +77,13 @@ router.post(
 
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
-			refreshTokens.push(refreshToken);
+
+			await prisma.refreshToken.create({
+				data: {
+					token: refreshToken,
+					administratorId: result.AdministratorID,
+				},
+			});
 
 			res.status(200).json({
 				accessToken,
@@ -115,8 +120,13 @@ router.post(
 				throw new KonMissingRequiredFieldsError();
 			}
 
-			if (!refreshTokens.includes(refreshToken)) {
-				logger.debug("The refresh token was not in the saved tokens.");
+			const savedToken = await prisma.refreshToken.findUnique({
+				where: {
+					token: refreshToken,
+				},
+			});
+
+			if (!savedToken) {
 				throw new KonInvalidTokenError();
 			}
 
