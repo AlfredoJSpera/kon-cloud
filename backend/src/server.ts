@@ -4,13 +4,13 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "@lib/prisma";
-import { catchError, prismaErrorHandler } from "./errorHandler";
-import { loggerHttp, logger } from "./logger";
+import { catchError, prismaErrorHandler } from "@middleware/errorHandler";
+import { loggerHttp, logger } from "@middleware/logger";
 import {
 	access_token_secret,
 	authenticateToken,
 	refresh_token_secret,
-} from "./authenticateToken";
+} from "@middleware/authenticateToken";
 import { rateLimit } from "express-rate-limit";
 
 const app = express();
