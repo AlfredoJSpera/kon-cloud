@@ -17,4 +17,5 @@ export interface IAuthRefreshTokenInput {
 
 export interface IAuthRefreshTokenOutput {
 	accessToken: string;
+	refreshToken: string;
 }

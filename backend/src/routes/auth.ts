@@ -43,7 +43,7 @@ router.post(
 				throw new KonIncorrectFieldTypeError();
 			}
 
-			const result = await prisma.administrator.findFirst({
+			const result = await prisma.administrator.findUnique({
 				where: {
 					Email: email,
 				},
@@ -127,18 +127,25 @@ router.post(
 			});
 
 			if (!savedToken) {
+				logger.debug("Refresh token not found in the database");
 				throw new KonInvalidTokenError();
 			}
 
 			jwt.verify(
 				refreshToken,
 				refresh_token_secret,
-				(err, decoded: any) => {
+				async (err, decoded: any) => {
 					if (err) {
 						logger.debug(
 							{ err },
 							"Error during verification of JWT.",
 						);
+						// Remove the token from the database if it exists
+						await prisma.refreshToken
+							.delete({
+								where: { token: refreshToken },
+							})
+							.catch(() => {});
 						throw new KonInvalidTokenError();
 					}
 
@@ -147,11 +154,34 @@ router.post(
 						email: decoded.email,
 					};
 
-					const accessToken = generateAccessToken(tokenPayload);
+					const newAccessToken = generateAccessToken(tokenPayload);
+					const newRefreshToken = generateRefreshToken(tokenPayload);
 
-					res.status(200).json({
-						accessToken,
-					});
+					try {
+						await prisma.$transaction([
+							prisma.refreshToken.delete({
+								where: { token: refreshToken },
+							}),
+							prisma.refreshToken.create({
+								data: {
+									token: newRefreshToken,
+									administratorId:
+										tokenPayload.administratorId,
+								},
+							}),
+						]);
+
+						res.status(200).json({
+							accessToken: newAccessToken,
+							refreshToken: newRefreshToken,
+						});
+					} catch (error) {
+						logger.error(
+							{ error },
+							"Error during database transaction for Refresh Token Rotation:",
+						);
+						throw new KonInvalidTokenError();
+					}
 				},
 			);
 		},

@@ -44,7 +44,7 @@ router.post(
 				throw new KonIncorrectFieldTypeError();
 			}
 
-			const found = await prisma.administrator.findFirst({
+			const found = await prisma.administrator.findUnique({
 				where: {
 					Email: email,
 				},
