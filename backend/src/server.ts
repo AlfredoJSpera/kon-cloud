@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import authRoutes from "@routes/authRoutes";
-import administratorsRoutes from "@routes/administratorsRoutes";
+import authRoutes from "@routes/auth";
+import administratorsRoutes from "@routes/administrator";
 import { prismaErrorHandler } from "@middleware/errorHandler";
 import { loggerHttp, logger } from "@middleware/logger";
 import { rateLimit } from "express-rate-limit";
