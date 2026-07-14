@@ -5,6 +5,7 @@
 		"paths": {
 			"@lib/*": ["lib/*"],
 			"@generated/*": ["generated/*"],
+			"@interfaces/*": ["interfaces/*"],
 			"@middleware/*": ["src/middleware/*"],
 			"@routes/*": ["src/routes/*"],
 			"@utils/*": ["src/utils/*"]

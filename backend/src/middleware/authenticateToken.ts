@@ -51,6 +51,7 @@ export function authenticateToken(
 			});
 		}
 
+		// Implant administrator info in the request to the endpoint
 		req.administrator = {
 			administratorId: decoded.administratorId,
 			email: decoded.email,
