@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
@@ -15,7 +15,7 @@ import {
 	IAuthRefreshTokenInput,
 	IAuthRefreshTokenOutput,
 } from "@interfaces/auth";
-import { KonApiContract } from "@interfaces/common";
+import { KonApiContract, TokenPayload } from "@interfaces/common";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
@@ -71,7 +71,7 @@ router.post(
 				throw new KonInvalidCredentialsError();
 			}
 
-			const tokenPayload = {
+			const tokenPayload: TokenPayload = {
 				administratorId: result.AdministratorID,
 				email: result.Email,
 			};
@@ -80,7 +80,7 @@ router.post(
 			const refreshToken = generateRefreshToken(tokenPayload);
 			refreshTokens.push(refreshToken);
 
-			const responseData: IAuthLoginOutput = {
+			res.status(200).json({
 				accessToken,
 				refreshToken,
 				profile: {
@@ -93,8 +93,7 @@ router.post(
 						name: c.Name,
 					})),
 				},
-			};
-			res.status(200).json(responseData);
+			});
 		},
 	),
 );
@@ -113,10 +112,11 @@ router.post(
 			const { refreshToken } = req.body;
 
 			if (!refreshToken) {
-				throw new KonMissingTokenError();
+				throw new KonMissingRequiredFieldsError();
 			}
 
 			if (!refreshTokens.includes(refreshToken)) {
+				logger.debug("The refresh token was not in the saved tokens.");
 				throw new KonInvalidTokenError();
 			}
 
@@ -132,15 +132,16 @@ router.post(
 						throw new KonInvalidTokenError();
 					}
 
-					const tokenPayload = {
+					const tokenPayload: TokenPayload = {
 						administratorId: decoded.administratorId,
 						email: decoded.email,
 					};
 
-					const responseData: IAuthRefreshTokenOutput = {
-						accessToken: generateAccessToken(tokenPayload),
-					};
-					res.status(200).json(responseData);
+					const accessToken = generateAccessToken(tokenPayload);
+
+					res.status(200).json({
+						accessToken,
+					});
 				},
 			);
 		},

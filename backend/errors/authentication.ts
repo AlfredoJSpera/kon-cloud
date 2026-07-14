@@ -17,3 +17,9 @@ export class KonInvalidTokenError extends KonBaseError {
 		super(message, 401);
 	}
 }
+
+export class KonExpiredTokenError extends KonBaseError {
+	constructor(message: string = "Expired token.") {
+		super(message, 401);
+	}
+}

@@ -1,4 +1,4 @@
-import { AdministratorBasicInfo, IErrorResponse } from "./common";
+import { AdministratorBasicInfo } from "./common";
 
 export interface IAdministratorRegisterInput {
 	firstName: string;

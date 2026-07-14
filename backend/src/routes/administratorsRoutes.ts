@@ -55,15 +55,14 @@ router.post(
 				},
 			});
 
-			const responseData: IAdministratorRegisterOutput = {
+			res.status(201).json({
 				administratorId: result.AdministratorID,
-			};
-			res.status(201).json(responseData);
+			});
 		},
 	),
 );
 
-type MeApiContract = KonApiContract<never, IAdministratorRegisterOutput>;
+type MeApiContract = KonApiContract<never, IAdministratorMeOutput>;
 router.get(
 	"/me",
 	authenticateToken,
@@ -84,7 +83,7 @@ router.get(
 			throw new KonNotFoundError();
 		}
 
-		const responseData: IAdministratorMeOutput = {
+		res.status(200).json({
 			administratorId: result.AdministratorID,
 			firstName: result.FirstName,
 			lastName: result.LastName,
@@ -93,8 +92,7 @@ router.get(
 				condominiumId: c.CondominiumID,
 				name: c.Name,
 			})),
-		};
-		res.status(200).json(responseData);
+		});
 	}),
 );
 

@@ -1,8 +1,13 @@
 import "dotenv/config";
+import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { logger } from "./logger";
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import { TokenPayload } from "@interfaces/common";
+import {
+	KonExpiredTokenError,
+	KonInvalidTokenError,
+	KonMissingTokenError,
+} from "@errors/authentication";
 
 // Get the token secrets from the .env
 if (
@@ -35,19 +40,22 @@ export function authenticateToken(
 
 	// Get the token after "Bearer"
 	const token = authHeader && authHeader?.split(" ")[1];
+
 	if (!token) {
-		return res.status(401).json({
-			error: true,
-			message: "Missing token.",
-		});
+		return next(new KonMissingTokenError());
 	}
 
-	jwt.verify(token, access_token_secret, (err, decoded: any) => {
+	jwt.verify(token, access_token_secret, (err: any, decoded: any) => {
 		if (err) {
-			return res.status(401).json({
-				error: true,
-				message: "Invalid or expired token.",
-			});
+			// Throw error to prismaErrorHandler
+			if (err.name === "JsonWebTokenError") {
+				return next(new KonInvalidTokenError("Invalid token."));
+			}
+			if (err.name === "TokenExpiredError") {
+				return next(new KonExpiredTokenError());
+			}
+			logger.error({ err }, "Unexpected Token verification failure:");
+			return next(new KonInvalidTokenError());
 		}
 
 		// Implant administrator info in the request to the endpoint
@@ -56,6 +64,6 @@ export function authenticateToken(
 			email: decoded.email,
 		};
 
-		next();
+		next(); // Go to selected endpoint
 	});
 }

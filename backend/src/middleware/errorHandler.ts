@@ -1,18 +1,8 @@
 import { logger } from "./logger";
 import { Request, Response, NextFunction } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import {
-	KonIncorrectFieldTypeError,
-	KonMissingRequiredFieldsError,
-	KonNotFoundError,
-} from "@errors/validation";
 import { IErrorResponse } from "@interfaces/common";
 import KonBaseError from "@errors/base";
-import {
-	KonInvalidCredentialsError,
-	KonInvalidTokenError,
-	KonMissingTokenError,
-} from "@errors/authentication";
 
 export function prismaErrorHandler(
 	err: any,
@@ -20,6 +10,7 @@ export function prismaErrorHandler(
 	res: Response<IErrorResponse>,
 	next: NextFunction,
 ) {
+	// Handle Prisma Errors
 	if (err instanceof PrismaClientKnownRequestError) {
 		logger.debug({ err }, "A Prisma Error has occurred:");
 		switch (err.code) {
@@ -44,6 +35,7 @@ export function prismaErrorHandler(
 		}
 	}
 
+	// Handle Kon Errors
 	if (err instanceof KonBaseError) {
 		logger.debug({ err }, "A Kon Error has occurred:");
 
@@ -53,11 +45,11 @@ export function prismaErrorHandler(
 		});
 	}
 
-	// Unknown Error
-	logger.error({ err }, "Unhandled Error");
+	// Handle Unknown Errors
+	logger.error({ err }, "Unhandled Error:");
 	return res.status(500).json({
 		error: true,
-		message: "An unexpected error occurred on the server.",
+		message: "An error occurred on the server.",
 	});
 }
 
