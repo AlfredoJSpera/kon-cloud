@@ -5,7 +5,9 @@
 		"paths": {
 			"@lib/*": ["lib/*"],
 			"@generated/*": ["generated/*"],
-			"@middleware/*": ["src/middleware/*"]
+			"@middleware/*": ["src/middleware/*"],
+			"@routes/*": ["src/routes/*"],
+			"@utils/*": ["src/utils/*"]
 		},
 
 		"types": ["node"],
