@@ -15,19 +15,16 @@ import {
 	IAuthRefreshTokenInput,
 	IAuthRefreshTokenOutput,
 } from "@interfaces/auth";
-import { IErrorResponse } from "@interfaces/common";
+import { KonApiContract } from "@interfaces/common";
 
 let refreshTokens: string[] = [];
 const router = Router();
 
-type LoginResponse = IAuthLoginOutput | IErrorResponse;
+type LoginApiContract = KonApiContract<IAuthLoginInput, IAuthLoginOutput>;
 router.post(
 	"/login",
 	catchError(
-		async (
-			req: Request<Record<string, never>, LoginResponse, IAuthLoginInput>,
-			res: Response<LoginResponse>,
-		) => {
+		async (req: LoginApiContract["Req"], res: LoginApiContract["Res"]) => {
 			const { email, password } = req.body;
 
 			if (!email || !password) {
@@ -98,17 +95,16 @@ router.post(
 	),
 );
 
-type RefreshTokenResponse = IAuthRefreshTokenOutput | IErrorResponse;
+type RefreshTokenApiContract = KonApiContract<
+	IAuthRefreshTokenInput,
+	IAuthRefreshTokenOutput
+>;
 router.post(
 	"/refresh-token",
 	catchError(
 		async (
-			req: Request<
-				Record<string, never>,
-				RefreshTokenResponse,
-				IAuthRefreshTokenInput
-			>,
-			res: Response<RefreshTokenResponse>,
+			req: RefreshTokenApiContract["Req"],
+			res: RefreshTokenApiContract["Res"],
 		) => {
 			const { refreshToken } = req.body;
 

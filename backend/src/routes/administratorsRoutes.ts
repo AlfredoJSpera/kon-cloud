@@ -8,21 +8,20 @@ import {
 	IAdministratorRegisterInput,
 	IAdministratorRegisterOutput,
 } from "@interfaces/administrator";
-import { IErrorResponse } from "@interfaces/common";
+import { KonApiContract } from "@interfaces/common";
 
 const router = Router();
 
-type RegisterResponse = IAdministratorRegisterOutput | IErrorResponse;
+type RegisterApiContract = KonApiContract<
+	IAdministratorRegisterInput,
+	IAdministratorRegisterOutput
+>;
 router.post(
 	"/register",
 	catchError(
 		async (
-			req: Request<
-				Record<string, never>,
-				RegisterResponse,
-				IAdministratorRegisterInput
-			>,
-			res: Response<RegisterResponse>,
+			req: RegisterApiContract["Req"],
+			res: RegisterApiContract["Res"],
 		) => {
 			const { firstName, lastName, email, password } = req.body;
 
@@ -53,46 +52,41 @@ router.post(
 	),
 );
 
-type MeResponse = IAdministratorMeOutput | IErrorResponse;
+type MeApiContract = KonApiContract<never, IAdministratorRegisterOutput>;
 router.get(
 	"/me",
 	authenticateToken,
-	catchError(
-		async (
-			req: Request<Record<string, never>, MeResponse>,
-			res: Response<MeResponse>,
-		) => {
-			const adminId = req.administrator?.administratorId;
+	catchError(async (req: MeApiContract["Req"], res: MeApiContract["Res"]) => {
+		const adminId = req.administrator?.administratorId;
 
-			const result = await prisma.administrator.findUnique({
-				where: {
-					AdministratorID: adminId,
-				},
-				include: {
-					Condominiums: true,
-				},
+		const result = await prisma.administrator.findUnique({
+			where: {
+				AdministratorID: adminId,
+			},
+			include: {
+				Condominiums: true,
+			},
+		});
+
+		if (!result) {
+			return res.status(404).json({
+				error: true,
+				message: "Profile not found in database.",
 			});
+		}
 
-			if (!result) {
-				return res.status(404).json({
-					error: true,
-					message: "Profile not found in database.",
-				});
-			}
-
-			const responseData: IAdministratorMeOutput = {
-				administratorId: result.AdministratorID,
-				firstName: result.FirstName,
-				lastName: result.LastName,
-				email: result.Email,
-				condominiums: result.Condominiums.map((c) => ({
-					condominiumId: c.CondominiumID,
-					name: c.Name,
-				})),
-			};
-			res.status(200).json(responseData);
-		},
-	),
+		const responseData: IAdministratorMeOutput = {
+			administratorId: result.AdministratorID,
+			firstName: result.FirstName,
+			lastName: result.LastName,
+			email: result.Email,
+			condominiums: result.Condominiums.map((c) => ({
+				condominiumId: c.CondominiumID,
+				name: c.Name,
+			})),
+		};
+		res.status(200).json(responseData);
+	}),
 );
 
 export default router;
