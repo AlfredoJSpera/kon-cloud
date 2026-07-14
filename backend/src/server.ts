@@ -11,15 +11,23 @@ import {
 	authenticateToken,
 	refresh_token_secret,
 } from "./authenticateToken";
+import { rateLimit } from "express-rate-limit";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
 let refreshTokens = [];
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 500,
+	standardHeaders: false,
+	legacyHeaders: false,
+});
 
 // Middleware
 app.use(cors());
 app.use(loggerHttp);
 app.use(express.json());
+app.use(limiter);
 
 // Endpoints
 app.post(
@@ -205,7 +213,7 @@ app.use(prismaErrorHandler);
 
 function generateAccessToken(tokenPayload: any) {
 	return jwt.sign(tokenPayload, access_token_secret, {
-		expiresIn: "15s",
+		expiresIn: "30m",
 	});
 }
 
