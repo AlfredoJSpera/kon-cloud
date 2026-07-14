@@ -10,6 +10,7 @@ import {
 } from "@interfaces/administrator";
 import { KonApiContract } from "@interfaces/common";
 import {
+	KonEmailAlreadyExistsError,
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
 	KonNotFoundError,
@@ -41,6 +42,16 @@ router.post(
 				typeof password !== "string"
 			) {
 				throw new KonIncorrectFieldTypeError();
+			}
+
+			const found = await prisma.administrator.findFirst({
+				where: {
+					Email: email,
+				},
+			});
+
+			if (found) {
+				throw new KonEmailAlreadyExistsError();
 			}
 
 			const saltRounds = 10;

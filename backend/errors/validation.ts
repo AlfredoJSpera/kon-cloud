@@ -17,3 +17,9 @@ export class KonNotFoundError extends KonBaseError {
 		super(message, 404);
 	}
 }
+
+export class KonEmailAlreadyExistsError extends KonBaseError {
+	constructor(message: string = "This email is already registered.") {
+		super(message, 409);
+	}
+}
