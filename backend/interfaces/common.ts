@@ -6,9 +6,14 @@ export type KonApiContract<
 	Params = Record<string, never>,
 	ReqQuery = any,
 > = {
-	Req: Request<Params, ResBody | IErrorResponse, ReqBody, ReqQuery>;
-	Res: Response<ResBody | IErrorResponse>;
+	Req: Request<Params, ResBody, ReqBody, ReqQuery>;
+	Res: Response<ResBody>;
 };
+
+export interface TokenPayload {
+	administratorId: string;
+	email: string;
+}
 
 export interface AdministratorBasicInfo {
 	administratorId: string;

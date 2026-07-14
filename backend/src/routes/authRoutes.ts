@@ -16,6 +16,15 @@ import {
 	IAuthRefreshTokenOutput,
 } from "@interfaces/auth";
 import { KonApiContract } from "@interfaces/common";
+import {
+	KonIncorrectFieldTypeError,
+	KonMissingRequiredFieldsError,
+} from "@errors/validation";
+import {
+	KonInvalidCredentialsError,
+	KonInvalidTokenError,
+	KonMissingTokenError,
+} from "@errors/authentication";
 
 let refreshTokens: string[] = [];
 const router = Router();
@@ -28,10 +37,11 @@ router.post(
 			const { email, password } = req.body;
 
 			if (!email || !password) {
-				return res.status(400).json({
-					error: true,
-					message: "Missing required fields.",
-				});
+				throw new KonMissingRequiredFieldsError();
+			}
+
+			if (typeof email !== "string" || typeof password !== "string") {
+				throw new KonIncorrectFieldTypeError();
 			}
 
 			const result = await prisma.administrator.findFirst({
@@ -42,17 +52,13 @@ router.post(
 			});
 
 			if (!result) {
-				return res.status(401).json({
-					error: true,
-					message: "Invalid credentials.",
-				});
+				// Wrong email
+				throw new KonInvalidCredentialsError();
 			}
 
 			if (!result.PasswordHash) {
-				return res.status(401).json({
-					error: true,
-					message: "Invalid credentials.",
-				});
+				// Account without password
+				throw new KonInvalidCredentialsError();
 			}
 
 			const isPasswordValid = await bcrypt.compare(
@@ -61,10 +67,8 @@ router.post(
 			);
 
 			if (!isPasswordValid) {
-				return res.status(401).json({
-					error: true,
-					message: "Invalid credentials.",
-				});
+				// Wrong password
+				throw new KonInvalidCredentialsError();
 			}
 
 			const tokenPayload = {
@@ -109,17 +113,11 @@ router.post(
 			const { refreshToken } = req.body;
 
 			if (!refreshToken) {
-				return res.status(401).json({
-					error: true,
-					message: "Missing token.",
-				});
+				throw new KonMissingTokenError();
 			}
 
 			if (!refreshTokens.includes(refreshToken)) {
-				return res.status(401).json({
-					error: true,
-					message: "Invalid or expired token.",
-				});
+				throw new KonInvalidTokenError();
 			}
 
 			jwt.verify(
@@ -131,10 +129,7 @@ router.post(
 							{ err },
 							"Error during verification of JWT.",
 						);
-						return res.status(401).json({
-							error: true,
-							message: "Invalid or expired token.",
-						});
+						throw new KonInvalidTokenError();
 					}
 
 					const tokenPayload = {

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { logger } from "./logger";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { TokenPayload } from "@interfaces/common";
 
 // Get the token secrets from the .env
 if (
@@ -20,10 +21,7 @@ export const refresh_token_secret = process.env.SV_REFRESH_TOKEN_SECRET;
 declare global {
 	namespace Express {
 		interface Request {
-			administrator?: {
-				administratorId: string;
-				email: string;
-			};
+			administrator?: TokenPayload;
 		}
 	}
 }

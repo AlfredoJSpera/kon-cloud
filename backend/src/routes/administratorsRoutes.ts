@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { authenticateToken } from "@middleware/authenticateToken";
@@ -9,6 +9,11 @@ import {
 	IAdministratorRegisterOutput,
 } from "@interfaces/administrator";
 import { KonApiContract } from "@interfaces/common";
+import {
+	KonIncorrectFieldTypeError,
+	KonMissingRequiredFieldsError,
+	KonNotFoundError,
+} from "@errors/validation";
 
 const router = Router();
 
@@ -26,10 +31,16 @@ router.post(
 			const { firstName, lastName, email, password } = req.body;
 
 			if (!firstName || !lastName || !email || !password) {
-				return res.status(400).json({
-					error: true,
-					message: "Missing required fields.",
-				});
+				throw new KonMissingRequiredFieldsError();
+			}
+
+			if (
+				typeof firstName !== "string" ||
+				typeof lastName !== "string" ||
+				typeof email !== "string" ||
+				typeof password !== "string"
+			) {
+				throw new KonIncorrectFieldTypeError();
 			}
 
 			const saltRounds = 10;
@@ -57,6 +68,7 @@ router.get(
 	"/me",
 	authenticateToken,
 	catchError(async (req: MeApiContract["Req"], res: MeApiContract["Res"]) => {
+		//* Error checking for adminId is done in authenticateToken
 		const adminId = req.administrator?.administratorId;
 
 		const result = await prisma.administrator.findUnique({
@@ -69,10 +81,7 @@ router.get(
 		});
 
 		if (!result) {
-			return res.status(404).json({
-				error: true,
-				message: "Profile not found in database.",
-			});
+			throw new KonNotFoundError();
 		}
 
 		const responseData: IAdministratorMeOutput = {
