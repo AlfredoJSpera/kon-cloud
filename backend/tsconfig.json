@@ -1,15 +1,14 @@
 {
 	"compilerOptions": {
 		//! TypeScript paths shorthand
-		"baseUrl": ".",
 		"paths": {
-			"@lib/*": ["lib/*"],
-			"@errors/*": ["errors/*"],
-			"@generated/*": ["generated/*"],
-			"@interfaces/*": ["interfaces/*"],
-			"@middleware/*": ["src/middleware/*"],
-			"@routes/*": ["src/routes/*"],
-			"@utils/*": ["src/utils/*"]
+			"@lib/*": ["./lib/*"],
+			"@errors/*": ["./errors/*"],
+			"@generated/*": ["./generated/*"],
+			"@interfaces/*": ["./interfaces/*"],
+			"@middleware/*": ["./src/middleware/*"],
+			"@routes/*": ["./src/routes/*"],
+			"@utils/*": ["./src/utils/*"]
 		},
 
 		"types": ["node"],
