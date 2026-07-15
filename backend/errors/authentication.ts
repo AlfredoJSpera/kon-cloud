@@ -8,7 +8,7 @@ export class KonInvalidCredentialsError extends KonBaseError {
 
 export class KonMissingTokenError extends KonBaseError {
 	constructor(message: string = "Missing token.") {
-		super(message, 401);
+		super(message, 400);
 	}
 }
 
