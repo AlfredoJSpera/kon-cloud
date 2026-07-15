@@ -20,7 +20,6 @@ model Administrator {
   PasswordHash     String?       @db.NVarChar(255)
   RegistrationDate DateTime      @default(now()) @db.DateTime2
   Condominiums     Condominium[]
-  RefreshTokens	   RefreshToken[]
 
   // Partial index so that EntraID_ObjectID can be null on different rows
   @@unique([EntraID_ObjectID], where: raw("EntraID_ObjectID IS NOT NULL"))
@@ -31,13 +30,4 @@ model Condominium {
   AdministratorID String        @db.UniqueIdentifier
   Name            String        @db.NVarChar(150)
   Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
-}
-
-model RefreshToken {
-  id              String        @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
-  token           String        @unique @db.NVarChar(500)
-  createdAt       DateTime      @default(now())
-  expiresAt		  DateTime		
-  administratorId String        @db.UniqueIdentifier
-  administrator   Administrator @relation(fields: [administratorId], references: [AdministratorID], onDelete: Cascade)
 }

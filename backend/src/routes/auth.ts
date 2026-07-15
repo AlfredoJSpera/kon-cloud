@@ -6,7 +6,6 @@ import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
 import { refresh_token_secret } from "@middleware/authenticateToken";
 import {
-	calculateRefreshTokenExpireDate,
 	generateAccessToken,
 	generateRefreshToken,
 } from "@utils/generateToken";
@@ -78,24 +77,6 @@ router.post(
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
 
-			const expiresAt = calculateRefreshTokenExpireDate();
-
-			// Delete expired tokens from the database
-			await prisma.refreshToken.deleteMany({
-				where: {
-					administratorId: result.AdministratorID,
-					expiresAt: { lt: new Date() },
-				},
-			});
-
-			await prisma.refreshToken.create({
-				data: {
-					token: refreshToken,
-					administratorId: result.AdministratorID,
-					expiresAt: expiresAt,
-				},
-			});
-
 			res.status(200).json({
 				accessToken,
 				refreshToken,
@@ -131,38 +112,15 @@ router.post(
 				throw new KonMissingRequiredFieldsError();
 			}
 
-			const savedToken = await prisma.refreshToken.findUnique({
-				where: {
-					token: refreshToken,
-				},
-			});
-
-			if (!savedToken || savedToken.expiresAt < new Date()) {
-				if (savedToken) {
-					// Token exists in database but it expired
-					await prisma.refreshToken.delete({
-						where: { token: refreshToken },
-					});
-				}
-				logger.debug("Refresh token not found in the database");
-				throw new KonInvalidTokenError();
-			}
-
 			jwt.verify(
 				refreshToken,
 				refresh_token_secret,
-				async (err, decoded: any) => {
+				(err, decoded: any) => {
 					if (err) {
 						logger.debug(
 							{ err },
 							"Error during verification of JWT.",
 						);
-						// Remove the token from the database if it exists
-						await prisma.refreshToken
-							.delete({
-								where: { token: refreshToken },
-							})
-							.catch(() => {});
 						throw new KonInvalidTokenError();
 					}
 
@@ -171,36 +129,10 @@ router.post(
 						email: decoded.email,
 					};
 
-					const newAccessToken = generateAccessToken(tokenPayload);
-					const newRefreshToken = generateRefreshToken(tokenPayload);
-					const expiresAt = calculateRefreshTokenExpireDate();
-
-					try {
-						await prisma.$transaction([
-							prisma.refreshToken.delete({
-								where: { token: refreshToken },
-							}),
-							prisma.refreshToken.create({
-								data: {
-									token: newRefreshToken,
-									administratorId:
-										tokenPayload.administratorId,
-									expiresAt: expiresAt,
-								},
-							}),
-						]);
-
-						res.status(200).json({
-							accessToken: newAccessToken,
-							refreshToken: newRefreshToken,
-						});
-					} catch (error) {
-						logger.error(
-							{ error },
-							"Error during database transaction for Refresh Token Rotation:",
-						);
-						throw new KonInvalidTokenError();
-					}
+					res.status(200).json({
+						accessToken: generateAccessToken(tokenPayload),
+						refreshToken: generateRefreshToken(tokenPayload),
+					});
 				},
 			);
 		},

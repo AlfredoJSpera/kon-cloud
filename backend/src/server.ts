@@ -6,7 +6,6 @@ import administratorsRoutes from "@routes/administrator";
 import { prismaErrorHandler } from "@middleware/errorHandler";
 import { loggerHttp, logger } from "@middleware/logger";
 import { rateLimit } from "express-rate-limit";
-import { initTokenCleanupJob } from "./jobs/cleanupTokens";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
@@ -30,8 +29,6 @@ app.use("/administrators", administratorsRoutes);
 // Automatic error handling
 //! Must be directly below the endpoints
 app.use(prismaErrorHandler);
-
-initTokenCleanupJob();
 
 // Run server
 app.listen(port, () => {
