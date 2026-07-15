@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import ms, { StringValue } from "ms";
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
@@ -26,6 +28,26 @@ import {
 } from "@errors/authentication";
 
 const router = Router();
+
+const rawWindow = process.env.AUTH_LIMITER_WINDOW || "15m";
+const limiterWindowMs = ms(rawWindow as StringValue);
+
+const limiterRequests = parseInt(process.env.AUTH_LIMITER_REQUESTS || "20", 10);
+
+const hideHeaders = parseInt(
+	process.env.GENERAL_LIMITER_HIDE_HEADERS || "1",
+	10,
+);
+const standardHeadersOption = hideHeaders === 0 ? "draft-7" : false;
+
+const limiter = rateLimit({
+	windowMs: limiterWindowMs,
+	limit: limiterRequests,
+	standardHeaders: standardHeadersOption,
+	legacyHeaders: false,
+});
+
+router.use(limiter);
 
 type LoginApiContract = KonApiContract<IAuthLoginInput, IAuthLoginOutput>;
 router.post(

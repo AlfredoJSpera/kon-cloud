@@ -1,4 +1,5 @@
 import "dotenv/config";
+import ms, { StringValue } from "ms";
 import express from "express";
 import cors from "cors";
 import authRoutes from "@routes/auth";
@@ -9,12 +10,35 @@ import { rateLimit } from "express-rate-limit";
 
 const app = express();
 const port = process.env.SV_PORT || 3000;
+
+const rawWindow = process.env.GENERAL_LIMITER_WINDOW || "15m";
+const limiterWindowMs = ms(rawWindow as StringValue);
+
+const limiterRequests = parseInt(
+	process.env.GENERAL_LIMITER_REQUESTS || "200",
+	10,
+);
+
+const hideHeaders = parseInt(
+	process.env.GENERAL_LIMITER_HIDE_HEADERS || "1",
+	10,
+);
+const standardHeadersOption = hideHeaders === 0 ? "draft-7" : false;
+
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	limit: 500,
-	standardHeaders: false,
+	windowMs: limiterWindowMs,
+	limit: limiterRequests,
+	// Auth has its own limiter
+	skip: (req) => req.path.startsWith("/auth"),
+	standardHeaders: standardHeadersOption,
 	legacyHeaders: false,
 });
+
+const trust_proxy = parseInt(process.env.GENERAL_LIMITER_TRUST_PROXY || "0");
+if (trust_proxy) {
+	// Trust first proxy for rate limiting
+	app.set("trust proxy", 1);
+}
 
 // Middleware
 app.use(cors());
