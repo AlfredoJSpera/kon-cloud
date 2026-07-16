@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import { doubleCsrf } from "csrf-csrf";
 
 export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
@@ -11,3 +12,14 @@ export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 	},
 	getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"] as string,
 });
+
+export const globalCsrfProtection = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	if (req.path === "/auth/refresh-token") {
+		return doubleCsrfProtection(req, res, next);
+	}
+	next();
+};

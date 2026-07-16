@@ -14,6 +14,7 @@ import {
 	GENERAL_LIMITER_WINDOW,
 	SV_PORT,
 } from "@utils/envVariables";
+import { globalCsrfProtection } from "@middleware/csrfConfig";
 
 const app = express();
 
@@ -33,6 +34,7 @@ if (GENERAL_LIMITER_TRUST_PROXY) {
 // Middleware
 app.use(cors());
 app.use(cookieParser());
+app.use(globalCsrfProtection);
 app.use(loggerHttp);
 app.use(limiter);
 app.use(express.json());

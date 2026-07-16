@@ -133,7 +133,6 @@ type RefreshTokenApiContract = KonApiContract<
 >;
 router.post(
 	"/refresh-token",
-	doubleCsrfProtection,
 	catchError(
 		async (
 			req: RefreshTokenApiContract["Req"],
