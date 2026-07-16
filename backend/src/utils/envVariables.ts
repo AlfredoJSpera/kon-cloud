@@ -75,3 +75,5 @@ export const REFRESH_TOKEN_EXPIRES_IN = getEnv(
 	"REFRESH_TOKEN_EXPIRES_IN",
 	"1d",
 );
+
+export const CSRF_TOKEN_SECRET = getEnv("CSRF_TOKEN_SECRET");
