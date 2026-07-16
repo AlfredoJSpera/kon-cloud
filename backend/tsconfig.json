@@ -2,10 +2,10 @@
 	"compilerOptions": {
 		//! TypeScript paths shorthand
 		"paths": {
-			"@lib/*": ["./lib/*"],
-			"@errors/*": ["./errors/*"],
 			"@generated/*": ["./generated/*"],
 			"@interfaces/*": ["./interfaces/*"],
+			"@errors/*": ["./src/errors/*"],
+			"@lib/*": ["./src/lib/*"],
 			"@middleware/*": ["./src/middleware/*"],
 			"@routes/*": ["./src/routes/*"],
 			"@utils/*": ["./src/utils/*"]

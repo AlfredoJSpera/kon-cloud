@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import ms, { StringValue } from "ms";
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
-import { prisma } from "@lib/prisma";
+import { prisma } from "../lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
 import { refresh_token_secret } from "@middleware/authenticateToken";
@@ -21,11 +21,11 @@ import { KonApiContract, TokenPayload } from "@interfaces/common";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
-} from "@errors/validation";
+} from "../errors/validation";
 import {
 	KonInvalidCredentialsError,
 	KonInvalidTokenError,
-} from "@errors/authentication";
+} from "../errors/authentication";
 
 const router = Router();
 

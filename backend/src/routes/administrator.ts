@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { Router } from "express";
-import { prisma } from "@lib/prisma";
+import { prisma } from "../lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { authenticateToken } from "@middleware/authenticateToken";
 import {
@@ -14,7 +14,7 @@ import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
 	KonNotFoundError,
-} from "@errors/validation";
+} from "../errors/validation";
 
 const router = Router();
 

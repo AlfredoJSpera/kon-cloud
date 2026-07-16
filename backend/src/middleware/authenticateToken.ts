@@ -7,7 +7,7 @@ import {
 	KonExpiredTokenError,
 	KonInvalidTokenError,
 	KonMissingTokenError,
-} from "@errors/authentication";
+} from "../errors/authentication";
 
 // Get the token secrets from the .env
 if (
