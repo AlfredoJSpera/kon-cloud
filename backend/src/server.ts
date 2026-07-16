@@ -1,4 +1,3 @@
-import "dotenv/config";
 import ms, { StringValue } from "ms";
 import express from "express";
 import cors from "cors";
@@ -7,35 +6,25 @@ import administratorsRoutes from "@routes/administrator";
 import { prismaErrorHandler } from "@middleware/errorHandler";
 import { loggerHttp, logger } from "@middleware/logger";
 import { rateLimit } from "express-rate-limit";
+import {
+	GENERAL_LIMITER_HIDE_HEADERS,
+	GENERAL_LIMITER_REQUESTS,
+	GENERAL_LIMITER_TRUST_PROXY,
+	GENERAL_LIMITER_WINDOW,
+	SV_PORT,
+} from "@utils/envVariables";
 
 const app = express();
-const port = process.env.SV_PORT || 3000;
-
-const rawWindow = process.env.GENERAL_LIMITER_WINDOW || "15m";
-const limiterWindowMs = ms(rawWindow as StringValue);
-
-const limiterRequests = parseInt(
-	process.env.GENERAL_LIMITER_REQUESTS || "200",
-	10,
-);
-
-const hideHeaders = parseInt(
-	process.env.GENERAL_LIMITER_HIDE_HEADERS || "1",
-	10,
-);
-const standardHeadersOption = hideHeaders === 0 ? "draft-7" : false;
 
 const limiter = rateLimit({
-	windowMs: limiterWindowMs,
-	limit: limiterRequests,
-	// Auth has its own limiter
-	skip: (req) => req.path.startsWith("/auth"),
-	standardHeaders: standardHeadersOption,
+	windowMs: ms(GENERAL_LIMITER_WINDOW as StringValue),
+	limit: GENERAL_LIMITER_REQUESTS,
+	skip: (req) => req.path.startsWith("/auth"), // Auth has its own limiter
+	standardHeaders: GENERAL_LIMITER_HIDE_HEADERS,
 	legacyHeaders: false,
 });
 
-const trust_proxy = parseInt(process.env.GENERAL_LIMITER_TRUST_PROXY || "0");
-if (trust_proxy) {
+if (GENERAL_LIMITER_TRUST_PROXY) {
 	// Trust first proxy for rate limiting
 	app.set("trust proxy", 1);
 }
@@ -55,6 +44,6 @@ app.use("/administrators", administratorsRoutes);
 app.use(prismaErrorHandler);
 
 // Run server
-app.listen(port, () => {
-	logger.info(`Express is running on port ${port}`);
+app.listen(SV_PORT, () => {
+	logger.info(`Express is running on port ${SV_PORT}`);
 });

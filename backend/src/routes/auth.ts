@@ -6,7 +6,6 @@ import { rateLimit } from "express-rate-limit";
 import { prisma } from "../lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
-import { refresh_token_secret } from "@middleware/authenticateToken";
 import {
 	generateAccessToken,
 	generateRefreshToken,
@@ -26,24 +25,19 @@ import {
 	KonInvalidCredentialsError,
 	KonInvalidTokenError,
 } from "../errors/authentication";
+import {
+	AUTH_LIMITER_REQUESTS,
+	AUTH_LIMITER_WINDOW,
+	GENERAL_LIMITER_HIDE_HEADERS,
+	REFRESH_TOKEN_SECRET,
+} from "@utils/envVariables";
 
 const router = Router();
 
-const rawWindow = process.env.AUTH_LIMITER_WINDOW || "15m";
-const limiterWindowMs = ms(rawWindow as StringValue);
-
-const limiterRequests = parseInt(process.env.AUTH_LIMITER_REQUESTS || "20", 10);
-
-const hideHeaders = parseInt(
-	process.env.GENERAL_LIMITER_HIDE_HEADERS || "1",
-	10,
-);
-const standardHeadersOption = hideHeaders === 0 ? "draft-7" : false;
-
 const limiter = rateLimit({
-	windowMs: limiterWindowMs,
-	limit: limiterRequests,
-	standardHeaders: standardHeadersOption,
+	windowMs: ms(AUTH_LIMITER_WINDOW as StringValue),
+	limit: AUTH_LIMITER_REQUESTS,
+	standardHeaders: GENERAL_LIMITER_HIDE_HEADERS,
 	legacyHeaders: false,
 });
 
@@ -136,7 +130,7 @@ router.post(
 
 			jwt.verify(
 				refreshToken,
-				refresh_token_secret,
+				REFRESH_TOKEN_SECRET,
 				(err, decoded: any) => {
 					if (err) {
 						logger.debug(

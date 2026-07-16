@@ -1,9 +1,11 @@
+import "dotenv/config";
 import chalk from "chalk";
 import pino from "pino";
 import { pinoHttp } from "pino-http";
+import { SV_LOG_LEVEL } from "@utils/envVariables";
 
 export const logger = pino({
-	level: process.env.SV_LOG_LEVEL || "info",
+	level: SV_LOG_LEVEL,
 	transport: {
 		target: "pino-pretty",
 		options: {

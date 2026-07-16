@@ -1,4 +1,3 @@
-import "dotenv/config";
 import jwt from "jsonwebtoken";
 import { logger } from "./logger";
 import { NextFunction, Request, Response } from "express";
@@ -8,19 +7,7 @@ import {
 	KonInvalidTokenError,
 	KonMissingTokenError,
 } from "../errors/authentication";
-
-// Get the token secrets from the .env
-if (
-	!process.env.SV_ACCESS_TOKEN_SECRET ||
-	!process.env.SV_REFRESH_TOKEN_SECRET
-) {
-	logger.fatal(
-		"Could not read SV_ACCESS_TOKEN_SECRET or SV_REFRESH_TOKEN_SECRET from the .env file.",
-	);
-	process.exit(1);
-}
-export const access_token_secret = process.env.SV_ACCESS_TOKEN_SECRET;
-export const refresh_token_secret = process.env.SV_REFRESH_TOKEN_SECRET;
+import { ACCESS_TOKEN_SECRET } from "@utils/envVariables";
 
 // Extend Express' Request to include the authenticated user
 declare global {
@@ -45,7 +32,7 @@ export function authenticateToken(
 		return next(new KonMissingTokenError());
 	}
 
-	jwt.verify(token, access_token_secret, (err: any, decoded: any) => {
+	jwt.verify(token, ACCESS_TOKEN_SECRET, (err: any, decoded: any) => {
 		if (err) {
 			// Throw error to prismaErrorHandler
 			if (err.name === "JsonWebTokenError") {

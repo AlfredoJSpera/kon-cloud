@@ -1,22 +1,20 @@
-import "dotenv/config";
 import { TokenPayload } from "@interfaces/common";
-import {
-	access_token_secret,
-	refresh_token_secret,
-} from "@middleware/authenticateToken";
 import jwt, { SignOptions } from "jsonwebtoken";
-
-const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "30m";
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "1d";
+import {
+	ACCESS_TOKEN_EXPIRES_IN,
+	REFRESH_TOKEN_EXPIRES_IN,
+	ACCESS_TOKEN_SECRET,
+	REFRESH_TOKEN_SECRET,
+} from "./envVariables";
 
 export function generateAccessToken(tokenPayload: TokenPayload) {
-	return jwt.sign(tokenPayload, access_token_secret, {
+	return jwt.sign(tokenPayload, ACCESS_TOKEN_SECRET, {
 		expiresIn: ACCESS_TOKEN_EXPIRES_IN as SignOptions["expiresIn"],
 	});
 }
 
 export function generateRefreshToken(tokenPayload: TokenPayload) {
-	return jwt.sign(tokenPayload, refresh_token_secret, {
+	return jwt.sign(tokenPayload, REFRESH_TOKEN_SECRET, {
 		expiresIn: REFRESH_TOKEN_EXPIRES_IN as SignOptions["expiresIn"],
 	});
 }

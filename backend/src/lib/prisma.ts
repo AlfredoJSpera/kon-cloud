@@ -1,17 +1,16 @@
-import "dotenv/config";
-import { env } from "prisma/config";
 import { PrismaMssql } from "@prisma/adapter-mssql";
 import { PrismaClient } from "@generated/prisma/client";
+import { DB_CONFIG } from "@utils/envVariables";
 
 const config = {
-	server: env("DB_HOST"),
-	port: parseInt(env("DB_PORT")),
-	database: env("DB_NAME"),
-	user: env("DB_USER"),
-	password: env("DB_PASSWORD"),
+	server: DB_CONFIG.host,
+	port: DB_CONFIG.port,
+	database: DB_CONFIG.databaseName,
+	user: DB_CONFIG.user,
+	password: DB_CONFIG.password,
 	options: {
-		encrypt: true,
-		trustServerCertificate: true,
+		encrypt: DB_CONFIG.encrypt,
+		trustServerCertificate: DB_CONFIG.trustServerCertificate,
 	},
 };
 
