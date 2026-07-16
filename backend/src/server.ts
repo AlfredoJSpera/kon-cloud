@@ -1,6 +1,7 @@
 import ms, { StringValue } from "ms";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRoutes from "@routes/auth";
 import administratorsRoutes from "@routes/administrator";
 import { prismaErrorHandler } from "@middleware/errorHandler";
@@ -31,6 +32,7 @@ if (GENERAL_LIMITER_TRUST_PROXY) {
 
 // Middleware
 app.use(cors());
+app.use(cookieParser());
 app.use(loggerHttp);
 app.use(limiter);
 app.use(express.json());

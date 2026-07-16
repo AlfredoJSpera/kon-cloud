@@ -7,15 +7,15 @@ export interface IAuthLoginInput {
 
 export interface IAuthLoginOutput {
 	accessToken: string;
-	refreshToken: string;
 	profile: AdministratorBasicInfo;
+	// refreshToken passed via httpOnly cookie
 }
 
 export interface IAuthRefreshTokenInput {
-	refreshToken: string;
+	// refreshToken passed via httpOnly cookie
 }
 
 export interface IAuthRefreshTokenOutput {
 	accessToken: string;
-	refreshToken: string;
+	// refreshToken passed via httpOnly cookie
 }

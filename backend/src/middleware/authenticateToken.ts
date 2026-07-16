@@ -6,7 +6,7 @@ import {
 	KonExpiredTokenError,
 	KonInvalidTokenError,
 	KonMissingTokenError,
-} from "../errors/authentication";
+} from "@errors/authentication";
 import { ACCESS_TOKEN_SECRET } from "@utils/envVariables";
 
 // Extend Express' Request to include the authenticated user

@@ -2,7 +2,7 @@ import { logger } from "./logger";
 import { Request, Response, NextFunction } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { IErrorResponse } from "@interfaces/common";
-import KonBaseError from "../errors/base";
+import KonBaseError from "@errors/base";
 
 export function prismaErrorHandler(
 	err: any,

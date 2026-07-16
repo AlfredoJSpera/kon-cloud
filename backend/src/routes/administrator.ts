@@ -14,7 +14,7 @@ import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
 	KonNotFoundError,
-} from "../errors/validation";
+} from "@errors/validation";
 
 const router = Router();
 

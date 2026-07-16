@@ -20,15 +20,17 @@ import { KonApiContract, TokenPayload } from "@interfaces/common";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
-} from "../errors/validation";
+} from "@errors/validation";
 import {
 	KonInvalidCredentialsError,
 	KonInvalidTokenError,
-} from "../errors/authentication";
+	KonMissingTokenError,
+} from "@errors/authentication";
 import {
 	AUTH_LIMITER_REQUESTS,
 	AUTH_LIMITER_WINDOW,
 	GENERAL_LIMITER_HIDE_HEADERS,
+	REFRESH_TOKEN_EXPIRES_IN,
 	REFRESH_TOKEN_SECRET,
 } from "@utils/envVariables";
 
@@ -42,6 +44,8 @@ const limiter = rateLimit({
 });
 
 router.use(limiter);
+
+const cookieMaxAge = ms(REFRESH_TOKEN_EXPIRES_IN as StringValue);
 
 type LoginApiContract = KonApiContract<IAuthLoginInput, IAuthLoginOutput>;
 router.post(
@@ -93,9 +97,15 @@ router.post(
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
 
+			res.cookie("refreshToken", refreshToken, {
+				httpOnly: true,
+				//secure: false,
+				sameSite: "strict",
+				maxAge: cookieMaxAge,
+			});
+
 			res.status(200).json({
 				accessToken,
-				refreshToken,
 				profile: {
 					administratorId: result.AdministratorID,
 					firstName: result.FirstName,
@@ -122,35 +132,41 @@ router.post(
 			req: RefreshTokenApiContract["Req"],
 			res: RefreshTokenApiContract["Res"],
 		) => {
-			const { refreshToken } = req.body;
+			logger.debug(req.cookies);
+			const refreshToken = req.cookies?.refreshToken;
 
 			if (!refreshToken) {
-				throw new KonMissingRequiredFieldsError();
+				throw new KonMissingTokenError("Missing refresh token.");
 			}
 
-			jwt.verify(
-				refreshToken,
-				REFRESH_TOKEN_SECRET,
-				(err, decoded: any) => {
-					if (err) {
-						logger.debug(
-							{ err },
-							"Error during verification of JWT.",
-						);
-						throw new KonInvalidTokenError();
-					}
+			try {
+				const decoded = jwt.verify(
+					refreshToken,
+					REFRESH_TOKEN_SECRET,
+				) as any;
 
-					const tokenPayload: TokenPayload = {
-						administratorId: decoded.administratorId,
-						email: decoded.email,
-					};
+				const tokenPayload: TokenPayload = {
+					administratorId: decoded.administratorId,
+					email: decoded.email,
+				};
 
-					res.status(200).json({
-						accessToken: generateAccessToken(tokenPayload),
-						refreshToken: generateRefreshToken(tokenPayload),
-					});
-				},
-			);
+				const newAccessToken = generateAccessToken(tokenPayload);
+				const newRefreshToken = generateRefreshToken(tokenPayload);
+
+				res.cookie("refreshToken", newRefreshToken, {
+					httpOnly: true,
+					// secure: false,
+					sameSite: "strict",
+					maxAge: cookieMaxAge,
+				});
+
+				res.status(200).json({
+					accessToken: newAccessToken,
+				});
+			} catch (err) {
+				logger.debug({ err }, "Error during verification of JWT.");
+				throw new KonInvalidTokenError();
+			}
 		},
 	),
 );
