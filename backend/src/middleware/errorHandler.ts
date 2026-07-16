@@ -45,6 +45,14 @@ export function prismaErrorHandler(
 		});
 	}
 
+	if (err.message === "invalid csrf token") {
+		logger.debug({ err }, "A CSRF Error has occurred:");
+		return res.status(err.statusCode).json({
+			error: true,
+			message: "Invalid csrf token.",
+		});
+	}
+
 	// Handle Unknown Errors
 	logger.error({ err }, "Unhandled Error:");
 	return res.status(500).json({

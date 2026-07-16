@@ -33,6 +33,10 @@ import {
 	REFRESH_TOKEN_EXPIRES_IN,
 	REFRESH_TOKEN_SECRET,
 } from "@utils/envVariables";
+import {
+	doubleCsrfProtection,
+	generateCsrfToken,
+} from "@middleware/csrfConfig";
 
 const router = Router();
 
@@ -96,16 +100,18 @@ router.post(
 
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
+			const csrfToken = generateCsrfToken(req, res);
 
 			res.cookie("refreshToken", refreshToken, {
 				httpOnly: true,
-				//secure: false,
+				secure: process.env.NODE_ENV === "production",
 				sameSite: "strict",
 				maxAge: cookieMaxAge,
 			});
 
 			res.status(200).json({
 				accessToken,
+				csrfToken,
 				profile: {
 					administratorId: result.AdministratorID,
 					firstName: result.FirstName,
@@ -127,12 +133,13 @@ type RefreshTokenApiContract = KonApiContract<
 >;
 router.post(
 	"/refresh-token",
+	doubleCsrfProtection,
 	catchError(
 		async (
 			req: RefreshTokenApiContract["Req"],
 			res: RefreshTokenApiContract["Res"],
 		) => {
-			logger.debug(req.cookies);
+			logger.debug(req.cookies, "Request cookies:");
 			const refreshToken = req.cookies?.refreshToken;
 
 			if (!refreshToken) {
@@ -155,7 +162,7 @@ router.post(
 
 				res.cookie("refreshToken", newRefreshToken, {
 					httpOnly: true,
-					// secure: false,
+					secure: process.env.NODE_ENV === "production",
 					sameSite: "strict",
 					maxAge: cookieMaxAge,
 				});
