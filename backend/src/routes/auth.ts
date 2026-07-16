@@ -37,6 +37,7 @@ import {
 	doubleCsrfProtection,
 	generateCsrfToken,
 } from "@middleware/csrfConfig";
+import cookieParser from "cookie-parser";
 
 const router = Router();
 
@@ -48,6 +49,7 @@ const limiter = rateLimit({
 });
 
 router.use(limiter);
+router.use(cookieParser());
 
 const cookieMaxAge = ms(REFRESH_TOKEN_EXPIRES_IN as StringValue);
 
@@ -133,6 +135,7 @@ type RefreshTokenApiContract = KonApiContract<
 >;
 router.post(
 	"/refresh-token",
+	doubleCsrfProtection,
 	catchError(
 		async (
 			req: RefreshTokenApiContract["Req"],
