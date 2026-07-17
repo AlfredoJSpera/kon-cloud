@@ -24,6 +24,8 @@ export function LoginPage() {
 					console.log("login:", { email, password });
 				}}
 			>
+				{/* Login info */}
+
 				<Field label="Email address">
 					<Input
 						placeholder="name@company.com"
@@ -38,12 +40,25 @@ export function LoginPage() {
 						onChange={(e) => setPassword(e.target.value)}
 					/>
 				</Field>
+
+				{/* Submit */}
+
 				<Button type="submit" size="lg">
 					Login
 				</Button>
-				<Link asChild alignSelf="center">
-					<RouterLink to="/register">Need an account?</RouterLink>
-				</Link>
+
+				{/* Registration link */}
+
+				<Text fontSize="sm" textAlign="center">
+					<Link asChild>
+						<RouterLink to="/register">
+							Need an account? Register here.
+						</RouterLink>
+					</Link>
+				</Text>
+
+				{/* OAuth links */}
+
 				<Separator />
 				<Stack gap="3">
 					<Button variant="outline" justifyContent="space-between">
