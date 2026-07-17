@@ -11,7 +11,7 @@
 			"@utils/*": ["./src/utils/*"]
 		},
 
-		"types": ["node"],
+		"types": ["node", "jest"],
 
 		//! Required by Prisma
 		"module": "esnext",
