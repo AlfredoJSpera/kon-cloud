@@ -15,9 +15,10 @@ export function RegisterPage() {
 
 	return (
 		<AuthContainer
-			title="Register to Kon-Cloud"
-			subtitle="Create a profile with your details."
+			brandName="Kon-Cloud"
+			brandSubtitle="Create a profile with your details."
 			actionLabel="Create account"
+			actionTitle="Register to Kon-Cloud"
 		>
 			<Stack
 				gap="4"

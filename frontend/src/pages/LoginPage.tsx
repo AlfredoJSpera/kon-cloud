@@ -12,9 +12,10 @@ export function LoginPage() {
 
 	return (
 		<AuthContainer
-			title="Login to Kon-Cloud"
-			subtitle="Use your account email and password to continue."
+			brandName="Kon-Cloud"
+			brandSubtitle="Use your account email and password to continue."
 			actionLabel="Sign in"
+			actionTitle="Login to Kon-Cloud"
 		>
 			<Stack
 				gap="4"

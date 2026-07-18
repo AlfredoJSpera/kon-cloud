@@ -1,11 +1,20 @@
-import { Box, Container, Flex, Heading, Stack, Text } from "@chakra-ui/react";
+import {
+	Box,
+	Container,
+	Flex,
+	Heading,
+	HStack,
+	Stack,
+	Text,
+} from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { ColorModeButton } from "@/components/ui/color-mode";
 
 export function AuthContainer(props: {
-	title: string;
-	subtitle: string;
+	brandName: string;
+	brandSubtitle: string;
 	actionLabel: string;
+	actionTitle: string;
 	children: ReactNode;
 }) {
 	return (
@@ -20,6 +29,7 @@ export function AuthContainer(props: {
 					borderWidth="1px"
 					direction={{ base: "column", lg: "row" }}
 				>
+					{/* Left */}
 					<Box
 						flex="1"
 						p={{ base: "6", md: "10" }}
@@ -27,16 +37,21 @@ export function AuthContainer(props: {
 					>
 						<Stack gap="6" h="full" justify="space-between">
 							<Box>
-								<Heading size="3xl" mt="4" maxW="sm">
-									Kon-Cloud
-								</Heading>
+								<HStack flex="1" justifyContent="space-between">
+									<Heading size="3xl" mt="4" maxW="sm">
+										{props.brandName}
+									</Heading>
+									<ColorModeButton variant="ghost" />
+								</HStack>
+
 								<Text mt="4" maxW="md" fontSize="lg">
-									{props.subtitle}
+									{props.brandSubtitle}
 								</Text>
 							</Box>
 						</Stack>
 					</Box>
 
+					{/* Right */}
 					<Box
 						flex="0 0 min(100%, 30rem)"
 						p={{ base: "6", md: "10" }}
@@ -45,7 +60,7 @@ export function AuthContainer(props: {
 							<Box>
 								<Text fontSize="sm">{props.actionLabel}</Text>
 								<Heading size="2xl" mt="2">
-									{props.title}
+									{props.actionTitle}
 								</Heading>
 							</Box>
 							{props.children}
@@ -53,9 +68,6 @@ export function AuthContainer(props: {
 					</Box>
 				</Flex>
 			</Container>
-			<Box position="absolute" top="4" right="4">
-				<ColorModeButton variant="ghost" />
-			</Box>
 		</Flex>
 	);
 }
