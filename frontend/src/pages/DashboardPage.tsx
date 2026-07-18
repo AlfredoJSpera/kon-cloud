@@ -20,7 +20,7 @@ import {
 	LuFolderKanban,
 	LuShieldCheck,
 } from "react-icons/lu";
-import { AppContainer } from "@/components/AppContainer";
+import { AppContainer } from "@/components/app-container/AppContainer";
 
 export function DashboardPage() {
 	const cards = useMemo(
@@ -34,7 +34,11 @@ export function DashboardPage() {
 	);
 
 	return (
-		<AppContainer title="Page Layout" subtitle="Dashboard preview">
+		<AppContainer
+			topBarTitle="My Extra Long Condominium Name"
+			pageHeaderTitle="Page Layout"
+			subtitle="Dashboard preview"
+		>
 			<Stack gap="6">
 				<Box borderWidth="1px" p={{ base: "4", md: "6" }}>
 					<Flex

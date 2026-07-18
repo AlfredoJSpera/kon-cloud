@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/ui/avatar";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { AppContainer } from "@/components/AppContainer";
+import { AppContainer } from "@/components/app-container/AppContainer";
 
 export function SettingsPage() {
 	const [email, setEmail] = useState("alex@kon-cloud.dev");
@@ -22,7 +22,7 @@ export function SettingsPage() {
 
 	return (
 		<AppContainer
-			title="User Settings"
+			pageHeaderTitle="User Settings"
 			subtitle="Profile and security controls"
 		>
 			<SimpleGrid columns={{ base: 1, xl: 3 }} gap="6">

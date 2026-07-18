@@ -31,15 +31,22 @@ const navItems: NavItem[] = [
 	},
 ];
 
-export function Sidebar(props: { navigate: (path: string) => void }) {
+export function Sidebar(props: {
+	brandName: string;
+	heading: string;
+	navigate: (path: string) => void;
+}) {
 	return (
 		<Stack gap="6" h="full">
+			{/* Headings */}
 			<Box>
-				<Text fontSize="xs">Kon-Cloud</Text>
+				<Text fontSize="xs">{props.brandName}</Text>
 				<Heading size="lg" mt="1">
-					Side Navigation
+					{props.heading}
 				</Heading>
 			</Box>
+
+			{/* Navigation items */}
 			<Stack gap="2">
 				{navItems.map((item) => (
 					<Button
