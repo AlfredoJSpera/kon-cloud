@@ -36,8 +36,8 @@ export function DashboardPage() {
 	return (
 		<AppContainer
 			topBarTitle="My Extra Long Condominium Name"
+			pageHeaderSubtitle="Dashboard preview"
 			pageHeaderTitle="Page Layout"
-			subtitle="Dashboard preview"
 		>
 			<Stack gap="6">
 				<Box borderWidth="1px" p={{ base: "4", md: "6" }}>

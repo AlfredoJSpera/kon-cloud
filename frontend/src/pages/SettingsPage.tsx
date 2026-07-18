@@ -23,7 +23,7 @@ export function SettingsPage() {
 	return (
 		<AppContainer
 			pageHeaderTitle="User Settings"
-			subtitle="Profile and security controls"
+			pageHeaderSubtitle="Profile and security controls"
 		>
 			<SimpleGrid columns={{ base: 1, xl: 3 }} gap="6">
 				<Box

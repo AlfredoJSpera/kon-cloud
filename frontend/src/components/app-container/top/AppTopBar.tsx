@@ -32,9 +32,6 @@ export function AppTopBar(props: {
 		>
 			{/* Left */}
 			<HStack gap="3">
-				{/* Button appears when <= md */}
-				<OpenDrawerButton drawerOnOpen={props.drawerOnOpen} />
-
 				<Heading size="md">{props.title}</Heading>
 			</HStack>
 
@@ -45,13 +42,24 @@ export function AppTopBar(props: {
 					variant="ghost"
 				/>
 
+				{/* Button appears when <= md */}
+				<OpenDrawerButton drawerOnOpen={props.drawerOnOpen} />
+
 				<MenuRoot>
 					{/* Menu button */}
 					<MenuTrigger asChild>
 						<Button variant="ghost" px="2" py="1">
 							<HStack gap="2">
 								<Avatar name={userNameSurname} size="xs" />
-								<Text fontSize="sm">{userNameSurname}</Text>
+								<Text
+									display={{
+										base: "none",
+										md: "inline-flex",
+									}}
+									fontSize="sm"
+								>
+									{userNameSurname}
+								</Text>
 							</HStack>
 						</Button>
 					</MenuTrigger>

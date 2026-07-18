@@ -18,7 +18,7 @@ export function MobileNavigationDrawer(props: {
 		<DrawerRoot
 			open={props.drawerOpen}
 			onOpenChange={(details) => props.drawerSetOpen(details.open)}
-			placement="start"
+			placement="bottom"
 		>
 			<DrawerContent borderRightWidth="1px">
 				<DrawerCloseTrigger />

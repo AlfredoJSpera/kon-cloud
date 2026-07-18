@@ -9,7 +9,7 @@ import { AppTopBar } from "./top/AppTopBar";
 export function AppContainer(props: {
 	topBarTitle: string;
 	pageHeaderTitle: string;
-	subtitle: string;
+	pageHeaderSubtitle: string;
 	children: ReactNode;
 }) {
 	const navigate = useNavigate();
@@ -44,7 +44,7 @@ export function AppContainer(props: {
 				<AppMainContent
 					topBarTitle={props.topBarTitle}
 					pageHeaderTitle={props.pageHeaderTitle}
-					pageHeaderSubtitle={props.subtitle}
+					pageHeaderSubtitle={props.pageHeaderSubtitle}
 					navigate={navigate}
 					drawerOnOpen={drawer.onOpen}
 				>
