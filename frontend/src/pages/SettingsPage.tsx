@@ -22,6 +22,7 @@ export function SettingsPage() {
 
 	return (
 		<AppContainer
+			topBarTitle=""
 			pageHeaderTitle="User Settings"
 			pageHeaderSubtitle="Profile and security controls"
 		>
