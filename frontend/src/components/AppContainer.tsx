@@ -32,7 +32,7 @@ import {
 import { ColorModeButton } from "@/components/ui/color-mode";
 import { Sidebar } from "./Sidebar";
 
-export function AppShell(props: {
+export function AppContainer(props: {
 	title: string;
 	subtitle: string;
 	children: ReactNode;

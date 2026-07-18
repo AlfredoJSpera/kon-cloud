@@ -2,7 +2,7 @@ import { Button, Input, Link, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { AuthFrame } from "@/components/AuthFrame";
+import { AuthContainer } from "@/components/AuthContainer";
 import { useState } from "react";
 
 export function RegisterPage() {
@@ -14,7 +14,7 @@ export function RegisterPage() {
 	const [repeatPassword, setRepeatPassword] = useState("");
 
 	return (
-		<AuthFrame
+		<AuthContainer
 			title="Register to Kon-Cloud"
 			subtitle="Create a profile with your details."
 			actionLabel="Create account"
@@ -103,6 +103,6 @@ export function RegisterPage() {
 					</Link>
 				</Text>
 			</Stack>
-		</AuthFrame>
+		</AuthContainer>
 	);
 }

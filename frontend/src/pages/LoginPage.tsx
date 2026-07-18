@@ -4,14 +4,14 @@ import { Link as RouterLink } from "react-router-dom";
 import { LuArrowRight } from "react-icons/lu";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { AuthFrame } from "@/components/AuthFrame";
+import { AuthContainer } from "@/components/AuthContainer";
 
 export function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
 	return (
-		<AuthFrame
+		<AuthContainer
 			title="Login to Kon-Cloud"
 			subtitle="Use your account email and password to continue."
 			actionLabel="Sign in"
@@ -71,6 +71,6 @@ export function LoginPage() {
 					</Button>
 				</Stack>
 			</Stack>
-		</AuthFrame>
+		</AuthContainer>
 	);
 }

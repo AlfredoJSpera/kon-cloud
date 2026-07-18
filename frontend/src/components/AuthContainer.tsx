@@ -2,7 +2,7 @@ import { Box, Container, Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { ColorModeButton } from "@/components/ui/color-mode";
 
-export function AuthFrame(props: {
+export function AuthContainer(props: {
 	title: string;
 	subtitle: string;
 	actionLabel: string;

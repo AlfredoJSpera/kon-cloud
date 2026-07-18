@@ -14,14 +14,14 @@ import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/ui/avatar";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { AppShell } from "@/components/AppShell";
+import { AppContainer } from "@/components/AppContainer";
 
 export function SettingsPage() {
 	const [email, setEmail] = useState("alex@kon-cloud.dev");
 	const navigate = useNavigate();
 
 	return (
-		<AppShell
+		<AppContainer
 			title="User Settings"
 			subtitle="Profile and security controls"
 		>
@@ -102,6 +102,6 @@ export function SettingsPage() {
 					</Stack>
 				</Box>
 			</SimpleGrid>
-		</AppShell>
+		</AppContainer>
 	);
 }

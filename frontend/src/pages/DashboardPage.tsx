@@ -20,7 +20,7 @@ import {
 	LuFolderKanban,
 	LuShieldCheck,
 } from "react-icons/lu";
-import { AppShell } from "@/components/AppShell";
+import { AppContainer } from "@/components/AppContainer";
 
 export function DashboardPage() {
 	const cards = useMemo(
@@ -34,7 +34,7 @@ export function DashboardPage() {
 	);
 
 	return (
-		<AppShell title="Page Layout" subtitle="Dashboard preview">
+		<AppContainer title="Page Layout" subtitle="Dashboard preview">
 			<Stack gap="6">
 				<Box borderWidth="1px" p={{ base: "4", md: "6" }}>
 					<Flex
@@ -125,6 +125,6 @@ export function DashboardPage() {
 					</Box>
 				</SimpleGrid>
 			</Stack>
-		</AppShell>
+		</AppContainer>
 	);
 }
