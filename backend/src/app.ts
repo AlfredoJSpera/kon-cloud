@@ -7,6 +7,7 @@ import { prismaErrorHandler } from "@middleware/errorHandler";
 import { loggerHttp } from "@middleware/logger";
 import { rateLimit } from "express-rate-limit";
 import {
+	FRONTEND_URL,
 	GENERAL_LIMITER_HIDE_HEADERS,
 	GENERAL_LIMITER_REQUESTS,
 	GENERAL_LIMITER_TRUST_PROXY,
@@ -29,7 +30,12 @@ if (GENERAL_LIMITER_TRUST_PROXY) {
 }
 
 // Middleware
-app.use(cors());
+app.use(
+	cors({
+		origin: FRONTEND_URL,
+		credentials: true,
+	}),
+);
 app.use(loggerHttp);
 app.use(limiter);
 app.use(express.json());

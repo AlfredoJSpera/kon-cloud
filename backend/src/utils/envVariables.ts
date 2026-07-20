@@ -77,3 +77,6 @@ export const REFRESH_TOKEN_EXPIRES_IN = getEnv(
 );
 
 export const CSRF_TOKEN_SECRET = getEnv("CSRF_TOKEN_SECRET");
+
+// Frontend
+export const FRONTEND_URL = getEnv("FRONTEND_URL");
