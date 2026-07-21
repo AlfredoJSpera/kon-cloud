@@ -23,8 +23,8 @@ import {
 } from "@errors/validation";
 import {
 	KonInvalidCredentialsError,
-	KonInvalidTokenError,
-	KonMissingTokenError,
+	KonInvalidRefreshTokenError,
+	KonMissingRefreshTokenError,
 } from "@errors/authentication";
 import {
 	AUTH_LIMITER_REQUESTS,
@@ -145,7 +145,7 @@ router.post(
 			const refreshToken = req.cookies?.refreshToken;
 
 			if (!refreshToken) {
-				throw new KonMissingTokenError("Missing refresh token.");
+				throw new KonMissingRefreshTokenError();
 			}
 
 			try {
@@ -174,7 +174,7 @@ router.post(
 				});
 			} catch (err) {
 				logger.debug({ err }, "Error during verification of JWT.");
-				throw new KonInvalidTokenError();
+				throw new KonInvalidRefreshTokenError();
 			}
 		},
 	),

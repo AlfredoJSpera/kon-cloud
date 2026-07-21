@@ -124,8 +124,8 @@ describe("administrator routes", () => {
 		expect(response.status).toBe(400);
 		expect(response.body).toEqual({
 			error: true,
-			message: "Missing token.",
-			errorCode: "MISSING_TOKEN",
+			message: "Missing authentication token.",
+			errorCode: "MISSING_AUTHENTICATION_TOKEN",
 		});
 	});
 

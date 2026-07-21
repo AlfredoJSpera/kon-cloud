@@ -124,7 +124,7 @@ describe("auth routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Missing refresh token.",
-			errorCode: "MISSING_TOKEN",
+			errorCode: "MISSING_REFRESH_TOKEN",
 		});
 	});
 });

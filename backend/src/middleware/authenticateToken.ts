@@ -3,9 +3,9 @@ import { logger } from "./logger";
 import { NextFunction, Request, Response } from "express";
 import { TokenPayload } from "@interfaces/common";
 import {
-	KonExpiredTokenError,
-	KonInvalidTokenError,
-	KonMissingTokenError,
+	KonExpiredAuthenticationTokenError,
+	KonInvalidAuthenticationTokenError,
+	KonMissingAuthenticationTokenError,
 } from "@errors/authentication";
 import { ACCESS_TOKEN_SECRET } from "@utils/envVariables";
 
@@ -29,20 +29,17 @@ export function authenticateToken(
 	const token = authHeader && authHeader?.split(" ")[1];
 
 	if (!token) {
-		return next(new KonMissingTokenError());
+		return next(new KonMissingAuthenticationTokenError());
 	}
 
 	jwt.verify(token, ACCESS_TOKEN_SECRET, (err: any, decoded: any) => {
 		if (err) {
-			// Throw error to prismaErrorHandler
-			if (err.name === "JsonWebTokenError") {
-				return next(new KonInvalidTokenError("Invalid token."));
-			}
+			// Throw error to errorHandler
 			if (err.name === "TokenExpiredError") {
-				return next(new KonExpiredTokenError());
+				return next(new KonExpiredAuthenticationTokenError());
 			}
 			logger.error({ err }, "Unexpected Token verification failure:");
-			return next(new KonInvalidTokenError());
+			return next(new KonInvalidAuthenticationTokenError());
 		}
 
 		// Implant administrator info in the request to the endpoint
