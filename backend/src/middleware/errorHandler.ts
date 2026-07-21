@@ -58,6 +58,18 @@ export function prismaErrorHandler(
 		});
 	}
 
+	// Handle bad JSON
+	try {
+		JSON.parse(req.body);
+	} catch (error) {
+		logger.debug({ err }, "A JSON Syntax Error has occurred:");
+		return res.status(400).json({
+			error: true,
+			message: "Bad JSON request.",
+			errorCode: "BAD_JSON",
+		});
+	}
+
 	// Handle Unknown Errors
 	logger.error({ err }, "Unhandled Error:");
 	return res.status(500).json({
