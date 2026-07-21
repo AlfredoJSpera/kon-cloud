@@ -1,4 +1,4 @@
-import { AdministratorBasicInfo } from "./common";
+import { type AdministratorBasicInfo } from "./common";
 
 export interface IAuthLoginInput {
 	email: string;
