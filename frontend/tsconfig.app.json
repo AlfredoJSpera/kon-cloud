@@ -10,7 +10,8 @@
 
 		/* Paths */
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@backend-interfaces/*": ["../backend/interfaces/*"]
 		},
 
 		/* Bundler mode */
