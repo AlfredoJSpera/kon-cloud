@@ -43,7 +43,8 @@ describe("auth routes", () => {
 		expect(response.status).toBe(400);
 		expect(response.body).toEqual({
 			error: true,
-			message: "Missing required field.",
+			message: "Missing required fields.",
+			errorCode: "MISSING_REQUIRED_FIELDS",
 		});
 	});
 
@@ -60,6 +61,7 @@ describe("auth routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Invalid credentials.",
+			errorCode: "INVALID_CREDENTIALS",
 		});
 	});
 
@@ -75,6 +77,7 @@ describe("auth routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Invalid credentials.",
+			errorCode: "INVALID_CREDENTIALS",
 		});
 	});
 
@@ -121,6 +124,7 @@ describe("auth routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Missing refresh token.",
+			errorCode: "MISSING_TOKEN",
 		});
 	});
 });

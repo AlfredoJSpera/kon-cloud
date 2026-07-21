@@ -31,4 +31,5 @@ export interface CondominiumBasicInfo {
 export interface IErrorResponse {
 	error: boolean;
 	message: string;
+	errorCode: string;
 }

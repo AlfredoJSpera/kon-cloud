@@ -1,8 +1,4 @@
-import request, {
-	adminRecord,
-	mockBcrypt,
-	mockPrisma,
-} from "./testHelpers";
+import request, { adminRecord, mockBcrypt, mockPrisma } from "./testHelpers";
 import app from "../app";
 
 describe("administrator routes", () => {
@@ -54,7 +50,8 @@ describe("administrator routes", () => {
 		expect(response.status).toBe(400);
 		expect(response.body).toEqual({
 			error: true,
-			message: "Missing required field.",
+			message: "Missing required fields.",
+			errorCode: "MISSING_REQUIRED_FIELDS",
 		});
 	});
 
@@ -72,6 +69,7 @@ describe("administrator routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Incorrect field type.",
+			errorCode: "INCORRECT_FIELD_TYPE",
 		});
 	});
 
@@ -93,6 +91,7 @@ describe("administrator routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "This email is already registered.",
+			errorCode: "EMAIL_ALREADY_EXISTS",
 		});
 	});
 
@@ -126,6 +125,7 @@ describe("administrator routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Missing token.",
+			errorCode: "MISSING_TOKEN",
 		});
 	});
 
@@ -148,6 +148,7 @@ describe("administrator routes", () => {
 		expect(response.body).toEqual({
 			error: true,
 			message: "Resource not found.",
+			errorCode: "NOT_FOUND",
 		});
 	});
 });

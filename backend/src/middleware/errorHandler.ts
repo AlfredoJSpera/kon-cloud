@@ -18,12 +18,14 @@ export function prismaErrorHandler(
 				return res.status(400).json({
 					error: true,
 					message: "One of the provided fields is too long.",
+					errorCode: "FIELD_TOO_LONG",
 				});
 
 			case "P2002": // Unique constraint failed
 				return res.status(409).json({
 					error: true,
 					message: "This record already exists.",
+					errorCode: "RECORD_ALREADY_EXISTS",
 				});
 
 			default:
@@ -31,6 +33,7 @@ export function prismaErrorHandler(
 				return res.status(400).json({
 					error: true,
 					message: "Bad request.",
+					errorCode: "BAD_REQUEST",
 				});
 		}
 	}
@@ -42,6 +45,7 @@ export function prismaErrorHandler(
 		return res.status(err.statusCode).json({
 			error: true,
 			message: err.message,
+			errorCode: err.errorCode,
 		});
 	}
 
@@ -50,6 +54,7 @@ export function prismaErrorHandler(
 		return res.status(err.statusCode).json({
 			error: true,
 			message: "Invalid csrf token.",
+			errorCode: "INVALID_CSRF_TOKEN",
 		});
 	}
 
@@ -58,6 +63,7 @@ export function prismaErrorHandler(
 	return res.status(500).json({
 		error: true,
 		message: "An error occurred on the server.",
+		errorCode: "SERVER_ERROR",
 	});
 }
 
