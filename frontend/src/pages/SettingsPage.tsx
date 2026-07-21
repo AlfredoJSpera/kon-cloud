@@ -22,9 +22,11 @@ export function SettingsPage() {
 
 	return (
 		<AppContainer
+			sidebarBrandName="Kon-Cloud"
+			sidebarHeading="Navigation"
 			topBarTitle=""
-			pageHeaderTitle="User Settings"
-			pageHeaderSubtitle="Profile and security controls"
+			contentHeaderSubtitle="User Settings"
+			contentHeaderTitle="Profile and security controls"
 		>
 			<SimpleGrid columns={{ base: 1, xl: 3 }} gap="6">
 				<Box

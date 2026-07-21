@@ -1,11 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { Sidebar } from "./Sidebar";
 
-export default function DesktopNavigationSidebar(props: {
-	brandName: string;
-	heading: string;
-	navigate: (path: string) => void;
-}) {
+export default function DesktopNavigationSidebar() {
 	return (
 		<Box
 			display={{ base: "none", lg: "block" }}
@@ -14,11 +10,7 @@ export default function DesktopNavigationSidebar(props: {
 			px="5"
 			py="6"
 		>
-			<Sidebar
-				brandName={props.brandName}
-				heading={props.heading}
-				navigate={props.navigate}
-			/>
+			<Sidebar />
 		</Box>
 	);
 }

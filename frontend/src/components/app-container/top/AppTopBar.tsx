@@ -1,4 +1,11 @@
-import { Flex, HStack, Heading, Button, Text } from "@chakra-ui/react";
+import {
+	Flex,
+	HStack,
+	Heading,
+	Button,
+	Text,
+	IconButton,
+} from "@chakra-ui/react";
 import { Avatar } from "@/components/ui/avatar";
 import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
 import {
@@ -8,19 +15,16 @@ import {
 	MenuItem,
 	MenuSeparator,
 } from "@/components/ui/menu";
-import OpenDrawerButton from "./OpenDrawerButton";
+import { useContext } from "react";
+import { AppContext } from "../AppContext";
+import { LuMenu } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 
-export function AppTopBar(props: {
-	title: string;
-	user: {
-		name: string;
-		surname: string;
-	};
-	drawerOnOpen: () => void;
-	navigate: (path: string) => void;
-}) {
+export function AppTopBar() {
 	const { colorMode, toggleColorMode } = useColorMode();
-	const userNameSurname = `${props.user.name} ${props.user.surname}`;
+	const navigate = useNavigate();
+	const appCtx = useContext(AppContext);
+	const userNameSurname = "Name Surname";
 
 	return (
 		<Flex
@@ -32,7 +36,7 @@ export function AppTopBar(props: {
 		>
 			{/* Left */}
 			<HStack gap="3">
-				<Heading size="md">{props.title}</Heading>
+				<Heading size="md">{appCtx?.topBarTitle}</Heading>
 			</HStack>
 
 			{/* Right */}
@@ -42,8 +46,16 @@ export function AppTopBar(props: {
 					variant="ghost"
 				/>
 
-				{/* Button appears when <= md */}
-				<OpenDrawerButton drawerOnOpen={props.drawerOnOpen} />
+				{/* OpenDrawerButton: appears when <= md */}
+				<IconButton
+					aria-label="Open navigation"
+					size="sm"
+					variant="ghost"
+					display={{ base: "inline-flex", lg: "none" }}
+					onClick={appCtx?.drawer.onOpen}
+				>
+					<LuMenu />
+				</IconButton>
 
 				<MenuRoot>
 					{/* Menu button */}
@@ -68,7 +80,7 @@ export function AppTopBar(props: {
 					<MenuContent>
 						<MenuItem
 							value="profile"
-							onClick={() => props.navigate("/profile")}
+							onClick={() => navigate("/profile")}
 						>
 							Profile
 						</MenuItem>
@@ -86,7 +98,7 @@ export function AppTopBar(props: {
 
 						<MenuItem
 							value="settings"
-							onClick={() => props.navigate("/settings")}
+							onClick={() => navigate("/settings")}
 						>
 							Settings
 						</MenuItem>
@@ -95,7 +107,7 @@ export function AppTopBar(props: {
 
 						<MenuItem
 							value="logout"
-							onClick={() => props.navigate("/login")}
+							onClick={() => navigate("/login")}
 						>
 							Logout
 						</MenuItem>

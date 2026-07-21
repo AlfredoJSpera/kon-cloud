@@ -6,29 +6,22 @@ import {
 } from "@/components/ui/drawer";
 import { Sidebar } from "./Sidebar";
 import { Box } from "@chakra-ui/react";
+import { useContext } from "react";
+import { AppContext } from "../AppContext";
 
-export function MobileNavigationDrawer(props: {
-	brandName: string;
-	heading: string;
-	drawerOpen: boolean;
-	drawerSetOpen: (open: boolean) => void;
-	navigate: (path: string) => void;
-}) {
+export function MobileNavigationDrawer() {
+	const ctx = useContext(AppContext);
 	return (
 		<DrawerRoot
-			open={props.drawerOpen}
-			onOpenChange={(details) => props.drawerSetOpen(details.open)}
+			open={ctx?.drawer.open}
+			onOpenChange={(details) => ctx?.drawer.setOpen(details.open)}
 			placement="bottom"
 		>
 			<DrawerContent borderRightWidth="1px">
 				<DrawerCloseTrigger />
 				<DrawerBody>
 					<Box mt={8}>
-						<Sidebar
-							brandName={props.brandName}
-							heading={props.heading}
-							navigate={props.navigate}
-						/>
+						<Sidebar />
 					</Box>
 				</DrawerBody>
 			</DrawerContent>

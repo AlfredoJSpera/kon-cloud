@@ -1,16 +1,9 @@
-import { Container, Flex, Stack } from "@chakra-ui/react";
-import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
-import { AppPageHeader } from "./AppPageHeader";
+import { Box, Heading, Text, Container, Flex, Stack } from "@chakra-ui/react";
+import { useContext, type ReactNode } from "react";
+import { AppContext } from "../AppContext";
 
-export default function AppMainContent(props: {
-	topBarTitle: string;
-	pageHeaderTitle: string;
-	pageHeaderSubtitle: string;
-	children: ReactNode;
-	navigate: ReturnType<typeof useNavigate>;
-	drawerOnOpen: () => void;
-}) {
+export default function AppMainContent(props: { children: ReactNode }) {
+	const ctx = useContext(AppContext);
 	return (
 		<Flex
 			flex="1"
@@ -20,10 +13,15 @@ export default function AppMainContent(props: {
 		>
 			<Container maxW="7xl" px="0">
 				<Stack gap="5">
-					<AppPageHeader
-						title={props.pageHeaderTitle}
-						subtitle={props.pageHeaderSubtitle}
-					/>
+					{/* Page Header */}
+					<Box>
+						<Text fontSize="sm">{ctx?.contentHeaderSubtitle}</Text>
+						<Heading size="2xl" mt="2">
+							{ctx?.contentHeaderTitle}
+						</Heading>
+					</Box>
+
+					{/* Content */}
 					{props.children}
 				</Stack>
 			</Container>

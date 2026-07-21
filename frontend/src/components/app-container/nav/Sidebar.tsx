@@ -7,8 +7,10 @@ import {
 	Stack,
 	Text,
 } from "@chakra-ui/react";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
 import { LuGrid2X2, LuLock, LuSettings2, LuSparkles } from "react-icons/lu";
+import { AppContext } from "../AppContext";
+import { useNavigate } from "react-router-dom";
 
 type NavItem = {
 	label: string;
@@ -31,18 +33,17 @@ const navItems: NavItem[] = [
 	},
 ];
 
-export function Sidebar(props: {
-	brandName: string;
-	heading: string;
-	navigate: (path: string) => void;
-}) {
+export function Sidebar() {
+	const ctx = useContext(AppContext);
+	const navigate = useNavigate();
+
 	return (
 		<Stack gap="6" h="full">
 			{/* Headings */}
 			<Box>
-				<Text fontSize="xs">{props.brandName}</Text>
+				<Text fontSize="xs">{ctx?.sidebarBrandName}</Text>
 				<Heading size="lg" mt="1">
-					{props.heading}
+					{ctx?.sidebarHeading}
 				</Heading>
 			</Box>
 
@@ -53,7 +54,7 @@ export function Sidebar(props: {
 						key={item.path}
 						justifyContent="flex-start"
 						variant="ghost"
-						onClick={() => props.navigate(item.path)}
+						onClick={() => navigate(item.path)}
 					>
 						<HStack gap="3">
 							{item.icon}

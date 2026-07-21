@@ -35,9 +35,11 @@ export function DashboardPage() {
 
 	return (
 		<AppContainer
+			sidebarBrandName="Kon-Cloud"
+			sidebarHeading="Navigation"
 			topBarTitle="My Extra Long Condominium Name"
-			pageHeaderSubtitle="Dashboard preview"
-			pageHeaderTitle="Page Layout"
+			contentHeaderSubtitle="Dashboard preview"
+			contentHeaderTitle="Page Layout"
 		>
 			<Stack gap="6">
 				<Box borderWidth="1px" p={{ base: "4", md: "6" }}>
