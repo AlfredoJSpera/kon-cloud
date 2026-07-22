@@ -25,14 +25,6 @@ export function RegisterPage() {
 				as="form"
 				onSubmit={(e) => {
 					e.preventDefault();
-					console.log("login:", {
-						name,
-						surname,
-						email,
-						repeatEmail,
-						password,
-						repeatPassword,
-					});
 				}}
 			>
 				{/* Basic info */}

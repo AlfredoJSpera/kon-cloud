@@ -4,7 +4,7 @@ import { MobileNavigationDrawer } from "./nav/MobileNavigationDrawer";
 import DesktopNavigationSidebar from "./nav/DesktopNavigationSidebar";
 import AppMainContent from "./main-content/AppMainContent";
 import { AppTopBar } from "./top/AppTopBar";
-import { AppContext } from "./AppContext";
+import { AppContext } from "@/contexts/AppContext";
 
 export function AppContainer(props: {
 	sidebarBrandName: string;
@@ -16,7 +16,7 @@ export function AppContainer(props: {
 }) {
 	const drawer = useDisclosure();
 	return (
-		<AppContext
+		<AppContext.Provider
 			value={{
 				drawer,
 				sidebarBrandName: props.sidebarBrandName,
@@ -36,6 +36,6 @@ export function AppContainer(props: {
 					<AppMainContent>{props.children}</AppMainContent>
 				</Stack>
 			</Flex>
-		</AppContext>
+		</AppContext.Provider>
 	);
 }

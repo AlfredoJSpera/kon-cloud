@@ -7,7 +7,7 @@ import {
 import { Sidebar } from "./Sidebar";
 import { Box } from "@chakra-ui/react";
 import { useContext } from "react";
-import { AppContext } from "../AppContext";
+import { AppContext } from "@/contexts/AppContext";
 
 export function MobileNavigationDrawer() {
 	const ctx = useContext(AppContext);

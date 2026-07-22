@@ -1,6 +1,6 @@
 import { Box, Heading, Text, Container, Flex, Stack } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { AppContext } from "../AppContext";
+import { AppContext } from "@/contexts/AppContext";
 
 export default function AppMainContent(props: { children: ReactNode }) {
 	const ctx = useContext(AppContext);

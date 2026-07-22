@@ -16,7 +16,7 @@ import {
 	MenuSeparator,
 } from "@/components/ui/menu";
 import { useContext } from "react";
-import { AppContext } from "../AppContext";
+import { AppContext } from "@/contexts/AppContext";
 import { LuMenu } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
