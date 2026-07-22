@@ -8,7 +8,13 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { LuGrid2X2, LuLock, LuSettings2, LuSparkles } from "react-icons/lu";
+import {
+	LuGrid2X2,
+	LuLock,
+	LuSettings2,
+	LuSparkles,
+	LuTestTube,
+} from "react-icons/lu";
 import { AppContext } from "@/contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 
@@ -30,6 +36,11 @@ const navItems: NavItem[] = [
 		label: "User Settings",
 		path: "/settings",
 		icon: <Icon as={LuSettings2} />,
+	},
+	{
+		label: "Manual Testing",
+		path: "/manualtest",
+		icon: <Icon as={LuTestTube} />,
 	},
 ];
 

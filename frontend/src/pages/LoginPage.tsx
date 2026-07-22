@@ -1,18 +1,11 @@
 import { Button, Input, Link, Separator, Stack, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LuArrowRight } from "react-icons/lu";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { AuthContainer } from "@/components/AuthContainer";
-import { loginUrl } from "@/api/apiUrls";
-import { type IErrorResponse } from "@backend-interfaces/common";
-import {
-	type IAuthLoginInput,
-	type IAuthLoginOutput,
-} from "@backend-interfaces/auth";
-import { toaster } from "@/components/ui/toaster";
-import handleApiError from "@/api/apiErrorHandler";
+import { AuthContext } from "@/contexts/AuthContext";
 
 export function LoginPage() {
 	const [email, setEmail] = useState("");
@@ -22,68 +15,26 @@ export function LoginPage() {
 		email: false,
 		password: false,
 	});
-	const navigate = useNavigate();
 
-	const handleLogin = async (e: React.SubmitEvent<HTMLDivElement>) => {
+	const navigate = useNavigate();
+	const authCtx = useContext(AuthContext);
+
+	const handleSubmit = async (e: React.SubmitEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setFieldErrors({ email: false, password: false });
+
+		if (!email || !password) {
+			setFieldErrors({ email: !email, password: !password });
+			return;
+		}
+
 		setIsLoading(true);
 
 		try {
-			if (!email || !password) {
-				// Set errors if fields are empty
-				setFieldErrors({ email: !email, password: !password });
-				throw new Error("MISSING_REQUIRED_FIELDS");
-			}
-
-			const input: IAuthLoginInput = {
-				email,
-				password,
-			};
-
-			const response = await fetch(loginUrl, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(input),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				const errorData = data as IErrorResponse;
-				throw new Error(errorData.errorCode);
-			}
-
-			const responseData = data as IAuthLoginOutput;
-
-			//TODO: Change localStorage for a React Context
-			localStorage.setItem("accessToken", responseData.accessToken);
-			localStorage.setItem("csrfToken", responseData.csrfToken);
-			localStorage.setItem(
-				"userProfile",
-				JSON.stringify(responseData.profile),
-			);
-
-			toaster.create({
-				title: "You are now logged in.",
-				type: "success",
-			});
-
+			await authCtx?.login({ email, password });
 			navigate("/dashboard");
-		} catch (err: unknown) {
-			console.error("Login error:", err);
-
-			const errorMessage =
-				err instanceof Error
-					? handleApiError(err.message)
-					: "Something went wrong.";
-
-			toaster.create({
-				title: errorMessage,
-				type: "error",
-			});
+		} catch {
+			// Error toasts and logging are already handled by AuthProvider
 		} finally {
 			setIsLoading(false);
 		}
@@ -96,7 +47,7 @@ export function LoginPage() {
 			actionLabel="Sign in"
 			actionTitle="Login to Kon-Cloud"
 		>
-			<Stack gap="4" as="form" onSubmit={handleLogin}>
+			<Stack gap="4" as="form" onSubmit={handleSubmit}>
 				<Field
 					label="Email address"
 					invalid={fieldErrors.email}
