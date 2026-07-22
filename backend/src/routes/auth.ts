@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ms, { StringValue } from "ms";
-import { Router } from "express";
+import { Router, NextFunction } from "express";
 import { rateLimit } from "express-rate-limit";
-import { prisma } from "../lib/prisma";
+import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandler";
 import { logger } from "@middleware/logger";
 import {
@@ -135,11 +135,11 @@ type RefreshTokenApiContract = KonApiContract<
 >;
 router.post(
 	"/refresh-token",
-	doubleCsrfProtection,
 	catchError(
 		async (
 			req: RefreshTokenApiContract["Req"],
 			res: RefreshTokenApiContract["Res"],
+			next: NextFunction,
 		) => {
 			logger.debug(req.cookies, "Request cookies:");
 			const refreshToken = req.cookies?.refreshToken;
@@ -148,34 +148,38 @@ router.post(
 				throw new KonMissingRefreshTokenError();
 			}
 
-			try {
-				const decoded = jwt.verify(
-					refreshToken,
-					REFRESH_TOKEN_SECRET,
-				) as any;
+			doubleCsrfProtection(req, res, (err) => {
+				if (err) return next(err);
 
-				const tokenPayload: TokenPayload = {
-					administratorId: decoded.administratorId,
-					email: decoded.email,
-				};
+				try {
+					const decoded = jwt.verify(
+						refreshToken,
+						REFRESH_TOKEN_SECRET,
+					) as any;
 
-				const newAccessToken = generateAccessToken(tokenPayload);
-				const newRefreshToken = generateRefreshToken(tokenPayload);
+					const tokenPayload: TokenPayload = {
+						administratorId: decoded.administratorId,
+						email: decoded.email,
+					};
 
-				res.cookie("refreshToken", newRefreshToken, {
-					httpOnly: true,
-					secure: process.env.NODE_ENV === "production",
-					sameSite: "strict",
-					maxAge: cookieMaxAge,
-				});
+					const newAccessToken = generateAccessToken(tokenPayload);
+					const newRefreshToken = generateRefreshToken(tokenPayload);
 
-				res.status(200).json({
-					accessToken: newAccessToken,
-				});
-			} catch (err) {
-				logger.debug({ err }, "Error during verification of JWT.");
-				throw new KonInvalidRefreshTokenError();
-			}
+					res.cookie("refreshToken", newRefreshToken, {
+						httpOnly: true,
+						secure: process.env.NODE_ENV === "production",
+						sameSite: "strict",
+						maxAge: cookieMaxAge,
+					});
+
+					res.status(200).json({
+						accessToken: newAccessToken,
+					});
+				} catch (err) {
+					logger.debug({ err }, "Error during verification of JWT.");
+					throw new KonInvalidRefreshTokenError();
+				}
+			});
 		},
 	),
 );
