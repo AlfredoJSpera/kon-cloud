@@ -37,11 +37,6 @@ const navItems: NavItem[] = [
 		path: "/settings",
 		icon: <Icon as={LuSettings2} />,
 	},
-	{
-		label: "Manual Testing",
-		path: "/manualtest",
-		icon: <Icon as={LuTestTube} />,
-	},
 ];
 
 export function Sidebar() {

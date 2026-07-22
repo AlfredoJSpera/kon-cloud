@@ -1,7 +1,7 @@
 import { Button, Input, Link, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
-import { Field } from "@/components/ui/field";
-import { PasswordInput } from "@/components/ui/password-input";
+import { Field } from "@/components/chakraui/field";
+import { PasswordInput } from "@/components/chakraui/password-input";
 import { AuthContainer } from "@/components/AuthContainer";
 import { useState } from "react";
 

@@ -8,7 +8,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import type { ReactNode } from "react";
-import { ColorModeButton } from "@/components/ui/color-mode";
+import { ColorModeButton } from "@/components/chakraui/color-mode";
 
 export function AuthContainer(props: {
 	brandName: string;

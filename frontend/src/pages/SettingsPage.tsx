@@ -11,9 +11,9 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar } from "@/components/ui/avatar";
-import { Field } from "@/components/ui/field";
-import { PasswordInput } from "@/components/ui/password-input";
+import { Avatar } from "@/components/chakraui/avatar";
+import { Field } from "@/components/chakraui/field";
+import { PasswordInput } from "@/components/chakraui/password-input";
 import { AppContainer } from "@/components/app-container/AppContainer";
 
 export function SettingsPage() {

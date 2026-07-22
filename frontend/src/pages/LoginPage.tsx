@@ -2,8 +2,8 @@ import { Button, Input, Link, Separator, Stack, Text } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LuArrowRight } from "react-icons/lu";
-import { Field } from "@/components/ui/field";
-import { PasswordInput } from "@/components/ui/password-input";
+import { Field } from "@/components/chakraui/field";
+import { PasswordInput } from "@/components/chakraui/password-input";
 import { AuthContainer } from "@/components/AuthContainer";
 import { AuthContext } from "@/contexts/AuthContext";
 

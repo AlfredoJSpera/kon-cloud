@@ -6,15 +6,18 @@ import {
 	Text,
 	IconButton,
 } from "@chakra-ui/react";
-import { Avatar } from "@/components/ui/avatar";
-import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
+import { Avatar } from "@/components/chakraui/avatar";
+import {
+	ColorModeButton,
+	useColorMode,
+} from "@/components/chakraui/color-mode";
 import {
 	MenuRoot,
 	MenuTrigger,
 	MenuContent,
 	MenuItem,
 	MenuSeparator,
-} from "@/components/ui/menu";
+} from "@/components/chakraui/menu";
 import { useContext } from "react";
 import { AppContext } from "@/contexts/AppContext";
 import { LuMenu } from "react-icons/lu";

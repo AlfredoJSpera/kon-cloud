@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthContext } from "@/contexts/AuthContext";
 import { loginUrl } from "@/api/apiUrls";
 import handleApiError from "@/api/apiErrorHandler";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/components/chakraui/toaster";
 import type {
 	AdministratorBasicInfo,
 	IErrorResponse,
