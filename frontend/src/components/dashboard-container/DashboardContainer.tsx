@@ -2,11 +2,11 @@ import { Flex, Stack, useDisclosure } from "@chakra-ui/react";
 import { type ReactNode } from "react";
 import { MobileNavigationDrawer } from "./nav/MobileNavigationDrawer";
 import DesktopNavigationSidebar from "./nav/DesktopNavigationSidebar";
-import AppMainContent from "./main-content/AppMainContent";
-import { AppTopBar } from "./top/AppTopBar";
-import { AppContext } from "@/contexts/AppContext";
+import DashboardMainContent from "./main-content/DashboardMainContent";
+import { DashboardTopBar } from "./top/DashboardTopBar";
+import { DashboardContext } from "@/contexts/DashboardContext";
 
-export function AppContainer(props: {
+export function DashboardContainer(props: {
 	sidebarBrandName: string;
 	sidebarHeading: string;
 	topBarTitle: string;
@@ -16,7 +16,7 @@ export function AppContainer(props: {
 }) {
 	const drawer = useDisclosure();
 	return (
-		<AppContext.Provider
+		<DashboardContext.Provider
 			value={{
 				drawer,
 				sidebarBrandName: props.sidebarBrandName,
@@ -31,11 +31,13 @@ export function AppContainer(props: {
 				<MobileNavigationDrawer />
 
 				<Stack flex="1" gap="0">
-					<AppTopBar />
+					<DashboardTopBar />
 
-					<AppMainContent>{props.children}</AppMainContent>
+					<DashboardMainContent>
+						{props.children}
+					</DashboardMainContent>
 				</Stack>
 			</Flex>
-		</AppContext.Provider>
+		</DashboardContext.Provider>
 	);
 }

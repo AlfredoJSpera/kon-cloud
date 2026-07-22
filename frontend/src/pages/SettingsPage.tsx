@@ -14,14 +14,14 @@ import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/chakraui/avatar";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
-import { AppContainer } from "@/components/app-container/AppContainer";
+import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 
 export function SettingsPage() {
 	const [email, setEmail] = useState("alex@kon-cloud.dev");
 	const navigate = useNavigate();
 
 	return (
-		<AppContainer
+		<DashboardContainer
 			sidebarBrandName="Kon-Cloud"
 			sidebarHeading="Navigation"
 			topBarTitle=""
@@ -105,6 +105,6 @@ export function SettingsPage() {
 					</Stack>
 				</Box>
 			</SimpleGrid>
-		</AppContainer>
+		</DashboardContainer>
 	);
 }

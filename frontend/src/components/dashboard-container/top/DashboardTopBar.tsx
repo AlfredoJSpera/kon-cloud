@@ -19,14 +19,14 @@ import {
 	MenuSeparator,
 } from "@/components/chakraui/menu";
 import { useContext } from "react";
-import { AppContext } from "@/contexts/AppContext";
+import { DashboardContext } from "@/contexts/DashboardContext";
 import { LuMenu } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
-export function AppTopBar() {
+export function DashboardTopBar() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const navigate = useNavigate();
-	const appCtx = useContext(AppContext);
+	const dashCtx = useContext(DashboardContext);
 	const userNameSurname = "Name Surname";
 
 	return (
@@ -39,7 +39,7 @@ export function AppTopBar() {
 		>
 			{/* Left */}
 			<HStack gap="3">
-				<Heading size="md">{appCtx?.topBarTitle}</Heading>
+				<Heading size="md">{dashCtx?.topBarTitle}</Heading>
 			</HStack>
 
 			{/* Right */}
@@ -55,7 +55,7 @@ export function AppTopBar() {
 					size="sm"
 					variant="ghost"
 					display={{ base: "inline-flex", lg: "none" }}
-					onClick={appCtx?.drawer.onOpen}
+					onClick={dashCtx?.drawer.onOpen}
 				>
 					<LuMenu />
 				</IconButton>

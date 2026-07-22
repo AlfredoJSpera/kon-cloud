@@ -1,7 +1,7 @@
 import type { useDisclosure } from "@chakra-ui/react";
 import { createContext } from "react";
 
-export interface IAppContext {
+export interface IDashboardContext {
 	drawer: ReturnType<typeof useDisclosure>;
 	sidebarBrandName: string;
 	sidebarHeading: string;
@@ -10,4 +10,4 @@ export interface IAppContext {
 	contentHeaderSubtitle: string;
 }
 
-export const AppContext = createContext<IAppContext | null>(null);
+export const DashboardContext = createContext<IDashboardContext | null>(null);

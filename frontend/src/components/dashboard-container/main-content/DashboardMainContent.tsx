@@ -1,9 +1,9 @@
 import { Box, Heading, Text, Container, Flex, Stack } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { AppContext } from "@/contexts/AppContext";
+import { DashboardContext } from "@/contexts/DashboardContext";
 
-export default function AppMainContent(props: { children: ReactNode }) {
-	const ctx = useContext(AppContext);
+export default function DashboardMainContent(props: { children: ReactNode }) {
+	const ctx = useContext(DashboardContext);
 	return (
 		<Flex
 			flex="1"

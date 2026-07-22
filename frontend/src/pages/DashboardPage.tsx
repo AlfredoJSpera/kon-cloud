@@ -20,7 +20,7 @@ import {
 	LuFolderKanban,
 	LuShieldCheck,
 } from "react-icons/lu";
-import { AppContainer } from "@/components/app-container/AppContainer";
+import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 
 export function DashboardPage() {
 	const cards = useMemo(
@@ -34,7 +34,7 @@ export function DashboardPage() {
 	);
 
 	return (
-		<AppContainer
+		<DashboardContainer
 			sidebarBrandName="Kon-Cloud"
 			sidebarHeading="Navigation"
 			topBarTitle="My Extra Long Condominium Name"
@@ -131,6 +131,6 @@ export function DashboardPage() {
 					</Box>
 				</SimpleGrid>
 			</Stack>
-		</AppContainer>
+		</DashboardContainer>
 	);
 }

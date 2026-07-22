@@ -8,14 +8,8 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import {
-	LuGrid2X2,
-	LuLock,
-	LuSettings2,
-	LuSparkles,
-	LuTestTube,
-} from "react-icons/lu";
-import { AppContext } from "@/contexts/AppContext";
+import { LuGrid2X2, LuLock, LuSettings2, LuSparkles } from "react-icons/lu";
+import { DashboardContext } from "@/contexts/DashboardContext";
 import { useNavigate } from "react-router-dom";
 
 type NavItem = {
@@ -40,7 +34,7 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar() {
-	const ctx = useContext(AppContext);
+	const ctx = useContext(DashboardContext);
 	const navigate = useNavigate();
 
 	return (
