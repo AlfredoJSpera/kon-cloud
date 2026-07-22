@@ -16,6 +16,6 @@ const ErrorMessages: Record<string, string> = {
 	ERR_NETWORK: "Server not reachable. Try again later.",
 };
 
-export default function handleApiError(errorCode: string) {
+export default function getApiErrorMessage(errorCode: string) {
 	return ErrorMessages[errorCode] || "Something went wrong.";
 }

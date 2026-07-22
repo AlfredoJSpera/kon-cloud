@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import axios from "axios";
 import { AuthContext } from "@/contexts/AuthContext";
 import { loginUrl } from "@/api/apiUrls";
-import handleApiError from "@/api/apiErrorHandler";
+import getApiErrorMessage from "@/api/apiErrorMessages";
 import { toaster } from "@/components/chakraui/toaster";
 import type {
 	AdministratorBasicInfo,
@@ -44,7 +44,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 				errorCode = err.message;
 			}
 
-			const errorMessage = handleApiError(errorCode);
+			const errorMessage = getApiErrorMessage(errorCode);
 
 			toaster.create({
 				title: errorMessage,
