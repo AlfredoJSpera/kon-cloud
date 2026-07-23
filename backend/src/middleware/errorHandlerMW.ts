@@ -1,10 +1,10 @@
-import { logger } from "./logger";
+import { logger } from "./loggerMW";
 import { Request, Response, NextFunction } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { IErrorResponse } from "@interfaces/common";
-import KonBaseError from "@errors/base";
+import KonBaseError from "@errors/baseError";
 
-export function prismaErrorHandler(
+export function routeErrorHandler(
 	err: any,
 	req: Request,
 	res: Response<IErrorResponse>,

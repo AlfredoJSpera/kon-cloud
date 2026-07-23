@@ -4,8 +4,8 @@ import ms, { StringValue } from "ms";
 import { Router, NextFunction } from "express";
 import { rateLimit } from "express-rate-limit";
 import { prisma } from "@lib/prisma";
-import { catchError } from "@middleware/errorHandler";
-import { logger } from "@middleware/logger";
+import { catchError } from "@middleware/errorHandlerMW";
+import { logger } from "@middleware/loggerMW";
 import {
 	generateAccessToken,
 	generateRefreshToken,
@@ -20,12 +20,12 @@ import { KonApiContract, TokenPayload } from "@interfaces/common";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
-} from "@errors/validation";
+} from "@errors/validationErrors";
 import {
 	KonInvalidCredentialsError,
 	KonInvalidRefreshTokenError,
 	KonMissingRefreshTokenError,
-} from "@errors/authentication";
+} from "@errors/authenticationErrors";
 import {
 	AUTH_LIMITER_REQUESTS,
 	AUTH_LIMITER_WINDOW,
@@ -36,7 +36,7 @@ import {
 import {
 	doubleCsrfProtection,
 	generateCsrfToken,
-} from "@middleware/csrfConfig";
+} from "@middleware/csrfConfigMW";
 import cookieParser from "cookie-parser";
 
 const router = Router();

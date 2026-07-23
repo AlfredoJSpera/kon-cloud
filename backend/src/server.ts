@@ -1,5 +1,5 @@
 import app from "./app";
-import { logger } from "@middleware/logger";
+import { logger } from "@middleware/loggerMW";
 import { SV_PORT } from "@utils/envVariables";
 
 app.listen(SV_PORT, () => {

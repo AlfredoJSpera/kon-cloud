@@ -1,10 +1,10 @@
 import ms, { StringValue } from "ms";
 import express from "express";
 import cors from "cors";
-import authRoutes from "@routes/auth";
-import administratorsRoutes from "@routes/administrator";
-import { prismaErrorHandler } from "@middleware/errorHandler";
-import { loggerHttp } from "@middleware/logger";
+import authRoutes from "@routes/authenticationRoutes";
+import administratorsRoutes from "@routes/administratorRoutes";
+import { routeErrorHandler } from "@middleware/errorHandlerMW";
+import { loggerHttp } from "@middleware/loggerMW";
 import { rateLimit } from "express-rate-limit";
 import {
 	FRONTEND_URL,
@@ -46,6 +46,6 @@ app.use("/administrators", administratorsRoutes);
 
 // Automatic error handling
 //! Must be directly below the endpoints
-app.use(prismaErrorHandler);
+app.use(routeErrorHandler);
 
 export default app;

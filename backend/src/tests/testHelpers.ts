@@ -1,6 +1,6 @@
 import request from "supertest";
 
-jest.mock("@middleware/logger", () => ({
+jest.mock("@middleware/loggerMW", () => ({
 	logger: {
 		info: jest.fn(),
 		debug: jest.fn(),
@@ -69,7 +69,9 @@ export function getCsrfCookie(setCookieHeader: string | string[] | undefined) {
 			? [setCookieHeader]
 			: [];
 
-	return cookies.find((cookie) => cookie.startsWith("__Host-psifi.x-csrf-token="));
+	return cookies.find((cookie) =>
+		cookie.startsWith("__Host-psifi.x-csrf-token="),
+	);
 }
 
 export default request;

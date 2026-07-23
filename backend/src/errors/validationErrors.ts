@@ -1,4 +1,4 @@
-import KonBaseError from "./base";
+import KonBaseError from "./baseError";
 
 export class KonMissingRequiredFieldsError extends KonBaseError {
 	constructor(message: string = "Missing required fields.") {

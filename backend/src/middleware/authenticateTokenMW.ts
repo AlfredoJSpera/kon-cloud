@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
-import { logger } from "./logger";
+import { logger } from "./loggerMW";
 import { NextFunction, Request, Response } from "express";
 import { TokenPayload } from "@interfaces/common";
 import {
 	KonExpiredAuthenticationTokenError,
 	KonInvalidAuthenticationTokenError,
 	KonMissingAuthenticationTokenError,
-} from "@errors/authentication";
+} from "@errors/authenticationErrors";
 import { ACCESS_TOKEN_SECRET } from "@utils/envVariables";
 
 // Extend Express' Request to include the authenticated user

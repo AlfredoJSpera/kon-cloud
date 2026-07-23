@@ -1,4 +1,4 @@
-import KonBaseError from "./base";
+import KonBaseError from "./baseError";
 
 export class KonInvalidCredentialsError extends KonBaseError {
 	constructor(message: string = "Invalid credentials.") {

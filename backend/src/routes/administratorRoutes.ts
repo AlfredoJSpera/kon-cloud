@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
-import { catchError } from "@middleware/errorHandler";
-import { authenticateToken } from "@middleware/authenticateToken";
+import { catchError } from "@middleware/errorHandlerMW";
+import { authenticateToken } from "@middleware/authenticateTokenMW";
 import {
 	IAdministratorMeOutput,
 	IAdministratorRegisterInput,
@@ -14,7 +14,7 @@ import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
 	KonNotFoundError,
-} from "@errors/validation";
+} from "@errors/validationErrors";
 
 const router = Router();
 
