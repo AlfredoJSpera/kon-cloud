@@ -10,7 +10,7 @@ export interface IAuthContext {
 		React.SetStateAction<AdministratorBasicInfo | undefined>
 	>;
 	login: (credentials: IAuthLoginInput) => Promise<void>;
-	logout: () => void;
+	logout: () => Promise<void>;
 	isLoading: boolean;
 }
 

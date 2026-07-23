@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import { api, setAccessToken, setAuthCallbacks } from "@/api/apiClient";
+import { api, clearCsrfToken, setAccessToken, setAuthCallbacks } from "@/api/apiClient";
 import getApiErrorMessage from "@/api/apiErrorMessages";
 import { toaster } from "@/components/chakraui/toaster";
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
@@ -116,9 +116,16 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		}
 	};
 
-	const logout = () => {
-		setToken(undefined);
-		setProfile(undefined);
+	const logout = async () => {
+		try {
+			await api.post("/auth/logout");
+		} catch {
+			// Ignore network/server errors during logout
+		} finally {
+			clearCsrfToken();
+			setToken(undefined);
+			setProfile(undefined);
+		}
 	};
 
 	return (

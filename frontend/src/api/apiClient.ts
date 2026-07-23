@@ -31,6 +31,13 @@ export function getCsrfToken(): string | undefined {
 	);
 }
 
+export function clearCsrfToken(): void {
+	Cookies.remove("psifi.x-csrf-token", { path: "/" });
+	Cookies.remove("__Host-psifi.x-csrf-token", { path: "/" });
+	Cookies.remove("csrfToken", { path: "/" });
+	Cookies.remove("x-csrf-token", { path: "/" });
+}
+
 type OnTokenRefreshedCallback = (newToken: string) => void;
 type OnAuthFailedCallback = () => void;
 

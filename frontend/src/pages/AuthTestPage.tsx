@@ -163,13 +163,13 @@ export function AuthTestPage() {
 		}
 	};
 
-	const handleLogout = () => {
+	const handleLogout = async () => {
 		if (authCtx) {
-			authCtx.logout();
+			await authCtx.logout();
 			setAccessToken(undefined);
 			addLog(
 				"Logout",
-				"Cleared access token and administrator profile.",
+				"Cleared cookies, access token, and administrator profile on server & client.",
 				"info",
 			);
 		}
