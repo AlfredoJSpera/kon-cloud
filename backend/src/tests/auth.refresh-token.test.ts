@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 import request from "./testHelpers";
 import app from "../app";
 import { generateCsrfToken } from "@middleware/csrfConfigMW";
-import { REFRESH_TOKEN_SECRET } from "@utils/envVariables";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "@utils/envVariables";
+import { TokenPayload } from "@interfaces/common";
 
 function createCsrfCredentials(sessionId = "test-session") {
 	const req = {
@@ -52,12 +53,64 @@ describe("GET /auth/refresh-token", () => {
 		expect(response.body).toEqual({
 			accessToken: expect.any(String),
 		});
+
+		const decodedAccess = jwt.verify(
+			response.body.accessToken,
+			ACCESS_TOKEN_SECRET,
+		) as TokenPayload;
+		expect(decodedAccess.administratorId).toBe("admin-123");
+		expect(decodedAccess.email).toBe("ada@example.com");
+
 		expect(response.headers["set-cookie"]).toEqual(
 			expect.arrayContaining([
 				expect.stringContaining("refreshToken="),
 				expect.stringContaining("x-csrf-token="),
 			]),
 		);
+	});
+
+	it("rejects refresh-token requests with an invalid/tampered refresh token", async () => {
+		const { token: csrfToken, cookiePair: csrfCookie } =
+			createCsrfCredentials("test-session");
+
+		const invalidRefreshToken = "invalid.jwt.token";
+
+		const response = await request(app)
+			.get("/auth/refresh-token")
+			.set("x-session-id", "test-session")
+			.set("x-csrf-token", csrfToken)
+			.set("Cookie", `refreshToken=${invalidRefreshToken}; ${csrfCookie}`);
+
+		expect(response.status).toBe(401);
+		expect(response.body).toEqual({
+			error: true,
+			message: "Invalid refresh token.",
+			errorCode: "INVALID_REFRESH_TOKEN",
+		});
+	});
+
+	it("rejects refresh-token requests with an expired refresh token", async () => {
+		const { token: csrfToken, cookiePair: csrfCookie } =
+			createCsrfCredentials("test-session");
+
+		const expiredRefreshToken = jwt.sign(
+			{ administratorId: "admin-123", email: "ada@example.com" },
+			REFRESH_TOKEN_SECRET,
+			{ expiresIn: "-1s" },
+		);
+
+		const response = await request(app)
+			.get("/auth/refresh-token")
+			.set("x-session-id", "test-session")
+			.set("x-csrf-token", csrfToken)
+			.set("Cookie", `refreshToken=${expiredRefreshToken}; ${csrfCookie}`);
+
+		expect(response.status).toBe(401);
+		expect(response.body).toEqual({
+			error: true,
+			message: "Invalid refresh token.",
+			errorCode: "INVALID_REFRESH_TOKEN",
+		});
 	});
 
 	it("rejects request when x-csrf-token header does not match csrf cookie", async () => {
