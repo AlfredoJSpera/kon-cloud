@@ -13,7 +13,7 @@ export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 	cookieOptions: {
 		sameSite: "strict",
 		path: "/",
-		httpOnly: true,
+		httpOnly: false,
 		secure: isProduction,
 		maxAge: COOKIE_MAX_AGE,
 	},
