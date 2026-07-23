@@ -11,18 +11,19 @@ import type {
 
 export default function AuthProvider(props: { children: ReactNode }) {
 	const [token, setTokenState] = useState<string | undefined>();
-	const [profile, setProfile] = useState<AdministratorBasicInfo | undefined>();
+	const [profile, setProfile] = useState<
+		AdministratorBasicInfo | undefined
+	>();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
-	const setToken: React.Dispatch<
-		React.SetStateAction<string | undefined>
-	> = useCallback((value) => {
-		setTokenState((prev) => {
-			const next = typeof value === "function" ? value(prev) : value;
-			setAccessToken(next);
-			return next;
-		});
-	}, []);
+	const setToken: React.Dispatch<React.SetStateAction<string | undefined>> =
+		useCallback((value) => {
+			setTokenState((prev) => {
+				const next = typeof value === "function" ? value(prev) : value;
+				setAccessToken(next);
+				return next;
+			});
+		}, []);
 
 	const fetchProfile = useCallback(async () => {
 		try {
@@ -136,4 +137,3 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		</AuthContext.Provider>
 	);
 }
-
