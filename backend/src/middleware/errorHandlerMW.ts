@@ -51,7 +51,7 @@ export function routeErrorHandler(
 
 	if (err.message === "invalid csrf token") {
 		logger.debug({ err }, "A CSRF Error has occurred:");
-		return res.status(err.statusCode).json({
+		return res.status(401).json({
 			error: true,
 			message: "Invalid csrf token.",
 			errorCode: "INVALID_CSRF_TOKEN",

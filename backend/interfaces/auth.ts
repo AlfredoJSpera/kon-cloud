@@ -8,7 +8,7 @@ export interface IAuthLoginInput {
 export interface IAuthLoginOutput {
 	accessToken: string;
 	profile: AdministratorBasicInfo;
-	csrfToken: string;
+	// csrfToken passed via httpOnly cookie
 }
 
 export interface IAuthRefreshTokenInput {

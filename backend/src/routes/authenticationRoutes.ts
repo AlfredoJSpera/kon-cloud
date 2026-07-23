@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ms, { StringValue } from "ms";
-import { Router, NextFunction } from "express";
+import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandlerMW";
@@ -29,8 +29,8 @@ import {
 import {
 	AUTH_LIMITER_REQUESTS,
 	AUTH_LIMITER_WINDOW,
+	COOKIE_MAX_AGE,
 	GENERAL_LIMITER_HIDE_HEADERS,
-	REFRESH_TOKEN_EXPIRES_IN,
 	REFRESH_TOKEN_SECRET,
 } from "@utils/envVariables";
 import {
@@ -50,8 +50,6 @@ const limiter = rateLimit({
 
 router.use(limiter);
 router.use(cookieParser());
-
-const cookieMaxAge = ms(REFRESH_TOKEN_EXPIRES_IN as StringValue);
 
 type LoginApiContract = KonApiContract<IAuthLoginInput, IAuthLoginOutput>;
 router.post(
@@ -95,25 +93,27 @@ router.post(
 				throw new KonInvalidCredentialsError();
 			}
 
+			// Tokens
 			const tokenPayload: TokenPayload = {
 				administratorId: result.AdministratorID,
 				email: result.Email,
 			};
-
 			const accessToken = generateAccessToken(tokenPayload);
 			const refreshToken = generateRefreshToken(tokenPayload);
-			const csrfToken = generateCsrfToken(req, res);
 
+			// Cookies
+			generateCsrfToken(req, res); // Generates the x-csrf-token cookie
 			res.cookie("refreshToken", refreshToken, {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === "production",
+				path: "/",
 				sameSite: "strict",
-				maxAge: cookieMaxAge,
+				maxAge: COOKIE_MAX_AGE,
 			});
 
+			// Response
 			res.status(200).json({
 				accessToken,
-				csrfToken,
 				profile: {
 					administratorId: result.AdministratorID,
 					firstName: result.FirstName,
@@ -133,13 +133,13 @@ type RefreshTokenApiContract = KonApiContract<
 	IAuthRefreshTokenInput,
 	IAuthRefreshTokenOutput
 >;
-router.post(
+router.get(
 	"/refresh-token",
+	doubleCsrfProtection,
 	catchError(
 		async (
 			req: RefreshTokenApiContract["Req"],
 			res: RefreshTokenApiContract["Res"],
-			next: NextFunction,
 		) => {
 			logger.debug(req.cookies, "Request cookies:");
 			const refreshToken = req.cookies?.refreshToken;
@@ -148,38 +148,38 @@ router.post(
 				throw new KonMissingRefreshTokenError();
 			}
 
-			doubleCsrfProtection(req, res, (err) => {
-				if (err) return next(err);
+			try {
+				const decoded = jwt.verify(
+					refreshToken,
+					REFRESH_TOKEN_SECRET,
+				) as TokenPayload;
 
-				try {
-					const decoded = jwt.verify(
-						refreshToken,
-						REFRESH_TOKEN_SECRET,
-					) as any;
+				// Tokens
+				const tokenPayload: TokenPayload = {
+					administratorId: decoded.administratorId,
+					email: decoded.email,
+				};
+				const newAccessToken = generateAccessToken(tokenPayload);
+				const newRefreshToken = generateRefreshToken(tokenPayload);
 
-					const tokenPayload: TokenPayload = {
-						administratorId: decoded.administratorId,
-						email: decoded.email,
-					};
+				// Cookies
+				generateCsrfToken(req, res); // Generates the x-csrf-token cookie
+				res.cookie("refreshToken", newRefreshToken, {
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					sameSite: "strict",
+					path: "/",
+					maxAge: COOKIE_MAX_AGE,
+				});
 
-					const newAccessToken = generateAccessToken(tokenPayload);
-					const newRefreshToken = generateRefreshToken(tokenPayload);
-
-					res.cookie("refreshToken", newRefreshToken, {
-						httpOnly: true,
-						secure: process.env.NODE_ENV === "production",
-						sameSite: "strict",
-						maxAge: cookieMaxAge,
-					});
-
-					res.status(200).json({
-						accessToken: newAccessToken,
-					});
-				} catch (err) {
-					logger.debug({ err }, "Error during verification of JWT.");
-					throw new KonInvalidRefreshTokenError();
-				}
-			});
+				// Response
+				res.status(200).json({
+					accessToken: newAccessToken,
+				});
+			} catch (err) {
+				logger.debug({ err }, "Error during verification of JWT.");
+				throw new KonInvalidRefreshTokenError();
+			}
 		},
 	),
 );

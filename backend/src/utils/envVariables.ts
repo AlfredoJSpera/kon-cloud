@@ -1,4 +1,5 @@
 import "dotenv/config";
+import ms, { StringValue } from "ms";
 
 export function getEnv(key: string, defaultValue?: string): string {
 	let value = process.env[key];
@@ -77,6 +78,8 @@ export const REFRESH_TOKEN_EXPIRES_IN = getEnv(
 );
 
 export const CSRF_TOKEN_SECRET = getEnv("CSRF_TOKEN_SECRET");
+
+export const COOKIE_MAX_AGE = ms(REFRESH_TOKEN_EXPIRES_IN as StringValue);
 
 // Frontend
 export const FRONTEND_URL = getEnv("FRONTEND_URL");

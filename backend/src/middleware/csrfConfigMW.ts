@@ -1,14 +1,23 @@
-import { CSRF_TOKEN_SECRET } from "@utils/envVariables";
+import { COOKIE_MAX_AGE, CSRF_TOKEN_SECRET } from "@utils/envVariables";
 import { doubleCsrf } from "csrf-csrf";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 	getSecret: () => CSRF_TOKEN_SECRET,
 	getSessionIdentifier: (req) =>
 		(req.headers["x-session-id"] as string) || req.ip || "",
-	cookieName: "__Host-psifi.x-csrf-token",
+	cookieName: isProduction
+		? "__Host-psifi.x-csrf-token"
+		: "psifi.x-csrf-token",
 	cookieOptions: {
 		sameSite: "strict",
-		secure: process.env.NODE_ENV === "production",
+		path: "/",
+		httpOnly: true,
+		secure: isProduction,
+		maxAge: COOKIE_MAX_AGE,
 	},
-	getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"] as string,
+	size: 32,
+	getCsrfTokenFromRequest: (req) =>
+		(req.headers["x-csrf-token"] as string) || "",
 });
