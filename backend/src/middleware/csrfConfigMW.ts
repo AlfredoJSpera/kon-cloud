@@ -18,6 +18,7 @@ export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 		maxAge: COOKIE_MAX_AGE,
 	},
 	size: 32,
+	ignoredMethods: ["HEAD", "OPTIONS"],
 	getCsrfTokenFromRequest: (req) =>
 		(req.headers["x-csrf-token"] as string) || "",
 });

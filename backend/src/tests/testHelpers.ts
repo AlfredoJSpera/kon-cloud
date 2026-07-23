@@ -1,4 +1,6 @@
 import request from "supertest";
+import bcrypt from "bcrypt";
+import { prisma } from "@lib/prisma";
 
 jest.mock("@middleware/loggerMW", () => ({
 	logger: {
@@ -36,9 +38,6 @@ jest.mock("@lib/prisma", () => ({
 		},
 	},
 }));
-
-import bcrypt from "bcrypt";
-import { prisma } from "@lib/prisma";
 
 export const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 export const mockPrisma = prisma as unknown as {

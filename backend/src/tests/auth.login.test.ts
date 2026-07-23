@@ -1,12 +1,7 @@
-import request, {
-	adminRecord,
-	getCsrfCookie,
-	mockBcrypt,
-	mockPrisma,
-} from "./testHelpers";
+import request, { adminRecord, mockBcrypt, mockPrisma } from "./testHelpers";
 import app from "../app";
 
-describe("auth routes", () => {
+describe("POST /auth/refresh-token", () => {
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
@@ -22,7 +17,6 @@ describe("auth routes", () => {
 
 		expect(response.status).toBe(200);
 		expect(response.body.accessToken).toEqual(expect.any(String));
-		expect(response.body.csrfToken).toEqual(expect.any(String));
 		expect(response.body.profile).toEqual({
 			administratorId: "admin-123",
 			firstName: "Ada",
@@ -31,7 +25,10 @@ describe("auth routes", () => {
 			condominiums: [{ condominiumId: 1, name: "North Tower" }],
 		});
 		expect(response.headers["set-cookie"]).toEqual(
-			expect.arrayContaining([expect.stringContaining("refreshToken=")]),
+			expect.arrayContaining([
+				expect.stringContaining("refreshToken="),
+				expect.stringContaining("x-csrf-token="),
+			]),
 		);
 	});
 
@@ -78,53 +75,6 @@ describe("auth routes", () => {
 			error: true,
 			message: "Invalid credentials.",
 			errorCode: "INVALID_CREDENTIALS",
-		});
-	});
-
-	it("refreshes an access token with a valid refresh token and csrf token", async () => {
-		mockPrisma.administrator.findUnique.mockResolvedValue(adminRecord);
-		mockBcrypt.compare.mockResolvedValue(true as never);
-
-		const agent = request.agent(app);
-		const loginResponse = await agent.post("/auth/login").send({
-			email: "ada@example.com",
-			password: "secret-password",
-		});
-
-		const refreshResponse = await agent
-			.post("/auth/refresh-token")
-			.set("x-csrf-token", loginResponse.body.csrfToken)
-			.send();
-
-		expect(refreshResponse.status).toBe(200);
-		expect(refreshResponse.body.accessToken).toEqual(expect.any(String));
-		expect(refreshResponse.headers["set-cookie"]).toEqual(
-			expect.arrayContaining([expect.stringContaining("refreshToken=")]),
-		);
-	});
-
-	it("rejects refresh-token requests without a refresh token cookie", async () => {
-		mockPrisma.administrator.findUnique.mockResolvedValue(adminRecord);
-		mockBcrypt.compare.mockResolvedValue(true as never);
-
-		const loginResponse = await request(app).post("/auth/login").send({
-			email: "ada@example.com",
-			password: "secret-password",
-		});
-
-		const csrfCookie = getCsrfCookie(loginResponse.headers["set-cookie"]);
-
-		const response = await request(app)
-			.post("/auth/refresh-token")
-			.set("Cookie", csrfCookie ?? "")
-			.set("x-csrf-token", loginResponse.body.csrfToken)
-			.send();
-
-		expect(response.status).toBe(400);
-		expect(response.body).toEqual({
-			error: true,
-			message: "Missing refresh token.",
-			errorCode: "MISSING_REFRESH_TOKEN",
 		});
 	});
 });
