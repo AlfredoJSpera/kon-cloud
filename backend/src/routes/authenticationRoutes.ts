@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ms, { StringValue } from "ms";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { prisma } from "@lib/prisma";
 import { catchError } from "@middleware/errorHandlerMW";
@@ -182,6 +182,31 @@ router.get(
 			}
 		},
 	),
+);
+
+router.post(
+	"/logout",
+	catchError(async (_req: Request, res: Response) => {
+		const isProduction = process.env.NODE_ENV === "production";
+		res.clearCookie("refreshToken", {
+			path: "/",
+			httpOnly: true,
+			secure: isProduction,
+			sameSite: "strict",
+		});
+		res.clearCookie(
+			isProduction
+				? "__Host-psifi.x-csrf-token"
+				: "psifi.x-csrf-token",
+			{
+				path: "/",
+				httpOnly: false,
+				secure: isProduction,
+				sameSite: "strict",
+			},
+		);
+		res.status(200).json({ message: "Logged out successfully" });
+	}),
 );
 
 export default router;
