@@ -1,4 +1,6 @@
 import axios from "axios";
+import createAuthRefreshInterceptor from "axios-auth-refresh";
+import Cookies from "js-cookie";
 
 const url: string | undefined = import.meta.env.VITE_BACKEND_URL;
 if (!url) {
@@ -21,11 +23,12 @@ export const setAccessToken = (token: string | undefined) => {
 export const getAccessToken = () => accessToken;
 
 export function getCsrfToken(): string | undefined {
-	if (typeof document === "undefined") return undefined;
-	const matches = document.cookie.match(
-		/(?:^|; )(?:psifi\.x-csrf-token|__Host-psifi\.x-csrf-token|csrfToken|x-csrf-token)=([^;]*)/,
+	return (
+		Cookies.get("psifi.x-csrf-token") ||
+		Cookies.get("__Host-psifi.x-csrf-token") ||
+		Cookies.get("csrfToken") ||
+		Cookies.get("x-csrf-token")
 	);
-	return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
 type OnTokenRefreshedCallback = (newToken: string) => void;
@@ -54,92 +57,46 @@ api.interceptors.request.use((config) => {
 	return config;
 });
 
-// Response interceptor: automatically handle 401 and token refresh
-let isRefreshing = false;
-let failedQueue: Array<{
-	resolve: (token: string) => void;
-	reject: (err: any) => void;
-}> = [];
+// Refresh logic for 401 Unauthorized using axios-auth-refresh
+const refreshAuthLogic = async (failedRequest: any) => {
+	const requestUrl = failedRequest?.response?.config?.url || "";
+	if (
+		requestUrl.includes("/auth/login") ||
+		requestUrl.includes("/auth/refresh-token") ||
+		requestUrl.includes("/refresh-token")
+	) {
+		return Promise.reject(failedRequest);
+	}
 
-const processQueue = (error: any, token: string | null = null) => {
-	failedQueue.forEach((prom) => {
-		if (error) {
-			prom.reject(error);
-		} else if (token) {
-			prom.resolve(token);
+	try {
+		const csrfToken = getCsrfToken();
+		const response = await api.get<{ accessToken: string }>(
+			"/auth/refresh-token",
+			{
+				headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+			},
+		);
+
+		const newAccessToken = response.data.accessToken;
+		setAccessToken(newAccessToken);
+		failedRequest.response.config.headers.Authorization = `Bearer ${newAccessToken}`;
+
+		if (onTokenRefreshed) {
+			onTokenRefreshed(newAccessToken);
 		}
-	});
-	failedQueue = [];
+		return Promise.resolve();
+	} catch (error) {
+		setAccessToken(undefined);
+		if (onAuthFailed) {
+			onAuthFailed();
+		}
+		return Promise.reject(error);
+	}
 };
 
-api.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-		if (
-			error.response?.status === 401 &&
-			originalRequest &&
-			!originalRequest._retry
-		) {
-			const requestUrl = originalRequest.url || "";
-			if (
-				requestUrl.includes("/auth/login") ||
-				requestUrl.includes("/auth/refresh-token") ||
-				requestUrl.includes("/refresh-token")
-			) {
-				return Promise.reject(error);
-			}
+// Instantiate automatic auth refresh interceptor
+createAuthRefreshInterceptor(api, refreshAuthLogic, {
+	statusCodes: [401],
+});
 
-			if (isRefreshing) {
-				return new Promise((resolve, reject) => {
-					failedQueue.push({
-						resolve: (token: string) => {
-							originalRequest.headers.Authorization = `Bearer ${token}`;
-							resolve(api(originalRequest));
-						},
-						reject: (err: any) => {
-							reject(err);
-						},
-					});
-				});
-			}
-
-			originalRequest._retry = true;
-			isRefreshing = true;
-
-			try {
-				const csrfToken = getCsrfToken();
-				const response = await api.get<{ accessToken: string }>(
-					"/auth/refresh-token",
-					{
-						headers: csrfToken
-							? { "x-csrf-token": csrfToken }
-							: undefined,
-					},
-				);
-
-				const newAccessToken = response.data.accessToken;
-				setAccessToken(newAccessToken);
-				if (onTokenRefreshed) {
-					onTokenRefreshed(newAccessToken);
-				}
-
-				processQueue(null, newAccessToken);
-				originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-				return api(originalRequest);
-			} catch (refreshError) {
-				processQueue(refreshError, null);
-				setAccessToken(undefined);
-				if (onAuthFailed) {
-					onAuthFailed();
-				}
-				return Promise.reject(refreshError);
-			} finally {
-				isRefreshing = false;
-			}
-		}
-
-		return Promise.reject(error);
-	},
-);
 
