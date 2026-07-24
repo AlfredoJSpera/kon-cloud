@@ -1,18 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
-	api,
 	clearCsrfToken,
+	makeApiRequest,
 	setAccessToken,
 	setOnAuthFailure,
 } from "@/api/apiClient";
 import { toaster } from "@/components/chakraui/toaster";
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
-import type {
-	IAuthLoginInput,
-	IAuthLoginOutput,
-	IAuthRefreshTokenOutput,
-} from "@backend-interfaces/auth";
+import type { IAuthLoginInput } from "@backend-interfaces/auth";
 import getApiErrorMessage from "@/api/apiErrorMessages";
 
 export default function AuthProvider(props: { children: ReactNode }) {
@@ -38,17 +34,14 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		const initAuth = async () => {
 			try {
 				// Refresh token via auth cookies
-				const res = await api.get<IAuthRefreshTokenOutput>(
-					"/auth/refresh-token",
-				);
+				const res = await makeApiRequest.auth.refreshToken();
 				if (!isMounted) return;
 
 				// User had valid auth cookies
 				setAccessToken(res.data.accessToken);
 
 				// Fetch administrator profile with the new access token
-				const profileRes =
-					await api.get<AdministratorBasicInfo>("/administrators/me");
+				const profileRes = await makeApiRequest.administrators.me();
 				if (isMounted) {
 					setProfile(profileRes.data);
 				}
@@ -78,10 +71,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 
 	const login = async (credentials: IAuthLoginInput) => {
 		try {
-			const res = await api.post<IAuthLoginOutput>(
-				"/auth/login",
-				credentials,
-			);
+			const res = await makeApiRequest.auth.login(credentials);
 			setAccessToken(res.data.accessToken);
 			setProfile(res.data.profile);
 		} catch (err: unknown) {
@@ -102,7 +92,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 
 	const logout = async () => {
 		try {
-			await api.post("/auth/logout");
+			await makeApiRequest.auth.logout();
 		} catch {
 			// Ignore network/server errors during logout
 		} finally {

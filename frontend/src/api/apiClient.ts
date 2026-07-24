@@ -1,4 +1,13 @@
-import type { IAuthRefreshTokenOutput } from "@backend-interfaces/auth";
+import type {
+	IAuthLoginInput,
+	IAuthLoginOutput,
+	IAuthRefreshTokenOutput,
+} from "@backend-interfaces/auth";
+import type { AdministratorBasicInfo } from "@backend-interfaces/common";
+import type {
+	IAdministratorRegisterInput,
+	IAdministratorRegisterOutput,
+} from "@backend-interfaces/administrator";
 import axios, { AxiosError } from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import Cookies from "js-cookie";
@@ -18,6 +27,29 @@ export const api = axios.create({
 	baseURL: backendUrl,
 	withCredentials: true, // For sending cookies
 });
+
+/**
+ * A collection of typed API request helpers grouped by domain.
+ */
+export const makeApiRequest = {
+	administrators: {
+		me: () => api.get<AdministratorBasicInfo>("/administrators/me"),
+		register: (credentials: IAdministratorRegisterInput) =>
+			api.post<IAdministratorRegisterOutput>(
+				"/administrators/register",
+				credentials,
+			),
+	},
+	auth: {
+		login: (credentials: IAuthLoginInput) =>
+			api.post<IAuthLoginOutput>("/auth/login", credentials),
+		logout: () => api.post("/auth/logout"),
+		refreshToken: (csrfToken?: string) =>
+			api.get<IAuthRefreshTokenOutput>("/auth/refresh-token", {
+				headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+			}),
+	},
+};
 
 //============================//
 // Low-level token management //
@@ -96,12 +128,7 @@ const refreshAuthLogic = async (failedRequest: AxiosError) => {
 	try {
 		// Try to refresh the auth token
 		const csrfToken = getCsrfToken();
-		const response = await api.get<IAuthRefreshTokenOutput>(
-			"/auth/refresh-token",
-			{
-				headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
-			},
-		);
+		const response = await makeApiRequest.auth.refreshToken(csrfToken);
 		const newAccessToken = response.data.accessToken;
 		setAccessToken(newAccessToken);
 

@@ -29,15 +29,13 @@ import {
 } from "react-icons/lu";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
-	api,
 	getAccessToken,
 	getCsrfToken,
+	makeApiRequest,
 	setAccessToken,
 } from "@/api/apiClient";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
-import type { IAuthRefreshTokenOutput } from "@backend-interfaces/auth";
-import type { IAdministratorMeOutput } from "@backend-interfaces/administrator";
 import { isAxiosError } from "axios";
 
 interface LogEntry {
@@ -80,13 +78,19 @@ export function AuthTestPage() {
 	useEffect(() => {
 		if (!authCtx?.isSessionRestoring && !hasLoggedSessionRestore.current) {
 			hasLoggedSessionRestore.current = true;
-			if (authCtx?.isAuthenticated && authCtx.profile) {
+
+			const profile = authCtx?.profile;
+
+			if (authCtx?.isAuthenticated && profile) {
 				const csrf = getCsrfToken();
-				addLog(
-					"Session Restored",
-					`Session automatically restored on page load via httpOnly refresh token cookie.\nUser: ${authCtx.profile.firstName} ${authCtx.profile.lastName} (${authCtx.profile.email})\nCSRF Cookie: ${csrf || "None"}`,
-					"success",
-				);
+
+				queueMicrotask(() => {
+					addLog(
+						"Session Restored",
+						`Session automatically restored on page load via httpOnly refresh token cookie.\nUser: ${profile.firstName} ${profile.lastName} (${profile.email})\nCSRF Cookie: ${csrf || "None"}`,
+						"success",
+					);
+				});
 			}
 		}
 	}, [
@@ -132,8 +136,7 @@ export function AuthTestPage() {
 			"info",
 		);
 		try {
-			const res =
-				await api.get<IAdministratorMeOutput>("/administrators/me");
+			const res = await makeApiRequest.administrators.me();
 			addLog(
 				"Fetch /administrators/me Success",
 				JSON.stringify(res.data, null, 2),
@@ -158,9 +161,7 @@ export function AuthTestPage() {
 			"info",
 		);
 		try {
-			const res = await api.get<IAuthRefreshTokenOutput>(
-				"/auth/refresh-token",
-			);
+			const res = await makeApiRequest.auth.refreshToken();
 			addLog(
 				"Token Refresh Success",
 				`New accessToken: ${res.data.accessToken.substring(0, 20)}...`,
@@ -186,7 +187,7 @@ export function AuthTestPage() {
 		setAccessToken("invalid_expired_token");
 
 		try {
-			const res = await api.get("/administrators/me");
+			const res = await makeApiRequest.administrators.me();
 			addLog(
 				"401 Interception & Refresh Success!",
 				`axios-auth-refresh automatically intercepted 401, refreshed access token via /auth/refresh-token, and re-fetched /administrators/me! Output:\n${JSON.stringify(res.data, null, 2)}`,
