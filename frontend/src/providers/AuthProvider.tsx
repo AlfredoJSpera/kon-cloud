@@ -1,69 +1,30 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
 	api,
 	clearCsrfToken,
 	setAccessToken,
-	setAuthCallbacks,
+	setOnAuthFailure,
 } from "@/api/apiClient";
 import { toaster } from "@/components/chakraui/toaster";
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
 import type {
 	IAuthLoginInput,
 	IAuthLoginOutput,
+	IAuthRefreshTokenOutput,
 } from "@backend-interfaces/auth";
 import getApiErrorMessage from "@/api/apiErrorMessages";
 
 export default function AuthProvider(props: { children: ReactNode }) {
-	const [token, setTokenState] = useState<string | undefined>();
 	const [profile, setProfile] = useState<
 		AdministratorBasicInfo | undefined
 	>();
 	const [isSessionRestoring, setIsSessionRestoring] = useState<boolean>(true);
 
-	/**
-	 * Custom wrapper around React's `useState` setter that keeps
-	 * React state and Axios in-memory state (`setAccessToken`) synchronized.
-	 */
-	const setToken: React.Dispatch<React.SetStateAction<string | undefined>> =
-		useCallback((value) => {
-			setTokenState((prev) => {
-				const next = typeof value === "function" ? value(prev) : value;
-				setAccessToken(next);
-				return next;
-			});
-		}, []);
-
-	const fetchProfile = useCallback(async () => {
-		try {
-			const res =
-				await api.get<AdministratorBasicInfo>("/administrators/me");
-			setProfile(res.data);
-		} catch {
-			setProfile(undefined);
-		}
-	}, []);
-
-	//=======================================//
-	//  Register callbacks for Axios events  //
-	//=======================================//
-
+	// Reset profile if background refresh fails
 	useEffect(() => {
-		setAuthCallbacks(
-			(newToken) => {
-				// Update profile and token states
-				setTokenState(newToken);
-				setAccessToken(newToken);
-				fetchProfile();
-			},
-			() => {
-				// Clear profile and token states
-				setTokenState(undefined);
-				setAccessToken(undefined);
-				setProfile(undefined);
-			},
-		);
-	}, [fetchProfile]);
+		setOnAuthFailure(() => setProfile(undefined));
+	}, []);
 
 	//============================================//
 	//  Initial authentication check on app load  //
@@ -76,29 +37,24 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		/** Attempt token refresh via httpOnly refreshToken cookie and csrfToken. */
 		const initAuth = async () => {
 			try {
-				const refreshRes = await api.get<{ accessToken: string }>(
+				// Refresh token via auth cookies
+				const res = await api.get<IAuthRefreshTokenOutput>(
 					"/auth/refresh-token",
 				);
+				if (!isMounted) return;
 
 				// User had valid auth cookies
-				const newToken = refreshRes.data.accessToken;
-				if (isMounted) {
-					setTokenState(newToken);
-					setAccessToken(newToken);
+				setAccessToken(res.data.accessToken);
 
-					// Fetch administrator profile with the new access token
-					const profileRes =
-						await api.get<AdministratorBasicInfo>(
-							"/administrators/me",
-						);
-					if (isMounted) {
-						setProfile(profileRes.data);
-					}
+				// Fetch administrator profile with the new access token
+				const profileRes =
+					await api.get<AdministratorBasicInfo>("/administrators/me");
+				if (isMounted) {
+					setProfile(profileRes.data);
 				}
 			} catch {
 				// User did not have valid auth cookies
 				if (isMounted) {
-					setTokenState(undefined);
 					setAccessToken(undefined);
 					setProfile(undefined);
 				}
@@ -126,16 +82,18 @@ export default function AuthProvider(props: { children: ReactNode }) {
 				"/auth/login",
 				credentials,
 			);
-			setToken(res.data.accessToken);
+			setAccessToken(res.data.accessToken);
 			setProfile(res.data.profile);
 		} catch (err: unknown) {
-			const error = err as { response?: { data?: { errorCode?: string } }; code?: string };
+			const error = err as {
+				response?: { data?: { errorCode?: string } };
+				code?: string;
+			};
 			const errorCode =
 				error.response?.data?.errorCode || error.code || "ERR_NETWORK";
-			const message = getApiErrorMessage(errorCode);
 			toaster.create({
 				title: "Login failed",
-				description: message,
+				description: getApiErrorMessage(errorCode),
 				type: "error",
 			});
 			throw err;
@@ -149,7 +107,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 			// Ignore network/server errors during logout
 		} finally {
 			clearCsrfToken();
-			setToken(undefined);
+			setAccessToken(undefined);
 			setProfile(undefined);
 		}
 	};
@@ -157,13 +115,11 @@ export default function AuthProvider(props: { children: ReactNode }) {
 	return (
 		<AuthContext.Provider
 			value={{
-				token,
-				setToken,
 				profile,
-				setProfile,
+				isAuthenticated: Boolean(profile),
+				isSessionRestoring,
 				login,
 				logout,
-				isSessionRestoring,
 			}}
 		>
 			{props.children}

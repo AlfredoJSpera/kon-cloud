@@ -13,7 +13,7 @@ import {
 	Stack,
 	Text,
 } from "@chakra-ui/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
 	LuCheck,
@@ -28,7 +28,12 @@ import {
 	LuZap,
 } from "react-icons/lu";
 import { AuthContext } from "@/contexts/AuthContext";
-import { api, getCsrfToken, setAccessToken } from "@/api/apiClient";
+import {
+	api,
+	getAccessToken,
+	getCsrfToken,
+	setAccessToken,
+} from "@/api/apiClient";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import type { IAuthRefreshTokenOutput } from "@backend-interfaces/auth";
@@ -49,6 +54,10 @@ export function AuthTestPage() {
 	const [password, setPassword] = useState("PasswordSicura123!");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [logs, setLogs] = useState<LogEntry[]>([]);
+	const currentToken = getAccessToken();
+
+	// Prevent duplicate logs across re-renders
+	const hasLoggedSessionRestore = useRef(false);
 
 	const addLog = (
 		action: string,
@@ -66,6 +75,25 @@ export function AuthTestPage() {
 			...prev,
 		]);
 	};
+
+	// Log session restoration when AuthProvider finishes loading
+	useEffect(() => {
+		if (!authCtx?.isSessionRestoring && !hasLoggedSessionRestore.current) {
+			hasLoggedSessionRestore.current = true;
+			if (authCtx?.isAuthenticated && authCtx.profile) {
+				const csrf = getCsrfToken();
+				addLog(
+					"Session Restored",
+					`Session automatically restored on page load via httpOnly refresh token cookie.\nUser: ${authCtx.profile.firstName} ${authCtx.profile.lastName} (${authCtx.profile.email})\nCSRF Cookie: ${csrf || "None"}`,
+					"success",
+				);
+			}
+		}
+	}, [
+		authCtx?.isSessionRestoring,
+		authCtx?.isAuthenticated,
+		authCtx?.profile,
+	]);
 
 	const handleLogin = async () => {
 		if (!authCtx) return;
@@ -208,11 +236,11 @@ export function AuthTestPage() {
 						<HStack gap="3">
 							<Heading size="xl">Auth Testing Lab</Heading>
 							<Badge
-								colorPalette={authCtx?.token ? "green" : "red"}
+								colorPalette={currentToken ? "green" : "red"}
 								variant="solid"
 								size="lg"
 							>
-								{authCtx?.token
+								{authCtx?.isAuthenticated
 									? "Authenticated"
 									: "Unauthenticated"}
 							</Badge>
@@ -267,7 +295,7 @@ export function AuthTestPage() {
 							</Text>
 							<Icon as={LuKey} color="yellow.400" />
 						</HStack>
-						{authCtx?.token ? (
+						{currentToken ? (
 							<Stack gap="1">
 								<Badge colorPalette="green" w="fit-content">
 									Present
@@ -280,7 +308,7 @@ export function AuthTestPage() {
 									maxH="80px"
 									overflowY="auto"
 								>
-									{authCtx.token}
+									{currentToken}
 								</Code>
 							</Stack>
 						) : (

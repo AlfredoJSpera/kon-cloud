@@ -11,7 +11,7 @@ const url: string | undefined = import.meta.env.VITE_BACKEND_URL;
 if (!url) {
 	throw new Error("VITE_BACKEND_URL is not defined in .env");
 }
-const backendUrl = url.replace(/\/$/, "");
+const backendUrl = url.replace(/\/$/, ""); // Remove trailing "/"
 
 /** A custom axios instance for connecting to the backend API. */
 export const api = axios.create({
@@ -50,31 +50,11 @@ export function clearCsrfToken(): void {
 	Cookies.remove("x-csrf-token", { path: "/" });
 }
 
-//============================//
-//  React-to-Axios Callbacks  //
-//============================//
-
-type OnTokenRefreshedCallback = (newToken: string) => void;
-type OnAuthFailedCallback = () => void;
-
-/** Notifies React that the token has been refreshed. */
-let onTokenRefreshed: OnTokenRefreshedCallback | null = null;
-/** Notifies React that the token refresh has failed. */
-let onTokenRefreshFailed: OnAuthFailedCallback | null = null;
-
-/**
- * Allows setting a callback when React is notified of
- * a successful or failed token refresh.
- *
- * @param onRefreshed A callback to handle the new refreshed token.
- * @param onFailed A callback to handle the auth failing.
- */
-export const setAuthCallbacks = (
-	onRefreshed: OnTokenRefreshedCallback,
-	onFailed: OnAuthFailedCallback,
-) => {
-	onTokenRefreshed = onRefreshed;
-	onTokenRefreshFailed = onFailed;
+/** Callback for auth failure (e.g., failed background refresh). */
+let onAuthFailureCallback: (() => void) | null = null;
+/** Sets a callback function that activates when the auth fails. */
+export const setOnAuthFailure = (callback: () => void) => {
+	onAuthFailureCallback = callback;
 };
 
 //==========================//
@@ -126,17 +106,8 @@ const refreshAuthLogic = async (failedRequest: AxiosError) => {
 		setAccessToken(newAccessToken);
 
 		// Set the new authentication token to the original failed request
-		if (
-			failedRequest.response &&
-			failedRequest.response.config &&
-			failedRequest.response.config.headers
-		) {
+		if (failedRequest.response?.config?.headers) {
 			failedRequest.response.config.headers.Authorization = `Bearer ${newAccessToken}`;
-		}
-
-		// Notify React of the success
-		if (onTokenRefreshed) {
-			onTokenRefreshed(newAccessToken);
 		}
 
 		// Retry original failed request
@@ -144,8 +115,8 @@ const refreshAuthLogic = async (failedRequest: AxiosError) => {
 	} catch (error) {
 		// Clear local token and notify React of the failure
 		setAccessToken(undefined);
-		if (onTokenRefreshFailed) {
-			onTokenRefreshFailed();
+		if (onAuthFailureCallback) {
+			onAuthFailureCallback();
 		}
 		return Promise.reject(error);
 	}
