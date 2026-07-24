@@ -31,6 +31,9 @@ import { AuthContext } from "@/contexts/AuthContext";
 import { api, getCsrfToken, setAccessToken } from "@/api/apiClient";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
+import type { IAuthRefreshTokenOutput } from "@backend-interfaces/auth";
+import type { IAdministratorMeOutput } from "@backend-interfaces/administrator";
+import { isAxiosError } from "axios";
 
 interface LogEntry {
 	id: number;
@@ -81,12 +84,14 @@ export function AuthTestPage() {
 				`Received token and profile. CSRF Cookie: ${csrf || "None"}`,
 				"success",
 			);
-		} catch (err: any) {
-			addLog(
-				"Login Error",
-				err.response?.data?.message || err.message,
-				"error",
-			);
+		} catch (err: unknown) {
+			if (isAxiosError(err)) {
+				addLog(
+					"Login Error",
+					err.response?.data?.message || err.message,
+					"error",
+				);
+			}
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -99,18 +104,21 @@ export function AuthTestPage() {
 			"info",
 		);
 		try {
-			const res = await api.get("/administrators/me");
+			const res =
+				await api.get<IAdministratorMeOutput>("/administrators/me");
 			addLog(
 				"Fetch /administrators/me Success",
 				JSON.stringify(res.data, null, 2),
 				"success",
 			);
-		} catch (err: any) {
-			addLog(
-				"Fetch /administrators/me Error",
-				err.response?.data?.message || err.message,
-				"error",
-			);
+		} catch (err: unknown) {
+			if (isAxiosError(err)) {
+				addLog(
+					"Fetch /administrators/me Error",
+					err.response?.data?.message || err.message,
+					"error",
+				);
+			}
 		}
 	};
 
@@ -122,7 +130,7 @@ export function AuthTestPage() {
 			"info",
 		);
 		try {
-			const res = await api.get<{ accessToken: string }>(
+			const res = await api.get<IAuthRefreshTokenOutput>(
 				"/auth/refresh-token",
 			);
 			addLog(
@@ -130,12 +138,14 @@ export function AuthTestPage() {
 				`New accessToken: ${res.data.accessToken.substring(0, 20)}...`,
 				"success",
 			);
-		} catch (err: any) {
-			addLog(
-				"Token Refresh Error",
-				err.response?.data?.message || err.message,
-				"error",
-			);
+		} catch (err: unknown) {
+			if (isAxiosError(err)) {
+				addLog(
+					"Token Refresh Error",
+					err.response?.data?.message || err.message,
+					"error",
+				);
+			}
 		}
 	};
 
@@ -154,12 +164,14 @@ export function AuthTestPage() {
 				`axios-auth-refresh automatically intercepted 401, refreshed access token via /auth/refresh-token, and re-fetched /administrators/me! Output:\n${JSON.stringify(res.data, null, 2)}`,
 				"success",
 			);
-		} catch (err: any) {
-			addLog(
-				"401 Interception Failed",
-				err.response?.data?.message || err.message,
-				"error",
-			);
+		} catch (err: unknown) {
+			if (isAxiosError(err)) {
+				addLog(
+					"401 Interception Failed",
+					err.response?.data?.message || err.message,
+					"error",
+				);
+			}
 		}
 	};
 
@@ -204,7 +216,7 @@ export function AuthTestPage() {
 									? "Authenticated"
 									: "Unauthenticated"}
 							</Badge>
-							{authCtx?.isLoading && (
+							{authCtx?.isSessionRestoring && (
 								<Badge colorPalette="blue" variant="outline">
 									Loading...
 								</Badge>
