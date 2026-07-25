@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
-	clearCsrfToken,
+	clearCsrfTokenCookie,
 	makeApiRequest,
 	setAccessToken,
 	setOnAuthFailure,
@@ -95,7 +95,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		} catch {
 			// Ignore network/server errors during logout
 		} finally {
-			clearCsrfToken();
+			clearCsrfTokenCookie();
 			setAccessToken(undefined);
 			setProfile(undefined);
 		}

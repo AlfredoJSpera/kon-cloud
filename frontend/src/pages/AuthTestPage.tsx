@@ -30,7 +30,7 @@ import {
 import { AuthContext } from "@/contexts/AuthContext";
 import {
 	getAccessToken,
-	getCsrfToken,
+	getCsrfTokenCookie,
 	makeApiRequest,
 	setAccessToken,
 } from "@/api/apiClient";
@@ -82,7 +82,7 @@ export function AuthTestPage() {
 			const profile = authCtx?.profile;
 
 			if (authCtx?.isAuthenticated && profile) {
-				const csrf = getCsrfToken();
+				const csrf = getCsrfTokenCookie();
 
 				queueMicrotask(() => {
 					addLog(
@@ -110,7 +110,7 @@ export function AuthTestPage() {
 
 		try {
 			await authCtx.login({ email, password });
-			const csrf = getCsrfToken();
+			const csrf = getCsrfTokenCookie();
 			addLog(
 				"Login Success",
 				`Received token and profile. CSRF Cookie: ${csrf || "None"}`,
@@ -154,7 +154,7 @@ export function AuthTestPage() {
 	};
 
 	const handleRefreshToken = async () => {
-		const csrf = getCsrfToken();
+		const csrf = getCsrfTokenCookie();
 		addLog(
 			"GET /auth/refresh-token",
 			`Sending request using refreshToken httpOnly cookie & x-csrf-token header (${csrf || "missing"})...`,
@@ -216,7 +216,7 @@ export function AuthTestPage() {
 		}
 	};
 
-	const csrfToken = getCsrfToken();
+	const csrfToken = getCsrfTokenCookie();
 
 	return (
 		<Box

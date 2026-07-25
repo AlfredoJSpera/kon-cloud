@@ -67,11 +67,15 @@ export const setAccessToken = (token: string | undefined) => {
 };
 export const getAccessToken = () => accessToken;
 
-//============================//
-//   CSRF cookie management   //
-//============================//
+//=======================//
+//   Cookie management   //
+//=======================//
 
-export function getCsrfToken(): string | undefined {
+export function getRefreshTokenCookie(): string | undefined {
+	return Cookies.get("refreshToken");
+}
+
+export function getCsrfTokenCookie(): string | undefined {
 	return (
 		Cookies.get("psifi.x-csrf-token") ||
 		Cookies.get("__Host-psifi.x-csrf-token") ||
@@ -79,11 +83,15 @@ export function getCsrfToken(): string | undefined {
 		Cookies.get("x-csrf-token")
 	);
 }
-export function clearCsrfToken(): void {
+export function clearCsrfTokenCookie(): void {
 	Cookies.remove("psifi.x-csrf-token", { path: "/" });
 	Cookies.remove("__Host-psifi.x-csrf-token", { path: "/" });
 	Cookies.remove("csrfToken", { path: "/" });
 	Cookies.remove("x-csrf-token", { path: "/" });
+}
+
+export function areAuthCookiesPresent(): boolean {
+	return Boolean(getCsrfTokenCookie() && getRefreshTokenCookie());
 }
 
 /** Callback for auth failure (e.g., failed background refresh). */
@@ -103,7 +111,7 @@ api.interceptors.request.use((config) => {
 	if (accessToken) {
 		config.headers.Authorization = `Bearer ${accessToken}`;
 	}
-	const csrfToken = getCsrfToken();
+	const csrfToken = getCsrfTokenCookie();
 	if (csrfToken && !config.headers["x-csrf-token"]) {
 		config.headers["x-csrf-token"] = csrfToken;
 	}
@@ -131,7 +139,7 @@ const refreshAuthLogic = async (failedRequest: AxiosError) => {
 
 	try {
 		// Try to refresh the auth token
-		const csrfToken = getCsrfToken();
+		const csrfToken = getCsrfTokenCookie();
 		const response = await makeApiRequest.auth.refreshToken(csrfToken);
 		const newAccessToken = response.data.accessToken;
 		setAccessToken(newAccessToken);
