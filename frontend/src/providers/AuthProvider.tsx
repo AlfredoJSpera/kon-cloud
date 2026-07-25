@@ -10,6 +10,7 @@ import { toaster } from "@/components/chakraui/toaster";
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
 import type { IAuthLoginInput } from "@backend-interfaces/auth";
 import getApiErrorMessage from "@/api/apiErrorMessages";
+import { isAxiosError } from "axios";
 
 export default function AuthProvider(props: { children: ReactNode }) {
 	const [profile, setProfile] = useState<
@@ -75,12 +76,10 @@ export default function AuthProvider(props: { children: ReactNode }) {
 			setAccessToken(res.data.accessToken);
 			setProfile(res.data.profile);
 		} catch (err: unknown) {
-			const error = err as {
-				response?: { data?: { errorCode?: string } };
-				code?: string;
-			};
-			const errorCode =
-				error.response?.data?.errorCode || error.code || "ERR_NETWORK";
+			let errorCode = "UNKNOWN";
+			if (isAxiosError(err)) {
+				errorCode = err.response?.data.errorCode;
+			}
 			toaster.create({
 				title: "Login failed",
 				description: getApiErrorMessage(errorCode),

@@ -22,6 +22,10 @@ if (!url) {
 }
 const backendUrl = url.replace(/\/$/, ""); // Remove trailing "/"
 
+//====================//
+// API Axios instance //
+//====================//
+
 /** A custom axios instance for connecting to the backend API. */
 export const api = axios.create({
 	baseURL: backendUrl,
