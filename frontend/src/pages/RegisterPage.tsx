@@ -8,10 +8,12 @@ import { toaster } from "@/components/chakraui/toaster";
 import getApiErrorMessage from "@/api/apiErrorMessages";
 import { isAxiosError } from "axios";
 import { makeApiRequest } from "@/api/api";
+import { useAuth } from "@/hooks/useAuth";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function RegisterPage() {
+	const { isSessionRestoring } = useAuth();
 	const [name, setName] = useState("");
 	const [surname, setSurname] = useState("");
 	const [email, setEmail] = useState("");
@@ -21,6 +23,7 @@ export function RegisterPage() {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const navigate = useNavigate();
+	const isFormDisabled = isLoading || isSessionRestoring;
 
 	const isEmailValid = !email || EMAIL_REGEX.test(email);
 	const isPasswordValid = !password || password.length >= 8;
@@ -119,7 +122,7 @@ export function RegisterPage() {
 							placeholder="Jane"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							disabled={isLoading}
+							disabled={isFormDisabled}
 						/>
 					</Field>
 					<Field label="Surname" required>
@@ -127,7 +130,7 @@ export function RegisterPage() {
 							placeholder="Doe"
 							value={surname}
 							onChange={(e) => setSurname(e.target.value)}
-							disabled={isLoading}
+							disabled={isFormDisabled}
 						/>
 					</Field>
 				</SimpleGrid>
@@ -144,7 +147,7 @@ export function RegisterPage() {
 						placeholder="name@company.com"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						disabled={isLoading}
+						disabled={isFormDisabled}
 					/>
 				</Field>
 				<Field
@@ -158,7 +161,7 @@ export function RegisterPage() {
 						placeholder="name@company.com"
 						value={repeatEmail}
 						onChange={(e) => setRepeatEmail(e.target.value)}
-						disabled={isLoading}
+						disabled={isFormDisabled}
 					/>
 				</Field>
 
@@ -173,7 +176,7 @@ export function RegisterPage() {
 						placeholder="Create a password (min. 8 characters)"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						disabled={isLoading}
+						disabled={isFormDisabled}
 					/>
 				</Field>
 				<Field
@@ -188,7 +191,7 @@ export function RegisterPage() {
 						placeholder="Repeat the password"
 						value={repeatPassword}
 						onChange={(e) => setRepeatPassword(e.target.value)}
-						disabled={isLoading}
+						disabled={isFormDisabled}
 					/>
 				</Field>
 
@@ -196,8 +199,8 @@ export function RegisterPage() {
 				<Button
 					type="submit"
 					size="lg"
-					loading={isLoading}
-					disabled={isLoading}
+					loading={isFormDisabled}
+					disabled={isFormDisabled}
 				>
 					Register
 				</Button>

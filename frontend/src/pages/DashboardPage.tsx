@@ -21,8 +21,10 @@ import {
 	LuShieldCheck,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { useAuth } from "@/hooks/useAuth";
 
 export function DashboardPage() {
+	const { user } = useAuth();
 	const cards = useMemo(
 		() => [
 			{ title: "Project files", value: "24", icon: LuFolderKanban },
@@ -39,7 +41,9 @@ export function DashboardPage() {
 			sidebarHeading="Navigation"
 			topBarTitle="My Extra Long Condominium Name"
 			contentHeaderSubtitle="Dashboard preview"
-			contentHeaderTitle="Page Layout"
+			contentHeaderTitle={
+				user ? `Welcome back, ${user.firstName}` : "Page Layout"
+			}
 		>
 			<Stack gap="6">
 				<Box borderWidth="1px" p={{ base: "4", md: "6" }}>

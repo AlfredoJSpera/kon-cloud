@@ -20,6 +20,7 @@ import {
 } from "@/components/chakraui/menu";
 import { useContext } from "react";
 import { DashboardContext } from "@/contexts/DashboardContext";
+import { useAuth } from "@/hooks/useAuth";
 import { LuMenu } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
@@ -27,7 +28,10 @@ export function DashboardTopBar() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const navigate = useNavigate();
 	const dashCtx = useContext(DashboardContext);
-	const userNameSurname = "Name Surname";
+	const { user, logout } = useAuth();
+	const userNameSurname = user
+		? `${user.firstName} ${user.lastName}`
+		: "Administrator";
 
 	return (
 		<Flex
@@ -110,7 +114,10 @@ export function DashboardTopBar() {
 
 						<MenuItem
 							value="logout"
-							onClick={() => navigate("/login")}
+							onClick={async () => {
+								await logout();
+								navigate("/login");
+							}}
 						>
 							Logout
 						</MenuItem>

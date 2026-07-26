@@ -15,10 +15,18 @@ import { Avatar } from "@/components/chakraui/avatar";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SettingsPage() {
-	const [email, setEmail] = useState("alex@kon-cloud.dev");
+	const { user } = useAuth();
 	const navigate = useNavigate();
+
+	const fullName = user
+		? `${user.firstName} ${user.lastName}`
+		: "Administrator";
+	const [firstName, setFirstName] = useState(user?.firstName ?? "");
+	const [lastName, setLastName] = useState(user?.lastName ?? "");
+	const [email, setEmail] = useState(user?.email ?? "");
 
 	return (
 		<DashboardContainer
@@ -35,10 +43,10 @@ export function SettingsPage() {
 					gridColumn={{ base: "auto", xl: "span 1" }}
 				>
 					<Stack gap="4" align="center" textAlign="center">
-						<Avatar name="Alex Morgan" size="2xl" />
+						<Avatar name={fullName} size="2xl" />
 						<Box>
-							<Heading size="lg">Alex Morgan</Heading>
-							<Text>Product designer</Text>
+							<Heading size="lg">{fullName}</Heading>
+							<Text>Administrator</Text>
 						</Box>
 						<Text fontSize="sm">
 							Upload a photo, update contact details, and manage
@@ -58,10 +66,22 @@ export function SettingsPage() {
 					<Stack gap="6">
 						<SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
 							<Field label="Name">
-								<Input placeholder="Alex" />
+								<Input
+									placeholder="Alex"
+									value={firstName}
+									onChange={(e) =>
+										setFirstName(e.target.value)
+									}
+								/>
 							</Field>
 							<Field label="Surname">
-								<Input placeholder="Morgan" />
+								<Input
+									placeholder="Morgan"
+									value={lastName}
+									onChange={(e) =>
+										setLastName(e.target.value)
+									}
+								/>
 							</Field>
 							<Field label="Email">
 								<Input
