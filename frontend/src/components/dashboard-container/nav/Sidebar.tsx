@@ -8,7 +8,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { LuGrid2X2, LuLock, LuSettings2, LuSparkles } from "react-icons/lu";
+import { LuGrid2X2, LuSettings2 } from "react-icons/lu";
 import { DashboardContext } from "@/contexts/DashboardContext";
 import { useNavigate } from "react-router-dom";
 
@@ -20,12 +20,6 @@ type NavItem = {
 
 const navItems: NavItem[] = [
 	{ label: "Page Layout", path: "/", icon: <Icon as={LuGrid2X2} /> },
-	{ label: "Login", path: "/login", icon: <Icon as={LuLock} /> },
-	{
-		label: "Registration",
-		path: "/register",
-		icon: <Icon as={LuSparkles} />,
-	},
 	{
 		label: "User Settings",
 		path: "/settings",

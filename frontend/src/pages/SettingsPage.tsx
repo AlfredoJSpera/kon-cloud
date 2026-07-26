@@ -105,12 +105,6 @@ export function SettingsPage() {
 							<Field label="New password">
 								<PasswordInput placeholder="New password" />
 							</Field>
-							<Field label="Two-factor code">
-								<Input placeholder="000000" />
-							</Field>
-							<Field label="Account status">
-								<Input value="Verified" readOnly />
-							</Field>
 						</SimpleGrid>
 
 						<HStack justify="flex-end" gap="3">

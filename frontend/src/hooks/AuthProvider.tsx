@@ -20,7 +20,10 @@ export default function AuthProvider(props: { children: ReactNode }) {
 
 	/** Synchronous ref to bypass React state re-render timing delays */
 	const tokenRef = useRef<string | undefined>(token);
-	const hasInitializedRef = useRef(false);
+	const initPromiseRef = useRef<Promise<{
+		token: string;
+		profile: AdministratorBasicInfo;
+	} | null> | null>(null);
 
 	useEffect(() => {
 		tokenRef.current = token;
@@ -110,45 +113,46 @@ export default function AuthProvider(props: { children: ReactNode }) {
 
 	// Initial session restoration on app load
 	useEffect(() => {
-		// Prevent double-execution in React Strict Mode (Dev environment)
-		if (hasInitializedRef.current) return;
-		hasInitializedRef.current = true;
+		let isCancelled = false;
 
-		let isMounted = true;
+		if (!initPromiseRef.current) {
+			initPromiseRef.current = (async () => {
+				try {
+					const res = await makeApiRequest.auth.refreshToken();
+					const newToken = res.data.accessToken;
+					tokenRef.current = newToken;
 
-		const initAuth = async () => {
-			try {
-				const res = await makeApiRequest.auth.refreshToken();
-				if (!isMounted) return;
+					const profileRes = await makeApiRequest.administrators.me({
+						headers: { Authorization: `Bearer ${newToken}` },
+					});
 
-				const newToken = res.data.accessToken;
-				tokenRef.current = newToken;
-				setToken(newToken);
-
-				const profileRes = await makeApiRequest.administrators.me({
-					headers: { Authorization: `Bearer ${newToken}` },
-				});
-
-				if (isMounted) {
-					setUser(profileRes.data);
+					return {
+						token: newToken,
+						profile: profileRes.data,
+					};
+				} catch {
+					return null;
 				}
-			} catch {
-				if (isMounted) {
+			})();
+		}
+
+		initPromiseRef.current.then((result) => {
+			if (!isCancelled) {
+				if (result) {
+					tokenRef.current = result.token;
+					setToken(result.token);
+					setUser(result.profile);
+				} else {
 					tokenRef.current = undefined;
 					setToken(undefined);
 					setUser(undefined);
 				}
-			} finally {
-				if (isMounted) {
-					setIsSessionRestoring(false);
-				}
+				setIsSessionRestoring(false);
 			}
-		};
-
-		initAuth();
+		});
 
 		return () => {
-			isMounted = false;
+			isCancelled = true;
 		};
 	}, []);
 
@@ -185,6 +189,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 			clearCsrfTokenCookie();
 			clearRefreshTokenCookie();
 			tokenRef.current = undefined;
+			initPromiseRef.current = null;
 			setToken(undefined);
 			setUser(undefined);
 		}
