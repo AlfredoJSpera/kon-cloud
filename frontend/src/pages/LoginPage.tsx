@@ -1,11 +1,11 @@
 import { Button, Input, Link, Separator, Stack, Text } from "@chakra-ui/react";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LuArrowRight } from "react-icons/lu";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { AuthContainer } from "@/components/AuthContainer";
-import { AuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LoginPage() {
 	const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ export function LoginPage() {
 	});
 
 	const navigate = useNavigate();
-	const authCtx = useContext(AuthContext);
+	const authCtx = useAuth();
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -31,7 +31,7 @@ export function LoginPage() {
 		setIsLoading(true);
 
 		try {
-			await authCtx?.login({ email, password });
+			await authCtx.login({ email, password });
 			navigate("/dashboard");
 		} catch {
 			// Error toasts and logging are already handled by AuthProvider

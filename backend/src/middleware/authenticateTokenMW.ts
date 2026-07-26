@@ -38,6 +38,12 @@ export function authenticateToken(
 			if (err.name === "TokenExpiredError") {
 				return next(new KonExpiredAuthenticationTokenError());
 			}
+			if (
+				err.name === "JsonWebTokenError" &&
+				err.message === "jwt malformed"
+			) {
+				return next(new KonInvalidAuthenticationTokenError());
+			}
 			logger.error({ err }, "Unexpected Token verification failure:");
 			return next(new KonInvalidAuthenticationTokenError());
 		}

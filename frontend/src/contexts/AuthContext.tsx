@@ -3,10 +3,12 @@ import type { IAuthLoginInput } from "@backend-interfaces/auth";
 import { createContext } from "react";
 
 export interface IAuthContext {
+	//TODO: Remove these two when removing AuthTestPage
+	token: string | undefined;
+	setToken: React.Dispatch<React.SetStateAction<string | undefined>>;
+
 	/** Basic information about the logged-in user. */
-	profile: AdministratorBasicInfo | undefined;
-	/** Helper flag for route guards and conditional rendering. */
-	isAuthenticated: boolean;
+	user: AdministratorBasicInfo | undefined;
 	/** Indicates whether session restoration is in progress on page load. */
 	isSessionRestoring: boolean;
 

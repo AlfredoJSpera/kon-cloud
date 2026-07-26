@@ -8,7 +8,9 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { AuthTestPage } from "./pages/AuthTestPage";
-import AuthProvider from "./providers/AuthProvider";
+import AuthProvider from "./hooks/AuthProvider";
+import { PrivateRoutes } from "./components/PrivateRoutes";
+import { PublicRoutes } from "./components/PublicRoute";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
@@ -16,10 +18,20 @@ createRoot(document.getElementById("root")!).render(
 			<AuthProvider>
 				<BrowserRouter>
 					<Routes>
-						<Route path="/" element={<DashboardPage />} />
-						<Route path="/login" element={<LoginPage />} />
-						<Route path="/register" element={<RegisterPage />} />
-						<Route path="/settings" element={<SettingsPage />} />
+						<Route element={<PrivateRoutes />}>
+							<Route path="/" element={<DashboardPage />} />
+							<Route
+								path="/settings"
+								element={<SettingsPage />}
+							/>
+						</Route>
+						<Route element={<PublicRoutes />}>
+							<Route path="/login" element={<LoginPage />} />
+							<Route
+								path="/register"
+								element={<RegisterPage />}
+							/>
+						</Route>
 						<Route path="/auth-test" element={<AuthTestPage />} />
 						<Route path="*" element={<Navigate to="/" replace />} />
 					</Routes>

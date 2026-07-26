@@ -13,7 +13,7 @@ import {
 	Stack,
 	Text,
 } from "@chakra-ui/react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
 	LuCheck,
@@ -27,16 +27,12 @@ import {
 	LuTrash2,
 	LuZap,
 } from "react-icons/lu";
-import { AuthContext } from "@/contexts/AuthContext";
-import {
-	getAccessToken,
-	getCsrfTokenCookie,
-	makeApiRequest,
-	setAccessToken,
-} from "@/api/apiClient";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { isAxiosError } from "axios";
+import { useAuth } from "@/hooks/useAuth";
+import { getCsrfTokenCookie } from "@/api/cookieManagement";
+import { makeApiRequest } from "@/api/api";
 
 interface LogEntry {
 	id: number;
@@ -47,12 +43,11 @@ interface LogEntry {
 }
 
 export function AuthTestPage() {
-	const authCtx = useContext(AuthContext);
+	const authCtx = useAuth();
 	const [email, setEmail] = useState("mario.rossi@example.com");
 	const [password, setPassword] = useState("PasswordSicura123!");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [logs, setLogs] = useState<LogEntry[]>([]);
-	const currentToken = getAccessToken();
 
 	// Prevent duplicate logs across re-renders
 	const hasLoggedSessionRestore = useRef(false);
@@ -76,12 +71,12 @@ export function AuthTestPage() {
 
 	// Log session restoration when AuthProvider finishes loading
 	useEffect(() => {
-		if (!authCtx?.isSessionRestoring && !hasLoggedSessionRestore.current) {
+		if (!authCtx.isSessionRestoring && !hasLoggedSessionRestore.current) {
 			hasLoggedSessionRestore.current = true;
 
-			const profile = authCtx?.profile;
+			const profile = authCtx.user;
 
-			if (authCtx?.isAuthenticated && profile) {
+			if (profile) {
 				const csrf = getCsrfTokenCookie();
 
 				queueMicrotask(() => {
@@ -93,11 +88,7 @@ export function AuthTestPage() {
 				});
 			}
 		}
-	}, [
-		authCtx?.isSessionRestoring,
-		authCtx?.isAuthenticated,
-		authCtx?.profile,
-	]);
+	}, [authCtx.isSessionRestoring, authCtx.user]);
 
 	const handleLogin = async () => {
 		if (!authCtx) return;
@@ -184,10 +175,13 @@ export function AuthTestPage() {
 			"Corrupting token in memory to 'invalid_expired_token' and calling GET /administrators/me...",
 			"warn",
 		);
-		setAccessToken("invalid_expired_token");
+		authCtx.setToken("invalid_expired_token");
 
 		try {
-			const res = await makeApiRequest.administrators.me();
+			// ✅ Pass the bad token header directly to bypass React state timing
+			const res = await makeApiRequest.administrators.me({
+				headers: { Authorization: "Bearer invalid_expired_token" },
+			});
 			addLog(
 				"401 Interception & Refresh Success!",
 				`axios-auth-refresh automatically intercepted 401, refreshed access token via /auth/refresh-token, and re-fetched /administrators/me! Output:\n${JSON.stringify(res.data, null, 2)}`,
@@ -207,7 +201,7 @@ export function AuthTestPage() {
 	const handleLogout = async () => {
 		if (authCtx) {
 			await authCtx.logout();
-			setAccessToken(undefined);
+			authCtx.setToken(undefined);
 			addLog(
 				"Logout",
 				"Cleared cookies, access token, and administrator profile on server & client.",
@@ -237,15 +231,15 @@ export function AuthTestPage() {
 						<HStack gap="3">
 							<Heading size="xl">Auth Testing Lab</Heading>
 							<Badge
-								colorPalette={currentToken ? "green" : "red"}
+								colorPalette={authCtx.token ? "green" : "red"}
 								variant="solid"
 								size="lg"
 							>
-								{authCtx?.isAuthenticated
+								{authCtx.user
 									? "Authenticated"
 									: "Unauthenticated"}
 							</Badge>
-							{authCtx?.isSessionRestoring && (
+							{authCtx.isSessionRestoring && (
 								<Badge colorPalette="blue" variant="outline">
 									Loading...
 								</Badge>
@@ -296,7 +290,7 @@ export function AuthTestPage() {
 							</Text>
 							<Icon as={LuKey} color="yellow.400" />
 						</HStack>
-						{currentToken ? (
+						{authCtx.token ? (
 							<Stack gap="1">
 								<Badge colorPalette="green" w="fit-content">
 									Present
@@ -309,7 +303,7 @@ export function AuthTestPage() {
 									maxH="80px"
 									overflowY="auto"
 								>
-									{currentToken}
+									{authCtx.token}
 								</Code>
 							</Stack>
 						) : (
@@ -380,19 +374,19 @@ export function AuthTestPage() {
 							</Text>
 							<Icon as={LuUserCheck} color="purple.400" />
 						</HStack>
-						{authCtx?.profile ? (
+						{authCtx.user ? (
 							<Stack gap="1">
 								<Text fontSize="sm" fontWeight="bold">
-									{authCtx.profile.firstName}{" "}
-									{authCtx.profile.lastName}
+									{authCtx.user.firstName}{" "}
+									{authCtx.user.lastName}
 								</Text>
 								<Text fontSize="xs" color="gray.400">
-									{authCtx.profile.email}
+									{authCtx.user.email}
 								</Text>
 								<Text fontSize="xs" color="gray.500">
-									ID: {authCtx.profile.administratorId} |
+									ID: {authCtx.user.administratorId} |
 									Condominiums:{" "}
-									{authCtx.profile.condominiums?.length ?? 0}
+									{authCtx.user.condominiums?.length ?? 0}
 								</Text>
 							</Stack>
 						) : (
