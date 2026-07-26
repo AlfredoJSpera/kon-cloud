@@ -173,7 +173,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		} catch (err: unknown) {
 			let errorCode = "UNKNOWN";
 			if (isAxiosError(err)) {
-				errorCode = err.response?.data.errorCode;
+				errorCode = err.code || "";
 			}
 			toaster.create({
 				title: "Login failed",

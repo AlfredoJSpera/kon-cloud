@@ -23,6 +23,7 @@ import {
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useAuth } from "@/hooks/useAuth";
 import { makeApiRequest } from "@/api/api";
+import { toaster } from "@/components/chakraui/toaster";
 
 export function DashboardPage() {
 	const { user } = useAuth();
@@ -38,7 +39,11 @@ export function DashboardPage() {
 
 	const handleMe = async () => {
 		const res = await makeApiRequest.administrators.me();
-		console.log(res);
+		toaster.create({
+			title: "Request completed",
+			description: `${res.data} ${res.data.lastName}`,
+			type: "success",
+		});
 	};
 
 	return (
