@@ -22,6 +22,7 @@ import {
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useAuth } from "@/hooks/useAuth";
+import { makeApiRequest } from "@/api/api";
 
 export function DashboardPage() {
 	const { user } = useAuth();
@@ -34,6 +35,11 @@ export function DashboardPage() {
 		],
 		[],
 	);
+
+	const handleMe = async () => {
+		const res = await makeApiRequest.administrators.me();
+		console.log(res);
+	};
 
 	return (
 		<DashboardContainer
@@ -59,7 +65,7 @@ export function DashboardPage() {
 								Responsive page layout
 							</Heading>
 						</Box>
-						<Button onClick={() => undefined}>
+						<Button onClick={() => handleMe()}>
 							Open dashboard
 						</Button>
 					</Flex>

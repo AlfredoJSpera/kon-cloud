@@ -100,6 +100,10 @@ export default function AuthProvider(props: { children: ReactNode }) {
 					tokenRef.current = undefined;
 					setToken(undefined);
 					setUser(undefined);
+					toaster.create({
+						description: "Session expired. Please log back in.",
+						type: "error",
+					});
 					return Promise.reject(error);
 				}
 			},
