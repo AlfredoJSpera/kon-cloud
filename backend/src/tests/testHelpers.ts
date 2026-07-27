@@ -6,6 +6,7 @@ jest.mock("@middleware/loggerMW", () => ({
 	logger: {
 		info: jest.fn(),
 		debug: jest.fn(),
+		http: jest.fn(),
 		error: jest.fn(),
 	},
 	loggerHttp: (_req: unknown, _res: unknown, next: () => void) => next(),

@@ -6,15 +6,21 @@ import { SV_LOG_LEVEL } from "@utils/envVariables";
 
 export const logger = pino({
 	level: SV_LOG_LEVEL,
+	customLevels: {
+		http: 25,
+	},
 	transport: {
 		target: "pino-pretty",
 		options: {
+			customLevels: "http:25",
+			useOnlyCustomProps: false,
 			customColors: {
 				default: "white",
 				60: "bgRed", // fatal
 				50: "red", // error
 				40: "yellow", // warn
 				30: "green", // info
+				25: "cyan", // http
 				20: "blue", // debug
 				10: "gray", // trace
 				message: "reset",
@@ -29,7 +35,7 @@ export const logger = pino({
 
 export const loggerHttp = pinoHttp({
 	logger,
-	useLevel: "debug",
+	useLevel: "http",
 	customSuccessMessage: (req, res, responseTime) => {
 		const status = res.statusCode;
 		let statusColor = chalk.bgWhite;
