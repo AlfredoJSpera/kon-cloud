@@ -67,6 +67,7 @@ export function RegisterPage() {
 			return;
 		}
 
+		// eslint-disable-next-line security/detect-possible-timing-attacks
 		if (password !== repeatPassword) {
 			toaster.create({
 				title: "Validation error",

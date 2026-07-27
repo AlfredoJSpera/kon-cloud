@@ -41,8 +41,9 @@ export function DashboardPage() {
 		const res = await makeApiRequest.administrators.me();
 		toaster.create({
 			title: "Request completed",
-			description: `${res.data} ${res.data.lastName}`,
+			description: `${res.data.firstName} ${res.data.lastName}`,
 			type: "success",
+			closable: true,
 		});
 	};
 
