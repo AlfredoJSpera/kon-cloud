@@ -3,7 +3,8 @@
 		"start": "tsx src/server.ts",
 		"dev": "tsx watch src/server.ts",
 		"test": "jest",
-		"test:watch": "jest --watch"
+		"test:watch": "jest --watch",
+		"db:deploy": "npx prisma migrate deploy && npx prisma generate"
 	},
 	"type": "module",
 	"devDependencies": {

@@ -1,4 +1,4 @@
-import { DB_CONNECTION_STRING } from "@utils/envVariables";
+import { DB_CONNECTION_STRING } from "./src/utils/envVariables";
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
