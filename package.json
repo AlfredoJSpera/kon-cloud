@@ -1,6 +1,6 @@
 {
 	"name": "kon-cloud",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Progetto di Cloud Computing (UNISA) A.A. 2025/26",
 	"private": true,
 	"type": "module",
@@ -19,6 +19,11 @@
 		"frontend"
 	],
 	"scripts": {
-		"test": "npm run test --workspaces --if-present"
+		"test": "npm run test --workspaces --if-present",
+		"release": "release-it"
+	},
+	"devDependencies": {
+		"@release-it/conventional-changelog": "^12.0.0",
+		"release-it": "^21.0.0"
 	}
 }
