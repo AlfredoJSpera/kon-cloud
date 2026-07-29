@@ -1,0 +1,24 @@
+{
+	"name": "kon-cloud",
+	"version": "0.1.0",
+	"description": "Progetto di Cloud Computing (UNISA) A.A. 2025/26",
+	"private": true,
+	"type": "module",
+	"homepage": "https://github.com/AlfredoJSpera/kon-cloud#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AlfredoJSpera/kon-cloud.git"
+	},
+	"bugs": {
+		"url": "https://github.com/AlfredoJSpera/kon-cloud/issues"
+	},
+	"author": "Spera Alfredo Jeshoua",
+	"license": "MIT",
+	"workspaces": [
+		"backend",
+		"frontend"
+	],
+	"scripts": {
+		"test": "npm run test --workspaces --if-present"
+	}
+}
