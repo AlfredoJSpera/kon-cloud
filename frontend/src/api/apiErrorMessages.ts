@@ -20,6 +20,7 @@ const ErrorMessages = new Map<string, string>([
 		"EXPIRED_AUTHENTICATION_TOKEN",
 		"Your session has expired. Please log in again.",
 	],
+	["SERVER_ERROR", "Server error. Try again later."],
 	// Axios errors
 	["ERR_NETWORK", "Server not reachable. Try again later."],
 ]);

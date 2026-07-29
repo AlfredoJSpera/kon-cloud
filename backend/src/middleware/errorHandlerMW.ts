@@ -27,6 +27,13 @@ export function routeErrorHandler(
 					message: "This record already exists.",
 					errorCode: "RECORD_ALREADY_EXISTS",
 				});
+			case "ESOCKET": // No database connection
+				logger.error("Database not reachable.");
+				return res.status(500).json({
+					error: true,
+					message: "An error occurred on the server.",
+					errorCode: "SERVER_ERROR",
+				});
 
 			default:
 				logger.error(`Unhandled Prisma error code ${err.code}`);
