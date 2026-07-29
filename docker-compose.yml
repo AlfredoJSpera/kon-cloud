@@ -29,8 +29,8 @@ services:
             - kon_network
     backend:
         build:
-            context: ./backend
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: ./backend/Dockerfile
         ports:
             - "3000:3000"
         depends_on:

@@ -5,7 +5,7 @@ module.exports = {
 	testMatch: ["<rootDir>/src/tests/**/*.test.ts"],
 	moduleNameMapper: {
 		"^@generated/(.*)$": "<rootDir>/generated/$1",
-		"^@interfaces/(.*)$": "<rootDir>/interfaces/$1",
+		"^@interfaces/(.*)$": "<rootDir>/../interfaces/$1",
 		"^@errors/(.*)$": "<rootDir>/src/errors/$1",
 		"^@lib/(.*)$": "<rootDir>/src/lib/$1",
 		"^@middleware/(.*)$": "<rootDir>/src/middleware/$1",

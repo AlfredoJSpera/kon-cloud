@@ -2,8 +2,9 @@
 	"compilerOptions": {
 		//! TypeScript paths shorthand
 		"paths": {
+			"express": ["./node_modules/@types/express"],
 			"@generated/*": ["./generated/*"],
-			"@interfaces/*": ["./interfaces/*"],
+			"@interfaces/*": ["../interfaces/*"],
 			"@errors/*": ["./src/errors/*"],
 			"@lib/*": ["./src/lib/*"],
 			"@middleware/*": ["./src/middleware/*"],

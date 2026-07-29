@@ -11,7 +11,7 @@ export default defineConfig({
 		alias: {
 			"@backend-interfaces": path.resolve(
 				__dirname,
-				"../backend/interfaces",
+				"../interfaces",
 			),
 		},
 	},

@@ -16,7 +16,7 @@ import {
 	IAuthRefreshTokenInput,
 	IAuthRefreshTokenOutput,
 } from "@interfaces/auth";
-import { KonApiContract, TokenPayload } from "@interfaces/common";
+import { TokenPayload } from "@interfaces/common";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
@@ -38,6 +38,7 @@ import {
 	generateCsrfToken,
 } from "@middleware/csrfConfigMW";
 import cookieParser from "cookie-parser";
+import { KonApiContract } from "@utils/apiContract";
 
 const router = Router();
 
@@ -195,9 +196,7 @@ router.post(
 			sameSite: "strict",
 		});
 		res.clearCookie(
-			isProduction
-				? "__Host-psifi.x-csrf-token"
-				: "psifi.x-csrf-token",
+			isProduction ? "__Host-psifi.x-csrf-token" : "psifi.x-csrf-token",
 			{
 				path: "/",
 				httpOnly: false,

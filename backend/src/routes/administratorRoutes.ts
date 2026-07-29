@@ -8,13 +8,13 @@ import {
 	IAdministratorRegisterInput,
 	IAdministratorRegisterOutput,
 } from "@interfaces/administrator";
-import { KonApiContract } from "@interfaces/common";
 import {
 	KonEmailAlreadyExistsError,
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
 	KonNotFoundError,
 } from "@errors/validationErrors";
+import { KonApiContract } from "@utils/apiContract";
 
 const router = Router();
 
