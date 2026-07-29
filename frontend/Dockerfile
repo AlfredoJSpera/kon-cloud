@@ -13,11 +13,14 @@ COPY frontend .
 RUN npm run build
 
 # Runner
-FROM nginx:alpine
+FROM node:lts-alpine3.24
 
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
+
+RUN npm install -g serve
+
+COPY --from=builder /usr/src/app/dist .
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", ".", "-l", "80"]
