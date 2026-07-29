@@ -79,7 +79,10 @@ describe("GET /auth/refresh-token", () => {
 			.get("/auth/refresh-token")
 			.set("x-session-id", "test-session")
 			.set("x-csrf-token", csrfToken)
-			.set("Cookie", `refreshToken=${invalidRefreshToken}; ${csrfCookie}`);
+			.set(
+				"Cookie",
+				`refreshToken=${invalidRefreshToken}; ${csrfCookie}`,
+			);
 
 		expect(response.status).toBe(401);
 		expect(response.body).toEqual({
@@ -103,7 +106,10 @@ describe("GET /auth/refresh-token", () => {
 			.get("/auth/refresh-token")
 			.set("x-session-id", "test-session")
 			.set("x-csrf-token", csrfToken)
-			.set("Cookie", `refreshToken=${expiredRefreshToken}; ${csrfCookie}`);
+			.set(
+				"Cookie",
+				`refreshToken=${expiredRefreshToken}; ${csrfCookie}`,
+			);
 
 		expect(response.status).toBe(401);
 		expect(response.body).toEqual({

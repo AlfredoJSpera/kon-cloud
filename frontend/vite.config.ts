@@ -9,10 +9,7 @@ export default defineConfig({
 	resolve: {
 		tsconfigPaths: true,
 		alias: {
-			"@backend-interfaces": path.resolve(
-				__dirname,
-				"../interfaces",
-			),
+			"@backend-interfaces": path.resolve(__dirname, "../interfaces"),
 		},
 	},
 });
