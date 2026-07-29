@@ -10,6 +10,10 @@ RUN npm ci
 COPY interfaces /usr/src/interfaces
 COPY frontend .
 
+# Inject build arguments for Vite
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
 RUN npm run build
 
 # Runner

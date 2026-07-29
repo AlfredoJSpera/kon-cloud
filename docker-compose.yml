@@ -4,9 +4,10 @@ services:
     restart: unless-stopped
     ports:
       - "1433:1433"
+    env_file:
+      - ./database/.env
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
       - MSSQL_PID=Developer
     volumes:
       - mssql_data:/var/opt/mssql
@@ -27,6 +28,7 @@ services:
           memory: 2G
     networks:
       - kon_network
+
   backend:
     build:
       context: .
@@ -36,20 +38,23 @@ services:
     depends_on:
       mssql:
         condition: service_healthy
+    env_file:
+      - ./backend/.env
     environment:
       - FORCE_COLOR=1
-    env_file:
-      - .env.prod
     networks:
       - kon_network
+
   frontend:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:3000}
     ports:
       - "5173:80"
     env_file:
-      - .env.prod
+      - ./frontend/.env
     depends_on:
       - backend
     networks:
