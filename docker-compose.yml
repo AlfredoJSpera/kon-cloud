@@ -42,6 +42,18 @@ services:
             - .env.prod
         networks:
             - kon_network
+    frontend:
+        build:
+            context: .
+            dockerfile: ./frontend/Dockerfile
+        ports:
+            - "5173:80"
+        env_file:
+            - .env.prod
+        depends_on:
+            - backend
+        networks:
+            - kon_network
 
 volumes:
     mssql_data:

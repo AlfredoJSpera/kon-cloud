@@ -24,6 +24,8 @@ import { DashboardContainer } from "@/components/dashboard-container/DashboardCo
 import { useAuth } from "@/hooks/useAuth";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
+import { isAxiosError } from "axios";
+import getApiErrorMessage from "@/api/apiErrorMessages";
 
 export function DashboardPage() {
 	const { user } = useAuth();
@@ -38,13 +40,26 @@ export function DashboardPage() {
 	);
 
 	const handleMe = async () => {
-		const res = await makeApiRequest.administrators.me();
-		toaster.create({
-			title: "Request completed",
-			description: `${res.data.firstName} ${res.data.lastName}`,
-			type: "success",
-			closable: true,
-		});
+		try {
+			const res = await makeApiRequest.administrators.me();
+			toaster.create({
+				title: "Request completed",
+				description: `${res.data.firstName} ${res.data.lastName}`,
+				type: "success",
+				closable: true,
+			});
+		} catch (error: unknown) {
+			if (isAxiosError(error)) {
+				toaster.create({
+					title: "Error",
+					description: getApiErrorMessage(
+						error.response?.data.errorCode || "",
+					),
+					type: "error",
+					closable: true,
+				});
+			}
+		}
 	};
 
 	return (
