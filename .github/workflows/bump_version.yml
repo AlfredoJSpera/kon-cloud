@@ -58,6 +58,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           INCREMENT="${{ github.event.inputs.increment }}"
+
+          if [ "${{ github.event_name }}" = "push" ] && [ -z "$INCREMENT" ]; then
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -n "$LAST_TAG" ]; then
+              COMMITS=$(git log "${LAST_TAG}..HEAD" --oneline | grep -iE '(feat|fix|refactor|perf|revert)(\([^)]+\))?!?:|BREAKING CHANGE' || true)
+            else
+              COMMITS=$(git log --oneline | grep -iE '(feat|fix|refactor|perf|revert)(\([^)]+\))?!?:|BREAKING CHANGE' || true)
+            fi
+
+            if [ -z "$COMMITS" ]; then
+              echo "No release-triggering commits (feat, fix, etc.) found since last tag. Skipping version bump."
+              exit 0
+            fi
+          fi
+
           if [ -z "$INCREMENT" ] || [ "$INCREMENT" = "auto" ]; then
             npx release-it --ci
           else
