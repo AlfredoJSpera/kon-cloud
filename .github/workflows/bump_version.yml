@@ -1,11 +1,12 @@
-name: Release
+name: Bump Version
 
 on:
   workflow_dispatch:
     inputs:
       increment:
-        description: "Release type (patch, minor, major, or auto based on conventional commits)"
+        description: "Version bump type (patch, minor, major, or auto based on conventional commits)"
         required: true
+
         default: "auto"
         type: choice
         options:
@@ -19,8 +20,8 @@ on:
           - prerelease
 
 jobs:
-  release:
-    name: Create Release
+  bump-version:
+    name: Bump Version
     runs-on: ubuntu-latest
     permissions:
       contents: write
