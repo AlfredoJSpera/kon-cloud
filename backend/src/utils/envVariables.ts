@@ -88,4 +88,5 @@ export const CSRF_TOKEN_SECRET = getEnv("CSRF_TOKEN_SECRET");
 export const COOKIE_MAX_AGE = ms(REFRESH_TOKEN_EXPIRES_IN as StringValue);
 
 // Frontend
-export const FRONTEND_URL = getEnv("FRONTEND_URL");
+export const FRONTEND_URL = getEnv("FRONTEND_URL", "http://localhost:5173");
+

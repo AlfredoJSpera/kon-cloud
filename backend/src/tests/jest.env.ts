@@ -34,3 +34,8 @@ process.env.REFRESH_TOKEN_EXPIRES_IN =
 	process.env.REFRESH_TOKEN_EXPIRES_IN ?? "1d";
 process.env.CSRF_TOKEN_SECRET =
 	process.env.CSRF_TOKEN_SECRET ?? "test-csrf-secret";
+
+process.env.FRONTEND_URL =
+	process.env.FRONTEND_URL || "http://localhost:5173";
+
+
