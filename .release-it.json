@@ -1,6 +1,6 @@
 {
 	"git": {
-		"commitMessage": "chore(release): v${version} [skip ci]",
+		"commitMessage": "chore(bump): v${version}",
 		"tag": true,
 		"tagName": "v${version}"
 	},
