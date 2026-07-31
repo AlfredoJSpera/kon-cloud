@@ -1,6 +1,6 @@
 {
 	"name": "kon-cloud",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"description": "Progetto di Cloud Computing (UNISA) A.A. 2025/26",
 	"private": true,
 	"type": "module",

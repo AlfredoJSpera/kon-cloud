@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.3](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.2...v0.3.3) (2026-07-31)
+
+### Bug Fixes
+
+* Set default backend URL and ensure services restart unless stopped ([6173869](https://github.com/AlfredoJSpera/kon-cloud/commit/617386917a3f0cfc106a04d721ae408838aa9dde))
+
 ## [0.3.2](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.1...v0.3.2) (2026-07-31)
 
 ## [0.3.1](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.0...v0.3.1) (2026-07-30)
