@@ -30,6 +30,7 @@ services:
       - kon_network
 
   backend:
+    image: ghcr.io/alfredojspera/kon-cloud/backend:${TAG:-latest}
     build:
       context: .
       dockerfile: ./backend/Dockerfile
@@ -46,6 +47,7 @@ services:
       - kon_network
 
   frontend:
+    image: ghcr.io/alfredojspera/kon-cloud/frontend:${TAG:-latest}
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
