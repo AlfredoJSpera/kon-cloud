@@ -27,4 +27,4 @@ COPY --from=builder /usr/src/app/dist .
 
 EXPOSE 80
 
-CMD ["serve", "-s", ".", "-l", "80"]
+CMD ["sh", "-c", "echo \"window.__ENV__ = { VITE_BACKEND_URL: '${VITE_BACKEND_URL}' };\" > env-config.js && serve -s . -l 80"]

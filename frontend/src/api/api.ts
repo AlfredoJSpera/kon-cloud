@@ -10,11 +10,18 @@ import type {
 } from "@backend-interfaces/administrator";
 import axios, { type AxiosRequestConfig } from "axios";
 
-//============================//
-// Get backend URL from .env  //
-//============================//
+declare global {
+	interface Window {
+		__ENV__?: {
+			VITE_BACKEND_URL?: string;
+		};
+	}
+}
 
-const url: string = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const url: string =
+	window.__ENV__?.VITE_BACKEND_URL ||
+	import.meta.env.VITE_BACKEND_URL ||
+	"http://localhost:3000";
 const backendUrl = url.replace(/\/$/, ""); // Remove trailing "/"
 
 //====================//
