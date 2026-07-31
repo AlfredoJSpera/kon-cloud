@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.2](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.1...v0.3.2) (2026-07-31)
+
 ## [0.3.1](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.0...v0.3.1) (2026-07-30)
 
 # 0.3.0 (2026-07-30)
