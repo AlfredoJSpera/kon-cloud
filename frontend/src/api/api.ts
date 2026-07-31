@@ -14,10 +14,7 @@ import axios, { type AxiosRequestConfig } from "axios";
 // Get backend URL from .env  //
 //============================//
 
-const url: string | undefined = import.meta.env.VITE_BACKEND_URL;
-if (!url) {
-	throw new Error("VITE_BACKEND_URL is not defined in .env");
-}
+const url: string = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 const backendUrl = url.replace(/\/$/, ""); // Remove trailing "/"
 
 //====================//
