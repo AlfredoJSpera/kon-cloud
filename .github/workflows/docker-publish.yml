@@ -1,0 +1,113 @@
+name: Docker Build & Push
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+    tags:
+      - 'v*'
+  workflow_run:
+    workflows:
+      - "Bump Version"
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  check-version:
+    name: Check Version Change
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check_version.outputs.should_build }}
+      version: ${{ steps.check_version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version change
+        id: check_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Workflow manually triggered. Proceeding with Docker build."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "Tag push detected: ${{ github.ref_name }}. Proceeding with Docker build."
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "Bump Version workflow did not finish successfully. Skipping Docker build."
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          else
+            PREV_VERSION=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf-8')).version" 2>/dev/null || echo "")
+            echo "Current version: $VERSION"
+            echo "Previous version: $PREV_VERSION"
+
+            if [ -n "$VERSION" ] && [ "$VERSION" != "$PREV_VERSION" ]; then
+              echo "Version changed from '$PREV_VERSION' to '$VERSION'. Triggering build."
+              echo "should_build=true" >> $GITHUB_OUTPUT
+            else
+              echo "Version did not change. Skipping build."
+              echo "should_build=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  build-and-push:
+    name: Build and Push ${{ matrix.service }} Image
+    needs: check-version
+    if: needs.check-version.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set lower case repository name
+        id: repo
+        run: |
+          echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for ${{ matrix.service }}
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ steps.repo.outputs.repo }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=${{ needs.check-version.outputs.version }}
+            type=raw,value=v${{ needs.check-version.outputs.version }}
+            type=raw,value=latest
+
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
