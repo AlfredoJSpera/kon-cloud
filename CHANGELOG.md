@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.3...v0.3.4) (2026-07-31)
+
+### Bug Fixes
+
+* Inject backend URL into env-config.js and update API to use it ([43a1db6](https://github.com/AlfredoJSpera/kon-cloud/commit/43a1db6c66eeeda700a5c076e96104a029be9af5))
+
 ## [0.3.3](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.2...v0.3.3) (2026-07-31)
 
 ### Bug Fixes
