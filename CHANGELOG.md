@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.5](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.4...v0.3.5) (2026-07-31)
+
+### Bug Fixes
+
+* Configure QEMU to use maximum CPU resources ([7581267](https://github.com/AlfredoJSpera/kon-cloud/commit/7581267ac0da04f705ba5707675ab29471543ba8))
+
 ## [0.3.4](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.3...v0.3.4) (2026-07-31)
 
 ### Bug Fixes
