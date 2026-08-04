@@ -6,8 +6,10 @@ import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { AuthContainer } from "@/components/AuthContainer";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 export function LoginPage() {
+	const { t } = useTranslation();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -43,18 +45,18 @@ export function LoginPage() {
 	return (
 		<AuthContainer
 			brandName="Kon-Cloud"
-			brandSubtitle="Use your account email and password to continue."
-			actionLabel="Sign in"
-			actionTitle="Login to Kon-Cloud"
+			brandSubtitle={t("login.brandSubtitle")}
+			actionLabel={t("login.actionLabel")}
+			actionTitle={t("login.actionTitle")}
 		>
 			<Stack gap="4" as="form" onSubmit={handleSubmit}>
 				<Field
-					label="Email address"
+					label={t("login.emailLabel")}
 					invalid={fieldErrors.email}
-					errorText="This field is required"
+					errorText={t("login.fieldRequired")}
 				>
 					<Input
-						placeholder="name@company.com"
+						placeholder={t("login.emailPlaceholder")}
 						value={email}
 						onChange={(e) => {
 							setEmail(e.target.value);
@@ -68,12 +70,12 @@ export function LoginPage() {
 					/>
 				</Field>
 				<Field
-					label="Password"
+					label={t("login.passwordLabel")}
 					invalid={fieldErrors.password}
-					errorText="This field is required"
+					errorText={t("login.fieldRequired")}
 				>
 					<PasswordInput
-						placeholder="Enter your password"
+						placeholder={t("login.passwordPlaceholder")}
 						value={password}
 						onChange={(e) => {
 							setPassword(e.target.value);
@@ -93,13 +95,13 @@ export function LoginPage() {
 					loading={isLoading}
 					disabled={isLoading}
 				>
-					Login
+					{t("login.submitButton")}
 				</Button>
 
 				<Text fontSize="sm" textAlign="center">
 					<Link asChild>
 						<RouterLink to="/register">
-							Need an account? Register here.
+							{t("login.needAccount")}
 						</RouterLink>
 					</Link>
 				</Text>
@@ -107,11 +109,11 @@ export function LoginPage() {
 				<Separator />
 				<Stack gap="3">
 					<Button variant="outline" justifyContent="space-between">
-						<Text>Continue with Microsoft</Text>
+						<Text>{t("login.continueMicrosoft")}</Text>
 						<LuArrowRight />
 					</Button>
 					<Button variant="outline" justifyContent="space-between">
-						<Text>Continue with GitHub</Text>
+						<Text>{t("login.continueGithub")}</Text>
 						<LuArrowRight />
 					</Button>
 				</Stack>
@@ -119,3 +121,4 @@ export function LoginPage() {
 		</AuthContainer>
 	);
 }
+

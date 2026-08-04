@@ -16,14 +16,16 @@ import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 export function SettingsPage() {
+	const { t } = useTranslation();
 	const { user } = useAuth();
 	const navigate = useNavigate();
 
 	const fullName = user
 		? `${user.firstName} ${user.lastName}`
-		: "Administrator";
+		: t("settings.administrator");
 	const [firstName, setFirstName] = useState(user?.firstName ?? "");
 	const [lastName, setLastName] = useState(user?.lastName ?? "");
 	const [email, setEmail] = useState(user?.email ?? "");
@@ -31,10 +33,10 @@ export function SettingsPage() {
 	return (
 		<DashboardContainer
 			sidebarBrandName="Kon-Cloud"
-			sidebarHeading="Navigation"
+			sidebarHeading={t("topbar.navigation")}
 			topBarTitle=""
-			contentHeaderSubtitle="User Settings"
-			contentHeaderTitle="Profile and security controls"
+			contentHeaderSubtitle={t("settings.contentHeaderSubtitle")}
+			contentHeaderTitle={t("settings.contentHeaderTitle")}
 		>
 			<SimpleGrid columns={{ base: 1, xl: 3 }} gap="6">
 				<Box
@@ -46,14 +48,13 @@ export function SettingsPage() {
 						<Avatar name={fullName} size="2xl" />
 						<Box>
 							<Heading size="lg">{fullName}</Heading>
-							<Text>Administrator</Text>
+							<Text>{t("settings.administrator")}</Text>
 						</Box>
 						<Text fontSize="sm">
-							Upload a photo, update contact details, and manage
-							account security from one place.
+							{t("settings.uploadDescription")}
 						</Text>
 						<Button variant="outline" width="full">
-							Upload new picture
+							{t("settings.uploadPicture")}
 						</Button>
 					</Stack>
 				</Box>
@@ -65,7 +66,7 @@ export function SettingsPage() {
 				>
 					<Stack gap="6">
 						<SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-							<Field label="Name">
+							<Field label={t("settings.nameLabel")}>
 								<Input
 									placeholder="Alex"
 									value={firstName}
@@ -74,7 +75,7 @@ export function SettingsPage() {
 									}
 								/>
 							</Field>
-							<Field label="Surname">
+							<Field label={t("settings.surnameLabel")}>
 								<Input
 									placeholder="Morgan"
 									value={lastName}
@@ -83,7 +84,7 @@ export function SettingsPage() {
 									}
 								/>
 							</Field>
-							<Field label="Email">
+							<Field label={t("settings.emailLabel")}>
 								<Input
 									value={email}
 									onChange={(event) =>
@@ -91,19 +92,19 @@ export function SettingsPage() {
 									}
 								/>
 							</Field>
-							<Field label="New Email">
-								<Input placeholder="new.email@company.com" />
+							<Field label={t("settings.newEmailLabel")}>
+								<Input placeholder={t("settings.newEmailPlaceholder")} />
 							</Field>
 						</SimpleGrid>
 
 						<Separator />
 
 						<SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-							<Field label="Password">
-								<PasswordInput placeholder="Current password" />
+							<Field label={t("settings.passwordLabel")}>
+								<PasswordInput placeholder={t("settings.currentPasswordPlaceholder")} />
 							</Field>
-							<Field label="New password">
-								<PasswordInput placeholder="New password" />
+							<Field label={t("settings.newPasswordLabel")}>
+								<PasswordInput placeholder={t("settings.newPasswordPlaceholder")} />
 							</Field>
 						</SimpleGrid>
 
@@ -112,9 +113,9 @@ export function SettingsPage() {
 								variant="outline"
 								onClick={() => navigate("/")}
 							>
-								Cancel
+								{t("settings.cancel")}
 							</Button>
-							<Button>Save changes</Button>
+							<Button>{t("settings.saveChanges")}</Button>
 						</HStack>
 					</Stack>
 				</Box>
@@ -122,3 +123,4 @@ export function SettingsPage() {
 		</DashboardContainer>
 	);
 }
+

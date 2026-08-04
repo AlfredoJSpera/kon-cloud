@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LanguageSelector } from "../dashboard-container/top/LanguageSelector";
 import { Provider } from "@/components/chakraui/provider";
@@ -36,9 +36,11 @@ describe("LanguageSelector Component", () => {
 		const itOption = await screen.findByText("Italiano");
 		await user.click(itOption);
 
-		expect(i18n.language).toContain("it");
+		await waitFor(() => {
+			expect(i18n.language).toContain("it");
+		});
 		expect(
 			screen.getByRole("button", { name: /select language/i }),
-		).toHaveTextContent(/es/i);
+		).toHaveTextContent(/it/i);
 	});
 });
