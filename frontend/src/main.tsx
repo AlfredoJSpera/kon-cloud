@@ -11,6 +11,7 @@ import { AuthTestPage } from "./pages/AuthTestPage";
 import AuthProvider from "./hooks/AuthProvider";
 import { PrivateRoutes } from "./components/PrivateRoutes";
 import { PublicRoutes } from "./components/PublicRoute";
+import "./i18n/config";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>

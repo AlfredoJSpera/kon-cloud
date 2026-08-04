@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { ColorModeButton } from "@/components/chakraui/color-mode";
+import { LanguageSelector } from "./dashboard-container/top/LanguageSelector";
 
 export function AuthContainer(props: {
 	brandName: string;
@@ -41,7 +42,10 @@ export function AuthContainer(props: {
 									<Heading size="3xl" mt="4" maxW="sm">
 										{props.brandName}
 									</Heading>
-									<ColorModeButton variant="ghost" />
+									<Box>
+										<ColorModeButton variant="ghost" />
+										<LanguageSelector />
+									</Box>
 								</HStack>
 
 								<Text mt="4" maxW="md" fontSize="lg">

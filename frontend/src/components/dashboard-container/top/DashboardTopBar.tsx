@@ -23,15 +23,18 @@ import { DashboardContext } from "@/contexts/DashboardContext";
 import { useAuth } from "@/hooks/useAuth";
 import { LuMenu } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "./LanguageSelector";
 
 export function DashboardTopBar() {
+	const { t } = useTranslation();
 	const { colorMode, toggleColorMode } = useColorMode();
 	const navigate = useNavigate();
 	const dashCtx = useContext(DashboardContext);
 	const { user, logout } = useAuth();
 	const userNameSurname = user
 		? `${user.firstName} ${user.lastName}`
-		: "Administrator";
+		: t("topbar.administrator");
 
 	return (
 		<Flex
@@ -48,6 +51,8 @@ export function DashboardTopBar() {
 
 			{/* Right */}
 			<HStack gap="2">
+				<LanguageSelector />
+
 				<ColorModeButton
 					display={{ base: "none", md: "inline-flex" }}
 					variant="ghost"
@@ -89,7 +94,7 @@ export function DashboardTopBar() {
 							value="profile"
 							onClick={() => navigate("/profile")}
 						>
-							Profile
+							{t("topbar.profile")}
 						</MenuItem>
 
 						<MenuItem
@@ -100,14 +105,16 @@ export function DashboardTopBar() {
 								md: "none",
 							}}
 						>
-							{colorMode === "light" ? "Dark mode" : "Light mode"}
+							{colorMode === "light"
+								? t("topbar.darkMode")
+								: t("topbar.lightMode")}
 						</MenuItem>
 
 						<MenuItem
 							value="settings"
 							onClick={() => navigate("/settings")}
 						>
-							Settings
+							{t("topbar.settings")}
 						</MenuItem>
 
 						<MenuSeparator />
@@ -119,7 +126,7 @@ export function DashboardTopBar() {
 								navigate("/login");
 							}}
 						>
-							Logout
+							{t("topbar.logout")}
 						</MenuItem>
 					</MenuContent>
 				</MenuRoot>
@@ -127,3 +134,4 @@ export function DashboardTopBar() {
 		</Flex>
 	);
 }
+
