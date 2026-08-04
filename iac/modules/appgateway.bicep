@@ -16,6 +16,14 @@ param backendAppServiceFqdn string
 @description('Frontend App Service FQDN')
 param frontendAppServiceFqdn string
 
+@description('Base64-encoded PFX SSL Certificate Data')
+@secure()
+param sslCertificateData string
+
+@description('Password for the PFX SSL Certificate')
+@secure()
+param sslCertificatePassword string
+
 var appGwName = 'appgw-${namePrefix}'
 
 resource appGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
@@ -27,6 +35,15 @@ resource appGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
       tier: 'Standard_v2'
       capacity: 1
     }
+    sslCertificates: [
+      {
+        name: 'appGwSslCert'
+        properties: {
+          data: sslCertificateData
+          password: sslCertificatePassword
+        }
+      }
+    ]
     gatewayIPConfigurations: [
       {
         name: 'appGatewayIpConfig'
@@ -52,6 +69,12 @@ resource appGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
         name: 'port_80'
         properties: {
           port: 80
+        }
+      }
+      {
+        name: 'port_443'
+        properties: {
+          port: 443
         }
       }
     ]
@@ -142,6 +165,34 @@ resource appGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
           protocol: 'Http'
         }
       }
+      {
+        name: 'https-listener'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', appGwName, 'appGatewayFrontendIP')
+          }
+          frontendPort: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', appGwName, 'port_443')
+          }
+          protocol: 'Https'
+          sslCertificate: {
+            id: resourceId('Microsoft.Network/applicationGateways/sslCertificates', appGwName, 'appGwSslCert')
+          }
+        }
+      }
+    ]
+    redirectConfigurations: [
+      {
+        name: 'http-to-https-redirect'
+        properties: {
+          redirectType: 'Permanent'
+          targetListener: {
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', appGwName, 'https-listener')
+          }
+          includePath: true
+          includeQueryString: true
+        }
+      }
     ]
     urlPathMaps: [
       {
@@ -175,12 +226,25 @@ resource appGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
     ]
     requestRoutingRules: [
       {
-        name: 'routing-rule-path-based'
+        name: 'rule-http-redirect'
+        properties: {
+          ruleType: 'Basic'
+          priority: 90
+          httpListener: {
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', appGwName, 'http-listener')
+          }
+          redirectConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/redirectConfigurations', appGwName, 'http-to-https-redirect')
+          }
+        }
+      }
+      {
+        name: 'rule-https-path-based'
         properties: {
           ruleType: 'PathBasedRouting'
           priority: 100
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', appGwName, 'http-listener')
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', appGwName, 'https-listener')
           }
           urlPathMap: {
             id: resourceId('Microsoft.Network/applicationGateways/urlPathMaps', appGwName, 'path-map-kon')

@@ -118,7 +118,7 @@ resource backendAppService 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'FRONTEND_URL'
-          value: 'http://${appGatewayPublicIp}'
+          value: 'https://${appGatewayPublicIp}'
         }
         {
           name: 'GENERAL_LIMITER_TRUST_PROXY'
@@ -154,7 +154,7 @@ resource frontendAppService 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'VITE_BACKEND_URL'
-          value: 'http://${appGatewayPublicIp}/api'
+          value: 'https://${appGatewayPublicIp}/api'
         }
         {
           name: 'DOCKER_REGISTRY_SERVER_URL'

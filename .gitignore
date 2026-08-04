@@ -2,3 +2,7 @@
 .env.prod
 .vscode/
 node_modules
+
+# Bicep compiled ARM JSON build artifacts
+main.json
+*.bicep.json
