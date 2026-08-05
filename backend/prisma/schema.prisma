@@ -29,6 +29,7 @@ model Condominium {
   CondominiumID   Int           @id @default(autoincrement())
   AdministratorID String        @db.UniqueIdentifier
   Name            String        @db.NVarChar(150)
+  Address         String?       @db.NVarChar(255)
   Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
   @@index([AdministratorID])
 }
