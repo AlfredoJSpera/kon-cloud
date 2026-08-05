@@ -1,0 +1,400 @@
+openapi: 3.0.3
+info:
+  title: kon-cloud REST API
+  description: API specification for the kon-cloud condominium management system backend.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+
+tags:
+  - name: Authentication
+    description: Endpoints for user login, token refresh, and logout
+  - name: Administrators
+    description: Endpoints for administrator registration and profile management
+
+paths:
+  /auth/login:
+    post:
+      summary: Administrator Login
+      description: Authenticates an administrator with email and password, setting HttpOnly refresh token and CSRF cookies, and returning an access token with administrator profile info.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginInput"
+      responses:
+        "200":
+          description: Login successful. Returns access token and user profile, and sets refreshToken and CSRF cookies.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets HttpOnly `refreshToken` cookie and `psifi.x-csrf-token` cookie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthLoginOutput"
+        "400":
+          description: Missing required fields or incorrect field type.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingFields:
+                  summary: Missing required fields
+                  value:
+                    error: true
+                    message: "Missing required fields."
+                    errorCode: "MISSING_REQUIRED_FIELDS"
+                incorrectType:
+                  summary: Incorrect field type
+                  value:
+                    error: true
+                    message: "Incorrect field type."
+                    errorCode: "INCORRECT_FIELD_TYPE"
+        "401":
+          description: Invalid email or password.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: true
+                message: "Invalid credentials."
+                errorCode: "INVALID_CREDENTIALS"
+
+  /auth/refresh-token:
+    get:
+      summary: Refresh Access Token
+      description: Uses the HttpOnly refresh token cookie and CSRF protection to issue a new access token and rotate the refresh token cookie.
+      tags:
+        - Authentication
+      security:
+        - cookieAuth: []
+        - csrfAuth: []
+      parameters:
+        - in: header
+          name: x-csrf-token
+          required: true
+          schema:
+            type: string
+          description: CSRF token header matching the value from the double-submit CSRF cookie.
+      responses:
+        "200":
+          description: Access token refreshed successfully. Rotates the `refreshToken` cookie.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Sets updated HttpOnly `refreshToken` cookie and `psifi.x-csrf-token` cookie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthRefreshTokenOutput"
+        "400":
+          description: Missing refresh token cookie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: true
+                message: "Missing refresh token."
+                errorCode: "MISSING_REFRESH_TOKEN"
+        "401":
+          description: Invalid or expired refresh token, or invalid CSRF token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRefreshToken:
+                  summary: Invalid refresh token
+                  value:
+                    error: true
+                    message: "Invalid refresh token."
+                    errorCode: "INVALID_REFRESH_TOKEN"
+                invalidCsrfToken:
+                  summary: Invalid CSRF token
+                  value:
+                    error: true
+                    message: "Invalid csrf token."
+                    errorCode: "INVALID_CSRF_TOKEN"
+
+  /auth/logout:
+    post:
+      summary: Administrator Logout
+      description: Clears the `refreshToken` and CSRF cookies.
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: Logged out successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+
+  /administrators/register:
+    post:
+      summary: Register New Administrator
+      description: Registers a new administrator account with a hashed password.
+      tags:
+        - Administrators
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdministratorRegisterInput"
+      responses:
+        "201":
+          description: Administrator created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdministratorRegisterOutput"
+        "400":
+          description: Missing required fields or incorrect field type.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingFields:
+                  summary: Missing required fields
+                  value:
+                    error: true
+                    message: "Missing required fields."
+                    errorCode: "MISSING_REQUIRED_FIELDS"
+                incorrectType:
+                  summary: Incorrect field type
+                  value:
+                    error: true
+                    message: "Incorrect field type."
+                    errorCode: "INCORRECT_FIELD_TYPE"
+        "409":
+          description: Email is already registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: true
+                message: "This email is already registered."
+                errorCode: "EMAIL_ALREADY_EXISTS"
+
+  /administrators/me:
+    get:
+      summary: Get Current Administrator Profile
+      description: Fetches profile information and associated condominiums for the authenticated administrator.
+      tags:
+        - Administrators
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Administrator profile retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdministratorMeOutput"
+        "400":
+          description: Missing authentication token header.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: true
+                message: "Missing authentication token."
+                errorCode: "MISSING_AUTHENTICATION_TOKEN"
+        "401":
+          description: Invalid or expired authentication token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidToken:
+                  summary: Invalid token
+                  value:
+                    error: true
+                    message: "Invalid authentication token."
+                    errorCode: "INVALID_AUTHENTICATION_TOKEN"
+                expiredToken:
+                  summary: Expired token
+                  value:
+                    error: true
+                    message: "Expired authentication token."
+                    errorCode: "EXPIRED_AUTHENTICATION_TOKEN"
+        "404":
+          description: Administrator account not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: true
+                message: "Resource not found."
+                errorCode: "NOT_FOUND"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Access Token provided via Authorization Bearer <token> header.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+      description: HttpOnly cookie containing the JWT refresh token.
+    csrfAuth:
+      type: apiKey
+      in: header
+      name: x-csrf-token
+      description: Header used for double-submit cookie CSRF protection.
+
+  schemas:
+    AuthLoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          format: password
+          example: SecretPassword123!
+
+    AuthLoginOutput:
+      type: object
+      required:
+        - accessToken
+        - profile
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        profile:
+          $ref: "#/components/schemas/AdministratorBasicInfo"
+
+    AuthRefreshTokenOutput:
+      type: object
+      required:
+        - accessToken
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    AdministratorRegisterInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+      properties:
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        password:
+          type: string
+          format: password
+          example: SecurePassword123!
+
+    AdministratorRegisterOutput:
+      type: object
+      required:
+        - administratorId
+      properties:
+        administratorId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+
+    AdministratorMeOutput:
+      $ref: "#/components/schemas/AdministratorBasicInfo"
+
+    AdministratorBasicInfo:
+      type: object
+      required:
+        - administratorId
+        - firstName
+        - lastName
+        - email
+        - condominiums
+      properties:
+        administratorId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        condominiums:
+          type: array
+          items:
+            $ref: "#/components/schemas/CondominiumBasicInfo"
+
+    CondominiumBasicInfo:
+      type: object
+      required:
+        - condominiumId
+        - name
+      properties:
+        condominiumId:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Sunset Palms Residence
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - errorCode
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: An error message describing what went wrong.
+        errorCode:
+          type: string
+          example: ERROR_CODE
