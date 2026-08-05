@@ -9,10 +9,12 @@ import getApiErrorMessage from "@/api/apiErrorMessages";
 import { isAxiosError } from "axios";
 import { makeApiRequest } from "@/api/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function RegisterPage() {
+	const { t } = useTranslation();
 	const { isSessionRestoring } = useAuth();
 	const [name, setName] = useState("");
 	const [surname, setSurname] = useState("");
@@ -33,8 +35,8 @@ export function RegisterPage() {
 
 		if (!name || !surname || !email || !password) {
 			toaster.create({
-				title: "Validation error",
-				description: "Please fill in all required fields.",
+				title: t("register.validationErrorTitle"),
+				description: t("register.fillRequiredFields"),
 				type: "error",
 			});
 			return;
@@ -42,8 +44,8 @@ export function RegisterPage() {
 
 		if (!EMAIL_REGEX.test(email)) {
 			toaster.create({
-				title: "Validation error",
-				description: "Please enter a valid email address.",
+				title: t("register.validationErrorTitle"),
+				description: t("register.enterValidEmail"),
 				type: "error",
 			});
 			return;
@@ -51,8 +53,8 @@ export function RegisterPage() {
 
 		if (email !== repeatEmail) {
 			toaster.create({
-				title: "Validation error",
-				description: "Email addresses do not match.",
+				title: t("register.validationErrorTitle"),
+				description: t("register.emailsDoNotMatch"),
 				type: "error",
 			});
 			return;
@@ -60,8 +62,8 @@ export function RegisterPage() {
 
 		if (password.length < 8) {
 			toaster.create({
-				title: "Validation error",
-				description: "Password must be at least 8 characters long.",
+				title: t("register.validationErrorTitle"),
+				description: t("register.passwordMinLength"),
 				type: "error",
 			});
 			return;
@@ -70,8 +72,8 @@ export function RegisterPage() {
 		// eslint-disable-next-line security/detect-possible-timing-attacks
 		if (password !== repeatPassword) {
 			toaster.create({
-				title: "Validation error",
-				description: "Passwords do not match.",
+				title: t("register.validationErrorTitle"),
+				description: t("register.passwordsDoNotMatch"),
 				type: "error",
 			});
 			return;
@@ -88,8 +90,8 @@ export function RegisterPage() {
 			});
 
 			toaster.create({
-				title: "Registration successful",
-				description: "You can now log in.",
+				title: t("register.registrationSuccessTitle"),
+				description: t("register.registrationSuccessDesc"),
 				type: "success",
 			});
 			navigate("/login");
@@ -99,7 +101,7 @@ export function RegisterPage() {
 				errorCode = err.response?.data?.errorCode ?? "UNKNOWN";
 			}
 			toaster.create({
-				title: "Registration failed",
+				title: t("register.registrationFailedTitle"),
 				description: getApiErrorMessage(errorCode),
 				type: "error",
 			});
@@ -111,14 +113,14 @@ export function RegisterPage() {
 	return (
 		<AuthContainer
 			brandName="Kon-Cloud"
-			brandSubtitle="Create a profile with your details."
-			actionLabel="Create account"
-			actionTitle="Register to Kon-Cloud"
+			brandSubtitle={t("register.brandSubtitle")}
+			actionLabel={t("register.actionLabel")}
+			actionTitle={t("register.actionTitle")}
 		>
 			<Stack gap="4" as="form" onSubmit={handleSubmit}>
 				{/* Basic info */}
 				<SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
-					<Field label="Name" required>
+					<Field label={t("register.nameLabel")} required>
 						<Input
 							placeholder="Jane"
 							value={name}
@@ -126,7 +128,7 @@ export function RegisterPage() {
 							disabled={isFormDisabled}
 						/>
 					</Field>
-					<Field label="Surname" required>
+					<Field label={t("register.surnameLabel")} required>
 						<Input
 							placeholder="Doe"
 							value={surname}
@@ -138,10 +140,10 @@ export function RegisterPage() {
 
 				{/* Email */}
 				<Field
-					label="Email"
+					label={t("register.emailLabel")}
 					required
 					invalid={!isEmailValid}
-					errorText="Please enter a valid email address"
+					errorText={t("register.enterValidEmail")}
 				>
 					<Input
 						type="email"
@@ -152,10 +154,10 @@ export function RegisterPage() {
 					/>
 				</Field>
 				<Field
-					label="Repeat email"
+					label={t("register.repeatEmailLabel")}
 					required
 					invalid={Boolean(repeatEmail && email !== repeatEmail)}
-					errorText="Email addresses do not match"
+					errorText={t("register.emailsDoNotMatch")}
 				>
 					<Input
 						type="email"
@@ -168,28 +170,28 @@ export function RegisterPage() {
 
 				{/* Password */}
 				<Field
-					label="Password"
+					label={t("register.passwordLabel")}
 					required
 					invalid={!isPasswordValid}
-					errorText="Password must be at least 8 characters long"
+					errorText={t("register.passwordMinLength")}
 				>
 					<PasswordInput
-						placeholder="Create a password (min. 8 characters)"
+						placeholder={t("register.passwordPlaceholder")}
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						disabled={isFormDisabled}
 					/>
 				</Field>
 				<Field
-					label="Repeat password"
+					label={t("register.repeatPasswordLabel")}
 					required
 					invalid={Boolean(
 						repeatPassword && password !== repeatPassword,
 					)}
-					errorText="Passwords do not match"
+					errorText={t("register.passwordsDoNotMatch")}
 				>
 					<PasswordInput
-						placeholder="Repeat the password"
+						placeholder={t("register.repeatPasswordPlaceholder")}
 						value={repeatPassword}
 						onChange={(e) => setRepeatPassword(e.target.value)}
 						disabled={isFormDisabled}
@@ -203,14 +205,14 @@ export function RegisterPage() {
 					loading={isFormDisabled}
 					disabled={isFormDisabled}
 				>
-					Register
+					{t("register.submitButton")}
 				</Button>
 
 				{/* Link to login */}
 				<Text fontSize="sm" textAlign="center">
 					<Link asChild>
 						<RouterLink to="/login">
-							Already have an account? Log in here.
+							{t("register.alreadyHaveAccount")}
 						</RouterLink>
 					</Link>
 				</Text>
@@ -218,3 +220,4 @@ export function RegisterPage() {
 		</AuthContainer>
 	);
 }
+

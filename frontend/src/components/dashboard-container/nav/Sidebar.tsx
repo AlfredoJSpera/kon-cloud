@@ -11,6 +11,7 @@ import { useContext, type ReactNode } from "react";
 import { LuGrid2X2, LuSettings2 } from "react-icons/lu";
 import { DashboardContext } from "@/contexts/DashboardContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type NavItem = {
 	label: string;
@@ -18,18 +19,23 @@ type NavItem = {
 	icon: ReactNode;
 };
 
-const navItems: NavItem[] = [
-	{ label: "Page Layout", path: "/", icon: <Icon as={LuGrid2X2} /> },
-	{
-		label: "User Settings",
-		path: "/settings",
-		icon: <Icon as={LuSettings2} />,
-	},
-];
-
 export function Sidebar() {
+	const { t } = useTranslation();
 	const ctx = useContext(DashboardContext);
 	const navigate = useNavigate();
+
+	const navItems: NavItem[] = [
+		{
+			label: t("dashboard.pageLayout"),
+			path: "/",
+			icon: <Icon as={LuGrid2X2} />,
+		},
+		{
+			label: t("topbar.settings"),
+			path: "/settings",
+			icon: <Icon as={LuSettings2} />,
+		},
+	];
 
 	return (
 		<Stack gap="6" h="full">

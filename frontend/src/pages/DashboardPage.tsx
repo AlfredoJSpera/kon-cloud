@@ -26,24 +26,36 @@ import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
 import { isAxiosError } from "axios";
 import getApiErrorMessage from "@/api/apiErrorMessages";
+import { useTranslation } from "react-i18next";
 
 export function DashboardPage() {
+	const { t } = useTranslation();
 	const { user } = useAuth();
+
 	const cards = useMemo(
 		() => [
-			{ title: "Project files", value: "24", icon: LuFolderKanban },
-			{ title: "Active sessions", value: "12", icon: LuChartBar },
-			{ title: "Shared notes", value: "8", icon: LuBookOpen },
-			{ title: "Security checks", value: "99%", icon: LuShieldCheck },
+			{ title: t("dashboard.projectFiles"), value: "24", icon: LuFolderKanban },
+			{ title: t("dashboard.activeSessions"), value: "12", icon: LuChartBar },
+			{ title: t("dashboard.sharedNotes"), value: "8", icon: LuBookOpen },
+			{ title: t("dashboard.securityChecks"), value: "99%", icon: LuShieldCheck },
 		],
-		[],
+		[t],
+	);
+
+	const quickActions = useMemo(
+		() => [
+			t("dashboard.actionOpenSettings"),
+			t("dashboard.actionReviewLogin"),
+			t("dashboard.actionSwitchRegister"),
+		],
+		[t],
 	);
 
 	const handleMe = async () => {
 		try {
 			const res = await makeApiRequest.administrators.me();
 			toaster.create({
-				title: "Request completed",
+				title: t("dashboard.requestCompleted"),
 				description: `${res.data.firstName} ${res.data.lastName}`,
 				type: "success",
 				closable: true,
@@ -51,7 +63,7 @@ export function DashboardPage() {
 		} catch (error: unknown) {
 			if (isAxiosError(error)) {
 				toaster.create({
-					title: "Error",
+					title: t("dashboard.errorTitle"),
 					description: getApiErrorMessage(
 						error.response?.data.errorCode || "",
 					),
@@ -65,11 +77,13 @@ export function DashboardPage() {
 	return (
 		<DashboardContainer
 			sidebarBrandName="Kon-Cloud"
-			sidebarHeading="Navigation"
+			sidebarHeading={t("topbar.navigation")}
 			topBarTitle="My Extra Long Condominium Name"
 			contentHeaderSubtitle="Dashboard preview"
 			contentHeaderTitle={
-				user ? `Welcome back, ${user.firstName}` : "Page Layout"
+				user
+					? t("dashboard.welcome", { name: user.firstName })
+					: t("dashboard.pageLayout")
 			}
 		>
 			<Stack gap="6">
@@ -81,13 +95,13 @@ export function DashboardPage() {
 						wrap="wrap"
 					>
 						<Box>
-							<Text fontSize="sm">Overview Settings</Text>
+							<Text fontSize="sm">{t("dashboard.overviewSettings")}</Text>
 							<Heading size="lg" mt="1">
-								Responsive page layout
+								{t("dashboard.responsiveLayout")}
 							</Heading>
 						</Box>
 						<Button onClick={() => handleMe()}>
-							Open dashboard
+							{t("dashboard.openDashboard")}
 						</Button>
 					</Flex>
 
@@ -111,8 +125,7 @@ export function DashboardPage() {
 								</HStack>
 								<Separator my="4" />
 								<Text fontSize="sm">
-									Placeholder tiles for the dashboard view
-									shown in the mockup.
+									{t("dashboard.placeholderTiles")}
 								</Text>
 							</Box>
 						))}
@@ -123,10 +136,10 @@ export function DashboardPage() {
 					<Box borderWidth="1px" p="6">
 						<Flex justify="space-between" align="center" mb="4">
 							<Box>
-								<Text fontSize="sm">Primary area</Text>
-								<Heading size="md">Content grid</Heading>
+								<Text fontSize="sm">{t("dashboard.primaryArea")}</Text>
+								<Heading size="md">{t("dashboard.contentGrid")}</Heading>
 							</Box>
-							<Badge variant="subtle">Live</Badge>
+							<Badge variant="subtle">{t("dashboard.liveBadge")}</Badge>
 						</Flex>
 						<Grid
 							templateColumns="repeat(2, minmax(0, 1fr))"
@@ -140,14 +153,10 @@ export function DashboardPage() {
 
 					<Box borderWidth="1px" p="6">
 						<Heading size="md" mb="4">
-							Quick actions
+							{t("dashboard.quickActions")}
 						</Heading>
 						<Stack gap="3">
-							{[
-								"Open user settings",
-								"Review login flow",
-								"Switch to registration",
-							].map((label) => (
+							{quickActions.map((label) => (
 								<Button
 									key={label}
 									variant="outline"
@@ -165,3 +174,4 @@ export function DashboardPage() {
 		</DashboardContainer>
 	);
 }
+
