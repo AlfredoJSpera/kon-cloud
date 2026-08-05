@@ -25,6 +25,7 @@ import { LuMenu } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "./LanguageSelector";
+import { CondominiumSelector } from "./CondominiumSelector";
 
 export function DashboardTopBar() {
 	const { t } = useTranslation();
@@ -46,7 +47,7 @@ export function DashboardTopBar() {
 		>
 			{/* Left */}
 			<HStack gap="3">
-				<Heading size="md">{dashCtx?.topBarTitle}</Heading>
+				<CondominiumSelector />
 			</HStack>
 
 			{/* Right */}

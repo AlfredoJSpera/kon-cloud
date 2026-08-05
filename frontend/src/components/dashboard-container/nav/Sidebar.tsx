@@ -8,9 +8,9 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { LuGrid2X2, LuSettings2 } from "react-icons/lu";
+import { LuGrid2X2, LuSettings2, LuBuilding } from "react-icons/lu";
 import { DashboardContext } from "@/contexts/DashboardContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 type NavItem = {
@@ -23,12 +23,18 @@ export function Sidebar() {
 	const { t } = useTranslation();
 	const ctx = useContext(DashboardContext);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const navItems: NavItem[] = [
 		{
-			label: t("dashboard.pageLayout"),
+			label: "Dashboard",
 			path: "/",
 			icon: <Icon as={LuGrid2X2} />,
+		},
+		{
+			label: t("condominiums.title"),
+			path: "/condominiums",
+			icon: <Icon as={LuBuilding} />,
 		},
 		{
 			label: t("topbar.settings"),
@@ -53,7 +59,9 @@ export function Sidebar() {
 					<Button
 						key={item.path}
 						justifyContent="flex-start"
-						variant="ghost"
+						variant={
+							location.pathname === item.path ? "subtle" : "ghost"
+						}
 						onClick={() => navigate(item.path)}
 					>
 						<HStack gap="3">
