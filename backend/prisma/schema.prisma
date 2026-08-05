@@ -30,4 +30,5 @@ model Condominium {
   AdministratorID String        @db.UniqueIdentifier
   Name            String        @db.NVarChar(150)
   Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
+  @@index([AdministratorID])
 }
