@@ -1,5 +1,15 @@
 # Changelog
 
+# [0.4.0](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.5...v0.4.0) (2026-08-05)
+
+### Bug Fixes
+
+* Remove cpu usage in docker-publish github action ([2e1a42c](https://github.com/AlfredoJSpera/kon-cloud/commit/2e1a42c06f875501064c3a84e1fba698fc0d2bd1))
+
+### Features
+
+* **frontend:** Install react-i18 and create LanguageSelector component ([212006b](https://github.com/AlfredoJSpera/kon-cloud/commit/212006b89d1995ea33921fc40c8944eaad04daea))
+
 ## [0.3.5](https://github.com/AlfredoJSpera/kon-cloud/compare/v0.3.4...v0.3.5) (2026-07-31)
 
 ### Bug Fixes
