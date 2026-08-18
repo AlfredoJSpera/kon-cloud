@@ -8,6 +8,11 @@ import type {
 	IAdministratorRegisterInput,
 	IAdministratorRegisterOutput,
 } from "@backend-interfaces/administrator";
+import type {
+	ICondominiumCreateInput,
+	ICondominiumOutput,
+	ICondominiumUpdateInput,
+} from "@backend-interfaces/condominium";
 import axios, { type AxiosRequestConfig } from "axios";
 
 declare global {
@@ -58,5 +63,24 @@ export const makeApiRequest = {
 			api.post("/auth/logout", options),
 		refreshToken: (options?: AxiosRequestConfig) =>
 			api.get<IAuthRefreshTokenOutput>("/auth/refresh-token", options),
+	},
+	condominiums: {
+		list: (options?: AxiosRequestConfig) =>
+			api.get<ICondominiumOutput[]>("/condominiums", options),
+		getById: (id: number, options?: AxiosRequestConfig) =>
+			api.get<ICondominiumOutput>(`/condominiums/${id}`, options),
+		create: (
+			data: ICondominiumCreateInput,
+			options?: AxiosRequestConfig,
+		) =>
+			api.post<ICondominiumOutput>("/condominiums", data, options),
+		update: (
+			id: number,
+			data: ICondominiumUpdateInput,
+			options?: AxiosRequestConfig,
+		) =>
+			api.put<ICondominiumOutput>(`/condominiums/${id}`, data, options),
+		delete: (id: number, options?: AxiosRequestConfig) =>
+			api.delete<{ message: string }>(`/condominiums/${id}`, options),
 	},
 };

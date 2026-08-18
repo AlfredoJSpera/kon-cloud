@@ -35,3 +35,10 @@ export class KonExpiredAuthenticationTokenError extends KonBaseError {
 		super(message, 401, "EXPIRED_AUTHENTICATION_TOKEN");
 	}
 }
+
+export class KonAccessDeniedError extends KonBaseError {
+	constructor(message: string = "Access denied.") {
+		super(message, 403, "ACCESS_DENIED");
+	}
+}
+

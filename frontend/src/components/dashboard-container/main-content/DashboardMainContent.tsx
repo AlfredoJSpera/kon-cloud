@@ -16,7 +16,7 @@ export default function DashboardMainContent(props: { children: ReactNode }) {
 					{/* Page Header */}
 					<Box>
 						<Text fontSize="sm">{ctx?.contentHeaderSubtitle}</Text>
-						<Heading size="2xl" mt="2">
+						<Heading size="2xl" mt="2" data-testid="condominiums-heading">
 							{ctx?.contentHeaderTitle}
 						</Heading>
 					</Box>
