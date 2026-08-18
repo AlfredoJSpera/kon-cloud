@@ -1,5 +1,5 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	DialogBody,
@@ -33,16 +33,18 @@ export function CondominiumModal({
 	const [loading, setLoading] = useState(false);
 	const [nameError, setNameError] = useState("");
 
-	useEffect(() => {
-		if (editingCondominium) {
-			setName(editingCondominium.name || "");
-			setAddress(editingCondominium.address || "");
-		} else {
-			setName("");
-			setAddress("");
-		}
+	const [prevEditing, setPrevEditing] = useState<ICondominiumOutput | null>(
+		null,
+	);
+	const [prevOpen, setPrevOpen] = useState(false);
+
+	if (editingCondominium !== prevEditing || open !== prevOpen) {
+		setPrevEditing(editingCondominium);
+		setPrevOpen(open);
+		setName(editingCondominium?.name || "");
+		setAddress(editingCondominium?.address || "");
 		setNameError("");
-	}, [editingCondominium, open]);
+	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();

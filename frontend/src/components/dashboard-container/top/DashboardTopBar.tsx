@@ -1,11 +1,4 @@
-import {
-	Flex,
-	HStack,
-	Heading,
-	Button,
-	Text,
-	IconButton,
-} from "@chakra-ui/react";
+import { Flex, HStack, Button, Text, IconButton } from "@chakra-ui/react";
 import { Avatar } from "@/components/chakraui/avatar";
 import {
 	ColorModeButton,
@@ -135,4 +128,3 @@ export function DashboardTopBar() {
 		</Flex>
 	);
 }
-

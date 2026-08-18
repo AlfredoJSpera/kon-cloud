@@ -17,10 +17,7 @@ import { KonApiContract } from "@utils/apiContract";
 
 const router = Router();
 
-type ListCondominiumsApiContract = KonApiContract<
-	never,
-	ICondominiumOutput[]
->;
+type ListCondominiumsApiContract = KonApiContract<never, ICondominiumOutput[]>;
 router.get(
 	"/",
 	authenticateToken,
@@ -123,6 +120,7 @@ router.get(
 				throw new KonNotFoundError();
 			}
 
+			// Guarantees isolation between administrators
 			if (condominium.AdministratorID !== adminId) {
 				throw new KonAccessDeniedError();
 			}
@@ -131,7 +129,9 @@ router.get(
 				condominiumId: condominium.CondominiumID,
 				administratorId: condominium.AdministratorID,
 				name: condominium.Name,
-				...(condominium.Address ? { address: condominium.Address } : {}),
+				...(condominium.Address
+					? { address: condominium.Address }
+					: {}),
 			});
 		},
 	),
@@ -157,6 +157,15 @@ router.put(
 				throw new KonNotFoundError();
 			}
 
+			const { name, address } = req.body;
+
+			if (
+				(name !== undefined && typeof name !== "string") ||
+				(address !== undefined && typeof address !== "string")
+			) {
+				throw new KonIncorrectFieldTypeError();
+			}
+
 			const existing = await prisma.condominium.findUnique({
 				where: {
 					CondominiumID: condominiumId,
@@ -167,17 +176,9 @@ router.put(
 				throw new KonNotFoundError();
 			}
 
+			// Guarantees isolation between administrators
 			if (existing.AdministratorID !== adminId) {
 				throw new KonAccessDeniedError();
-			}
-
-			const { name, address } = req.body;
-
-			if (
-				(name !== undefined && typeof name !== "string") ||
-				(address !== undefined && typeof address !== "string")
-			) {
-				throw new KonIncorrectFieldTypeError();
 			}
 
 			const updated = await prisma.condominium.update({
@@ -230,6 +231,7 @@ router.delete(
 				throw new KonNotFoundError();
 			}
 
+			// Guarantees isolation between administrators
 			if (existing.AdministratorID !== adminId) {
 				throw new KonAccessDeniedError();
 			}
@@ -240,7 +242,9 @@ router.delete(
 				},
 			});
 
-			res.status(200).json({ message: "Condominium deleted successfully" });
+			res.status(200).json({
+				message: "Condominium deleted successfully",
+			});
 		},
 	),
 );

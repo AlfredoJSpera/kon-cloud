@@ -77,7 +77,7 @@ export function DashboardPage() {
 			contentHeaderTitle="Dashboard"
 		>
 			{!selectedCondominium ? (
-				/* Case 1: No Condominium Selected (matching wireframe Picture 1) */
+				/* Case 1: No Condominium Selected */
 				<Flex
 					direction="column"
 					align="center"
@@ -113,7 +113,7 @@ export function DashboardPage() {
 					</Button>
 				</Flex>
 			) : (
-				/* Case 2: Condominium Selected (matching wireframe Picture 2) */
+				/* Case 2: Condominium Selected, sample elements */
 				<Stack gap="6" data-testid="condo-selected-container">
 					<Box borderWidth="1px" p={{ base: "4", md: "6" }}>
 						<Flex

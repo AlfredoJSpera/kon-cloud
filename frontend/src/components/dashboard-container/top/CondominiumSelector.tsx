@@ -50,7 +50,8 @@ export function CondominiumSelector() {
 							value={String(c.condominiumId)}
 							onClick={() => setSelectedCondominium(c)}
 							fontWeight={
-								selectedCondominium?.condominiumId === c.condominiumId
+								selectedCondominium?.condominiumId ===
+								c.condominiumId
 									? "bold"
 									: "normal"
 							}
