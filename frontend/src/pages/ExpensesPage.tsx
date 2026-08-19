@@ -221,6 +221,58 @@ export function ExpensesPage() {
 				<NoCondominiumSelected />
 			) : (
 				<Stack gap="6" data-testid="expenses-page-container">
+					{/* Control Header & Filters */}
+					<Flex
+						justify="space-between"
+						align="center"
+						wrap="wrap"
+						gap="4"
+					>
+						<HStack gap="3">
+							<Badge colorPalette="blue" size="lg" px="3" py="1">
+								{selectedCondominium.name}
+							</Badge>
+							<NativeSelect.Root size="sm" maxW="200px">
+								<NativeSelect.Field
+									value={categoryFilter}
+									onChange={(e) =>
+										setCategoryFilter(e.target.value)
+									}
+									data-testid="category-filter-select"
+								>
+									<option value="ALL">
+										{t("expenses.allCategories")}
+									</option>
+									<option value="Utilities">
+										{t("expenses.categories.Utilities")}
+									</option>
+									<option value="Cleaning">
+										{t("expenses.categories.Cleaning")}
+									</option>
+									<option value="Maintenance">
+										{t("expenses.categories.Maintenance")}
+									</option>
+									<option value="Insurance">
+										{t("expenses.categories.Insurance")}
+									</option>
+									<option value="Other">
+										{t("expenses.categories.Other")}
+									</option>
+								</NativeSelect.Field>
+							</NativeSelect.Root>
+						</HStack>
+
+						<Button
+							onClick={handleOpenCreateModal}
+							data-testid="record-expense-btn"
+						>
+							<HStack gap="2">
+								<LuPlus />
+								<Text>{t("expenses.recordExpense")}</Text>
+							</HStack>
+						</Button>
+					</Flex>
+
 					{/* Financial Summary Cards */}
 					<Grid
 						templateColumns={{
@@ -358,61 +410,6 @@ export function ExpensesPage() {
 							</Card.Body>
 						</Card.Root>
 					</Grid>
-
-					{/* Control Header & Filters */}
-					<Flex
-						justify="space-between"
-						align="center"
-						wrap="wrap"
-						gap="4"
-					>
-						<HStack gap="3">
-							<HStack gap="2">
-								<Icon as={LuFilter} color="gray.500" />
-								<Text fontSize="sm" fontWeight="medium">
-									{t("expenses.category")}:
-								</Text>
-							</HStack>
-							<NativeSelect.Root size="sm" maxW="200px">
-								<NativeSelect.Field
-									value={categoryFilter}
-									onChange={(e) =>
-										setCategoryFilter(e.target.value)
-									}
-									data-testid="category-filter-select"
-								>
-									<option value="ALL">
-										{t("expenses.allCategories")}
-									</option>
-									<option value="Utilities">
-										{t("expenses.categories.Utilities")}
-									</option>
-									<option value="Cleaning">
-										{t("expenses.categories.Cleaning")}
-									</option>
-									<option value="Maintenance">
-										{t("expenses.categories.Maintenance")}
-									</option>
-									<option value="Insurance">
-										{t("expenses.categories.Insurance")}
-									</option>
-									<option value="Other">
-										{t("expenses.categories.Other")}
-									</option>
-								</NativeSelect.Field>
-							</NativeSelect.Root>
-						</HStack>
-
-						<Button
-							onClick={handleOpenCreateModal}
-							data-testid="record-expense-btn"
-						>
-							<HStack gap="2">
-								<LuPlus />
-								<Text>{t("expenses.recordExpense")}</Text>
-							</HStack>
-						</Button>
-					</Flex>
 
 					{/* Expenses Table */}
 					{loading ? (
