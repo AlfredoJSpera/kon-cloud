@@ -273,11 +273,6 @@ export function ExpensesPage() {
 									? "green.500"
 									: "red.500"
 							}
-							bg={
-								(cashBalanceInfo?.cashBalance ?? 0) >= 0
-									? "green.50/30"
-									: "red.50/30"
-							}
 							data-testid="cash-balance-card"
 						>
 							<Card.Body p="5">
