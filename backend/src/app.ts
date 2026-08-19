@@ -5,6 +5,8 @@ import authRoutes from "@routes/authenticationRoutes";
 import administratorsRoutes from "@routes/administratorRoutes";
 import condominiumRoutes from "@routes/condominiumRoutes";
 import tenantRoutes from "@routes/tenantRoutes";
+import dueRoutes from "@routes/dueRoutes";
+import paymentRoutes from "@routes/paymentRoutes";
 import { routeErrorHandler } from "@middleware/errorHandlerMW";
 import { loggerHttp } from "@middleware/loggerMW";
 import { rateLimit } from "express-rate-limit";
@@ -47,6 +49,8 @@ app.use("/auth", authRoutes);
 app.use("/administrators", administratorsRoutes);
 app.use("/condominiums", condominiumRoutes);
 app.use("/tenants", tenantRoutes);
+app.use("/dues", dueRoutes);
+app.use("/payments", paymentRoutes);
 
 // Automatic error handling
 //! Must be directly below the endpoints
