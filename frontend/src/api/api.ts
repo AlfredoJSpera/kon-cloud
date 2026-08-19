@@ -13,6 +13,11 @@ import type {
 	ICondominiumOutput,
 	ICondominiumUpdateInput,
 } from "@backend-interfaces/condominium";
+import type {
+	ITenantCreateInput,
+	ITenantOutput,
+	ITenantUpdateInput,
+} from "@backend-interfaces/tenant";
 import axios, { type AxiosRequestConfig } from "axios";
 
 declare global {
@@ -82,5 +87,23 @@ export const makeApiRequest = {
 			api.put<ICondominiumOutput>(`/condominiums/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/condominiums/${id}`, options),
+	},
+	tenants: {
+		list: (condominiumId: number, options?: AxiosRequestConfig) =>
+			api.get<ITenantOutput[]>(
+				`/tenants?condominiumId=${condominiumId}`,
+				options,
+			),
+		getById: (id: number, options?: AxiosRequestConfig) =>
+			api.get<ITenantOutput>(`/tenants/${id}`, options),
+		create: (data: ITenantCreateInput, options?: AxiosRequestConfig) =>
+			api.post<ITenantOutput>("/tenants", data, options),
+		update: (
+			id: number,
+			data: ITenantUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<ITenantOutput>(`/tenants/${id}`, data, options),
+		delete: (id: number, options?: AxiosRequestConfig) =>
+			api.delete<{ message: string }>(`/tenants/${id}`, options),
 	},
 };

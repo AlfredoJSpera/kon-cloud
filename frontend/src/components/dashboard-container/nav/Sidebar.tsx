@@ -8,7 +8,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { LuGrid2X2, LuSettings2, LuBuilding } from "react-icons/lu";
+import { LuGrid2X2, LuSettings2, LuBuilding, LuUsers } from "react-icons/lu";
 import { DashboardContext } from "@/contexts/DashboardContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,11 @@ export function Sidebar() {
 			label: t("condominiums.title"),
 			path: "/condominiums",
 			icon: <Icon as={LuBuilding} />,
+		},
+		{
+			label: t("tenants.title"),
+			path: "/tenants",
+			icon: <Icon as={LuUsers} />,
 		},
 		{
 			label: t("topbar.settings"),

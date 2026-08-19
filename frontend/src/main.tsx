@@ -8,6 +8,7 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { CondominiumsPage } from "./pages/CondominiumsPage";
+import { TenantsPage } from "./pages/TenantsPage";
 import { AuthTestPage } from "./pages/AuthTestPage";
 import AuthProvider from "./hooks/AuthProvider";
 import { CondominiumProvider } from "./hooks/CondominiumProvider";
@@ -27,6 +28,10 @@ createRoot(document.getElementById("root")!).render(
 								<Route
 									path="/condominiums"
 									element={<CondominiumsPage />}
+								/>
+								<Route
+									path="/tenants"
+									element={<TenantsPage />}
 								/>
 								<Route
 									path="/settings"
