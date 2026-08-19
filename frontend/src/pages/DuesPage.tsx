@@ -7,7 +7,6 @@ import {
 	Flex,
 	Grid,
 	HStack,
-	IconButton,
 	Portal,
 	Select,
 	Spinner,
@@ -19,15 +18,12 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-	LuPlus,
 	LuCreditCard,
-	LuTrash2,
-	LuPencil,
 	LuCoins,
 	LuArrowDownRight,
 	LuArrowUpRight,
 	LuWallet,
-	LuEllipsisVertical,
+	LuReceipt,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
@@ -42,12 +38,7 @@ import { makeApiRequest } from "@/api/api";
 import { DueModal } from "@/components/dues/DueModal";
 import { PaymentModal } from "@/components/dues/PaymentModal";
 import { toaster } from "@/components/chakraui/toaster";
-import {
-	MenuContent,
-	MenuItem,
-	MenuRoot,
-	MenuTrigger,
-} from "@/components/chakraui/menu";
+import { ActionMenu } from "@/components/common/ActionMenu";
 
 export function DuesPage() {
 	const { t } = useTranslation();
@@ -276,17 +267,15 @@ export function DuesPage() {
 							<HStack gap="3">
 								<Button
 									onClick={() => setIsDueModalOpen(true)}
-									colorPalette="blue"
 									data-testid="issue-due-btn"
 								>
-									<LuPlus />
+									<LuReceipt />
 									<Text>{t("dues.issueDue")}</Text>
 								</Button>
 
 								<Button
 									onClick={() => setIsPaymentModalOpen(true)}
 									variant="outline"
-									colorPalette="green"
 									data-testid="record-payment-btn"
 								>
 									<LuCreditCard />
@@ -520,62 +509,21 @@ export function DuesPage() {
 																{due.reason}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<MenuRoot>
-																	<MenuTrigger
-																		asChild
-																	>
-																		<IconButton
-																			aria-label="Actions"
-																			variant="ghost"
-																			size="sm"
-																			data-testid={`due-actions-btn-${due.dueId}`}
-																		>
-																			<LuEllipsisVertical />
-																		</IconButton>
-																	</MenuTrigger>
-																	<MenuContent>
-																		<MenuItem
-																			value="edit"
-																			onClick={() =>
-																				handleEditDue(
-																					due,
-																				)
-																			}
-																			data-testid={`edit-due-${due.dueId}`}
-																		>
-																			<HStack gap="2">
-																				<LuPencil />
-																				<Text>
-																					{t(
-																						"dues.edit",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																		<MenuItem
-																			value="delete"
-																			color="red.500"
-																			onClick={() =>
-																				handleDeleteDue(
-																					due.dueId,
-																				)
-																			}
-																			data-testid={`delete-due-${due.dueId}`}
-																		>
-																			<HStack
-																				gap="2"
-																				color="red.500"
-																			>
-																				<LuTrash2 />
-																				<Text color="red.500">
-																					{t(
-																						"condominiums.delete",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																	</MenuContent>
-																</MenuRoot>
+																<ActionMenu
+																	onEdit={() =>
+																		handleEditDue(
+																			due,
+																		)
+																	}
+																	onDelete={() =>
+																		handleDeleteDue(
+																			due.dueId,
+																		)
+																	}
+																	triggerTestId={`due-actions-btn-${due.dueId}`}
+																	editTestId={`edit-due-${due.dueId}`}
+																	deleteTestId={`delete-due-${due.dueId}`}
+																/>
 															</Table.Cell>
 														</Table.Row>
 													))}
@@ -658,62 +606,21 @@ export function DuesPage() {
 																	"-"}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<MenuRoot>
-																	<MenuTrigger
-																		asChild
-																	>
-																		<IconButton
-																			aria-label="Actions"
-																			variant="ghost"
-																			size="sm"
-																			data-testid={`payment-actions-btn-${payment.paymentId}`}
-																		>
-																			<LuEllipsisVertical />
-																		</IconButton>
-																	</MenuTrigger>
-																	<MenuContent>
-																		<MenuItem
-																			value="edit"
-																			onClick={() =>
-																				handleEditPayment(
-																					payment,
-																				)
-																			}
-																			data-testid={`edit-payment-${payment.paymentId}`}
-																		>
-																			<HStack gap="2">
-																				<LuPencil />
-																				<Text>
-																					{t(
-																						"dues.edit",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																		<MenuItem
-																			value="delete"
-																			color="red.500"
-																			onClick={() =>
-																				handleDeletePayment(
-																					payment.paymentId,
-																				)
-																			}
-																			data-testid={`delete-payment-${payment.paymentId}`}
-																		>
-																			<HStack
-																				gap="2"
-																				color="red.500"
-																			>
-																				<LuTrash2 />
-																				<Text color="red.500">
-																					{t(
-																						"condominiums.delete",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																	</MenuContent>
-																</MenuRoot>
+																<ActionMenu
+																	onEdit={() =>
+																		handleEditPayment(
+																			payment,
+																		)
+																	}
+																	onDelete={() =>
+																		handleDeletePayment(
+																			payment.paymentId,
+																		)
+																	}
+																	triggerTestId={`payment-actions-btn-${payment.paymentId}`}
+																	editTestId={`edit-payment-${payment.paymentId}`}
+																	deleteTestId={`delete-payment-${payment.paymentId}`}
+																/>
 															</Table.Cell>
 														</Table.Row>
 													))}

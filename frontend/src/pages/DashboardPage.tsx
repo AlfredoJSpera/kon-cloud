@@ -123,22 +123,20 @@ export function DashboardPage() {
 							wrap="wrap"
 						>
 							<Box>
-								<Text
-									fontSize="sm"
-									color="blue.600"
-									fontWeight="semibold"
+								<Badge
+									colorPalette="blue"
+									size="lg"
+									px="3"
+									py="1"
 								>
 									{selectedCondominium.name}
-								</Text>
+								</Badge>
 								<Heading size="lg" mt="1">
 									{t(
 										"dashboard.condominiumDataVisualization",
 									)}
 								</Heading>
 							</Box>
-							<Badge colorPalette="green" size="lg">
-								{t("condominiums.active")}
-							</Badge>
 						</Flex>
 
 						{/* Real Financial Cards */}

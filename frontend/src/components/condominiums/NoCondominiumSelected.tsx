@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LuArrowRight, LuBuilding } from "react-icons/lu";
 
-export function NoCondominiumSelected() {
+export interface NoCondominiumSelectedProps {
+	description?: string;
+}
+
+export function NoCondominiumSelected({ description }: NoCondominiumSelectedProps = {}) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 
@@ -24,7 +28,7 @@ export function NoCondominiumSelected() {
 				{t("dashboard.noCondominiumSelected")}
 			</Heading>
 			<Text color="gray.500" mb="6" maxW="md">
-				{t("dashboard.selectOrCreateFromCondominiumsPage")}
+				{description || t("dashboard.selectOrCreateFromCondominiumsPage")}
 			</Text>
 			<Button
 				colorPalette="blue"

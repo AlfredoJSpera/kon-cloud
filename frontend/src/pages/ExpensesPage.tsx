@@ -7,7 +7,6 @@ import {
 	Grid,
 	HStack,
 	Icon,
-	IconButton,
 	Input,
 	NativeSelect,
 	Spinner,
@@ -20,17 +19,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	LuPlus,
-	LuTrash2,
-	LuPencil,
 	LuWallet,
 	LuTrendingUp,
 	LuTrendingDown,
-	LuBuilding,
-	LuArrowRight,
 	LuFilter,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
+import { ActionMenu } from "@/components/common/ActionMenu";
 import { useCondominium } from "@/hooks/useCondominium";
 import type {
 	IExpenseOutput,
@@ -408,7 +404,6 @@ export function ExpensesPage() {
 						</HStack>
 
 						<Button
-							colorPalette="blue"
 							onClick={handleOpenCreateModal}
 							data-testid="record-expense-btn"
 						>
@@ -509,42 +504,24 @@ export function ExpensesPage() {
 												).format(expense.amount)}
 											</Table.Cell>
 											<Table.Cell textAlign="right">
-												<HStack justify="end" gap="2">
-													<IconButton
-														size="xs"
-														variant="ghost"
-														aria-label={t(
-															"expenses.edit",
-														)}
-														onClick={() =>
-															handleOpenEditModal(
-																expense,
-															)
-														}
-														data-testid={`edit-expense-btn-${expense.expenseId}`}
-													>
-														<LuPencil />
-													</IconButton>
-													<IconButton
-														size="xs"
-														variant="ghost"
-														colorPalette="red"
-														aria-label={t(
-															"condominiums.delete",
-														)}
-														onClick={() => {
-															setDeletingExpense(
-																expense,
-															);
-															setIsDeleteModalOpen(
-																true,
-															);
-														}}
-														data-testid={`delete-expense-btn-${expense.expenseId}`}
-													>
-														<LuTrash2 />
-													</IconButton>
-												</HStack>
+												<ActionMenu
+													onEdit={() =>
+														handleOpenEditModal(
+															expense,
+														)
+													}
+													onDelete={() => {
+														setDeletingExpense(
+															expense,
+														);
+														setIsDeleteModalOpen(
+															true,
+														);
+													}}
+													triggerTestId={`expense-actions-btn-${expense.expenseId}`}
+													editTestId={`edit-expense-btn-${expense.expenseId}`}
+													deleteTestId={`delete-expense-btn-${expense.expenseId}`}
+												/>
 											</Table.Cell>
 										</Table.Row>
 									))}
