@@ -18,6 +18,7 @@ import {
 } from "@/components/chakraui/dialog";
 import { Field } from "@/components/chakraui/field";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
+import type { IPaymentOutput } from "@backend-interfaces/due";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
 import axios from "axios";
@@ -27,6 +28,7 @@ interface PaymentModalProps {
 	onClose: () => void;
 	tenants: ITenantOutput[];
 	defaultTenantId?: number;
+	editingPayment?: IPaymentOutput | null;
 	onSuccess: () => void;
 }
 
@@ -35,17 +37,30 @@ export function PaymentModal({
 	onClose,
 	tenants,
 	defaultTenantId,
+	editingPayment,
 	onSuccess,
 }: PaymentModalProps) {
 	const { t } = useTranslation();
 	const todayDate = new Date().toISOString().split("T")[0];
 
 	const [tenantId, setTenantId] = useState<string>(
-		defaultTenantId ? String(defaultTenantId) : "",
+		editingPayment
+			? String(editingPayment.tenantId)
+			: defaultTenantId
+				? String(defaultTenantId)
+				: "",
 	);
-	const [amount, setAmount] = useState<string>("");
-	const [paymentDate, setPaymentDate] = useState<string>(todayDate);
-	const [notes, setNotes] = useState<string>("");
+	const [amount, setAmount] = useState<string>(
+		editingPayment ? String(editingPayment.amount) : "",
+	);
+	const [paymentDate, setPaymentDate] = useState<string>(
+		editingPayment
+			? editingPayment.paymentDate.split("T")[0]
+			: todayDate,
+	);
+	const [notes, setNotes] = useState<string>(
+		editingPayment ? editingPayment.notes || "" : "",
+	);
 
 	const modalTenantCollection = useMemo(() => {
 		return createListCollection({
@@ -66,20 +81,35 @@ export function PaymentModal({
 	const [prevDefaultTenant, setPrevDefaultTenant] = useState<
 		number | undefined
 	>(defaultTenantId);
+	const [prevEditingPayment, setPrevEditingPayment] = useState<
+		IPaymentOutput | null | undefined
+	>(editingPayment);
 
-	if (open !== prevOpen || defaultTenantId !== prevDefaultTenant) {
+	if (
+		open !== prevOpen ||
+		defaultTenantId !== prevDefaultTenant ||
+		editingPayment !== prevEditingPayment
+	) {
 		setPrevOpen(open);
 		setPrevDefaultTenant(defaultTenantId);
-		setTenantId(
-			defaultTenantId
-				? String(defaultTenantId)
-				: tenants.length > 0
-					? String(tenants[0].tenantId)
-					: "",
-		);
-		setAmount("");
-		setPaymentDate(todayDate);
-		setNotes("");
+		setPrevEditingPayment(editingPayment);
+		if (editingPayment) {
+			setTenantId(String(editingPayment.tenantId));
+			setAmount(String(editingPayment.amount));
+			setPaymentDate(editingPayment.paymentDate.split("T")[0]);
+			setNotes(editingPayment.notes || "");
+		} else {
+			setTenantId(
+				defaultTenantId
+					? String(defaultTenantId)
+					: tenants.length > 0
+						? String(tenants[0].tenantId)
+						: "",
+			);
+			setAmount("");
+			setPaymentDate(todayDate);
+			setNotes("");
+		}
 		setTenantError("");
 		setAmountError("");
 		setDateError("");
@@ -96,7 +126,7 @@ export function PaymentModal({
 		let hasError = false;
 
 		const parsedTenantId = parseInt(tenantId, 10);
-		if (!tenantId || isNaN(parsedTenantId)) {
+		if (!editingPayment && (!tenantId || isNaN(parsedTenantId))) {
 			setTenantError(t("register.fieldRequired"));
 			hasError = true;
 		}
@@ -117,31 +147,43 @@ export function PaymentModal({
 		setLoading(true);
 
 		try {
+			// Enforce fixed 2 decimal places precision for monetary amounts
 			const fixedPrecisionAmount = Number(parsedAmount.toFixed(2));
 
-			await makeApiRequest.payments.create({
-				tenantId: parsedTenantId,
-				amount: fixedPrecisionAmount,
-				paymentDate: new Date(paymentDate).toISOString(),
-				notes: notes.trim() || undefined,
-			});
-
-			toaster.create({
-				title: t("dues.paymentCreatedSuccess"),
-				type: "success",
-			});
+			if (editingPayment) {
+				await makeApiRequest.payments.update(editingPayment.paymentId, {
+					amount: fixedPrecisionAmount,
+					paymentDate: new Date(paymentDate).toISOString(),
+					notes: notes.trim() || undefined,
+				});
+				toaster.create({
+					title: t("dues.paymentUpdatedSuccess"),
+					type: "success",
+				});
+			} else {
+				await makeApiRequest.payments.create({
+					tenantId: parsedTenantId,
+					amount: fixedPrecisionAmount,
+					paymentDate: new Date(paymentDate).toISOString(),
+					notes: notes.trim() || undefined,
+				});
+				toaster.create({
+					title: t("dues.paymentCreatedSuccess"),
+					type: "success",
+				});
+			}
 
 			onSuccess();
 			onClose();
 		} catch (err: unknown) {
 			if (axios.isAxiosError(err) && err.response) {
 				setGeneralError(
-					err.response.data?.message || "Failed to record payment",
+					err.response.data?.message || "Failed to save payment",
 				);
 				toaster.create({
 					title: t("dashboard.errorTitle"),
 					description:
-						err.response.data?.message || "Failed to record payment",
+						err.response.data?.message || "Failed to save payment",
 					type: "error",
 				});
 			} else {
@@ -167,7 +209,11 @@ export function PaymentModal({
 			<DialogContent>
 				<form onSubmit={handleSubmit}>
 					<DialogHeader>
-						<DialogTitle>{t("dues.paymentTitle")}</DialogTitle>
+						<DialogTitle>
+							{editingPayment
+								? t("dues.editPaymentTitle")
+								: t("dues.paymentTitle")}
+						</DialogTitle>
 					</DialogHeader>
 					<DialogCloseTrigger />
 
@@ -177,53 +223,55 @@ export function PaymentModal({
 								<Field invalid errorText={generalError} />
 							)}
 
-							<Field
-								label={t("dues.tenant")}
-								required
-								invalid={!!tenantError}
-								errorText={tenantError}
-							>
-								<Select.Root
-									collection={modalTenantCollection}
-									size="sm"
-									value={tenantId ? [tenantId] : []}
-									onValueChange={(e) => {
-										const val = e.value[0] ?? "";
-										setTenantId(val);
-										if (tenantError) setTenantError("");
-									}}
-									data-testid="payment-tenant-select"
+							{!editingPayment && (
+								<Field
+									label={t("dues.tenant")}
+									required
+									invalid={!!tenantError}
+									errorText={tenantError}
 								>
-									<Select.HiddenSelect />
-									<Select.Control>
-										<Select.Trigger>
-											<Select.ValueText
-												placeholder={t(
-													"dues.selectTenant",
+									<Select.Root
+										collection={modalTenantCollection}
+										size="sm"
+										value={tenantId ? [tenantId] : []}
+										onValueChange={(e) => {
+											const val = e.value[0] ?? "";
+											setTenantId(val);
+											if (tenantError) setTenantError("");
+										}}
+										data-testid="payment-tenant-select"
+									>
+										<Select.HiddenSelect />
+										<Select.Control>
+											<Select.Trigger>
+												<Select.ValueText
+													placeholder={t(
+														"dues.selectTenant",
+													)}
+												/>
+											</Select.Trigger>
+											<Select.IndicatorGroup>
+												<Select.Indicator />
+											</Select.IndicatorGroup>
+										</Select.Control>
+										<Select.Positioner>
+											<Select.Content>
+												{modalTenantCollection.items.map(
+													(item) => (
+														<Select.Item
+															item={item}
+															key={item.value}
+														>
+															{item.label}
+															<Select.ItemIndicator />
+														</Select.Item>
+													),
 												)}
-											/>
-										</Select.Trigger>
-										<Select.IndicatorGroup>
-											<Select.Indicator />
-										</Select.IndicatorGroup>
-									</Select.Control>
-									<Select.Positioner>
-										<Select.Content>
-											{modalTenantCollection.items.map(
-												(item) => (
-													<Select.Item
-														item={item}
-														key={item.value}
-													>
-														{item.label}
-														<Select.ItemIndicator />
-													</Select.Item>
-												),
-											)}
-										</Select.Content>
-									</Select.Positioner>
-								</Select.Root>
-							</Field>
+											</Select.Content>
+										</Select.Positioner>
+									</Select.Root>
+								</Field>
+							)}
 
 							<Field
 								label={t("dues.amount")}
@@ -286,7 +334,7 @@ export function PaymentModal({
 							type="submit"
 							data-testid="payment-submit-btn"
 						>
-							{t("dues.savePayment")}
+							{editingPayment ? t("dues.edit") : t("dues.savePayment")}
 						</Button>
 					</DialogFooter>
 				</form>

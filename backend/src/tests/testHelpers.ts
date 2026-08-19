@@ -57,6 +57,7 @@ jest.mock("@lib/prisma", () => ({
 			findUnique: jest.fn(),
 			findFirst: jest.fn(),
 			create: jest.fn(),
+			update: jest.fn(),
 			delete: jest.fn(),
 		},
 		payment: {
@@ -64,6 +65,7 @@ jest.mock("@lib/prisma", () => ({
 			findUnique: jest.fn(),
 			findFirst: jest.fn(),
 			create: jest.fn(),
+			update: jest.fn(),
 			delete: jest.fn(),
 		},
 	},
@@ -95,6 +97,7 @@ export const mockPrisma = prisma as unknown as {
 		findUnique: jest.Mock;
 		findFirst: jest.Mock;
 		create: jest.Mock;
+		update: jest.Mock;
 		delete: jest.Mock;
 	};
 	payment: {
@@ -102,6 +105,7 @@ export const mockPrisma = prisma as unknown as {
 		findUnique: jest.Mock;
 		findFirst: jest.Mock;
 		create: jest.Mock;
+		update: jest.Mock;
 		delete: jest.Mock;
 	};
 };

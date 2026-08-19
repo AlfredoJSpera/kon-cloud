@@ -184,4 +184,28 @@ describe("Due API Endpoints", () => {
 			expect(response.body.message).toBe("Due deleted successfully.");
 		});
 	});
+
+	describe("PUT /dues/:id", () => {
+		it("updates existing due amount", async () => {
+			const updatedDue = {
+				...mockDue,
+				Amount: new Prisma.Decimal(250.0),
+				Reason: "Updated Condo Maintenance",
+			};
+			mockPrisma.due.findUnique.mockResolvedValue(mockDue);
+			mockPrisma.due.update.mockResolvedValue(updatedDue);
+
+			const response = await request(app)
+				.put("/dues/100")
+				.set("Authorization", `Bearer ${authToken}`)
+				.send({
+					amount: 250.0,
+					reason: "Updated Condo Maintenance",
+				});
+
+			expect(response.status).toBe(200);
+			expect(response.body.amount).toBe(250.0);
+			expect(response.body.reason).toBe("Updated Condo Maintenance");
+		});
+	});
 });

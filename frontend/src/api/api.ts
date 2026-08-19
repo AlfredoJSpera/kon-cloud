@@ -21,8 +21,10 @@ import type {
 import type {
 	IDueCreateInput,
 	IDueOutput,
+	IDueUpdateInput,
 	IPaymentCreateInput,
 	IPaymentOutput,
+	IPaymentUpdateInput,
 	ITenantBalanceOutput,
 } from "@backend-interfaces/due";
 import axios, { type AxiosRequestConfig } from "axios";
@@ -131,6 +133,11 @@ export const makeApiRequest = {
 			),
 		create: (data: IDueCreateInput, options?: AxiosRequestConfig) =>
 			api.post<IDueOutput>("/dues", data, options),
+		update: (
+			id: number,
+			data: IDueUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<IDueOutput>(`/dues/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/dues/${id}`, options),
 	},
@@ -147,6 +154,11 @@ export const makeApiRequest = {
 		},
 		create: (data: IPaymentCreateInput, options?: AxiosRequestConfig) =>
 			api.post<IPaymentOutput>("/payments", data, options),
+		update: (
+			id: number,
+			data: IPaymentUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<IPaymentOutput>(`/payments/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/payments/${id}`, options),
 	},

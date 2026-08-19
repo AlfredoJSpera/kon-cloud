@@ -3,7 +3,11 @@ import { prisma } from "@lib/prisma";
 import { Prisma } from "@generated/prisma/client";
 import { catchError } from "@middleware/errorHandlerMW";
 import { authenticateToken } from "@middleware/authenticateTokenMW";
-import { IPaymentCreateInput, IPaymentOutput } from "@interfaces/due";
+import {
+	IPaymentCreateInput,
+	IPaymentOutput,
+	IPaymentUpdateInput,
+} from "@interfaces/due";
 import {
 	KonIncorrectFieldTypeError,
 	KonMissingRequiredFieldsError,
@@ -223,6 +227,97 @@ router.delete(
 			});
 
 			res.status(200).json({ message: "Payment deleted successfully." });
+		},
+	),
+);
+
+// PUT /payments/:id
+type UpdatePaymentApiContract = KonApiContract<
+	IPaymentUpdateInput,
+	IPaymentOutput,
+	{ id: string }
+>;
+router.put(
+	"/:id",
+	authenticateToken,
+	catchError(
+		async (
+			req: UpdatePaymentApiContract["Req"],
+			res: UpdatePaymentApiContract["Res"],
+		) => {
+			const adminId = req.administrator?.administratorId;
+			const paymentId = parseInt(req.params.id, 10);
+
+			if (isNaN(paymentId)) {
+				throw new KonNotFoundError();
+			}
+
+			const existing = await prisma.payment.findUnique({
+				where: { PaymentID: paymentId },
+				include: { Tenant: { include: { Condominium: true } } },
+			});
+
+			if (!existing) {
+				throw new KonNotFoundError("Payment record not found.");
+			}
+
+			if (existing.Tenant.Condominium.AdministratorID !== adminId) {
+				throw new KonAccessDeniedError();
+			}
+
+			const { amount, paymentDate, notes } = req.body;
+
+			if (
+				(amount !== undefined &&
+					(typeof amount !== "number" || isNaN(amount) || amount <= 0)) ||
+				(paymentDate !== undefined && typeof paymentDate !== "string") ||
+				(notes !== undefined && typeof notes !== "string")
+			) {
+				throw new KonIncorrectFieldTypeError("Invalid field types.");
+			}
+
+			let newPaymentDate = existing.PaymentDate;
+			if (paymentDate !== undefined) {
+				const parsedDate = new Date(paymentDate);
+				if (isNaN(parsedDate.getTime())) {
+					throw new KonIncorrectFieldTypeError(
+						"Invalid paymentDate format.",
+					);
+				}
+				newPaymentDate = parsedDate;
+			}
+
+			const newAmount =
+				amount !== undefined
+					? new Prisma.Decimal(amount.toFixed(2))
+					: existing.Amount;
+
+			const newNotes =
+				notes !== undefined
+					? notes.trim().length > 0
+						? notes.trim()
+						: null
+					: existing.Notes;
+
+			const updated = await prisma.payment.update({
+				where: { PaymentID: paymentId },
+				data: {
+					Amount: newAmount,
+					PaymentDate: newPaymentDate,
+					Notes: newNotes,
+				},
+				include: { Tenant: true },
+			});
+
+			res.status(200).json({
+				paymentId: updated.PaymentID,
+				tenantId: updated.TenantID,
+				dueId: updated.DueID ?? undefined,
+				tenantName: `${updated.Tenant.FirstName} ${updated.Tenant.LastName}`,
+				amount: Number(updated.Amount.toFixed(2)),
+				paymentDate: updated.PaymentDate.toISOString(),
+				notes: updated.Notes ?? undefined,
+			});
 		},
 	),
 );

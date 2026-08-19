@@ -4,6 +4,11 @@ export interface IDueCreateInput {
 	reason: string;
 }
 
+export interface IDueUpdateInput {
+	amount?: number;
+	reason?: string;
+}
+
 export interface IDueOutput {
 	dueId: number;
 	tenantId: number;
@@ -19,6 +24,12 @@ export interface IPaymentCreateInput {
 	dueId?: number;
 	amount: number;
 	paymentDate: string;
+	notes?: string;
+}
+
+export interface IPaymentUpdateInput {
+	amount?: number;
+	paymentDate?: string;
 	notes?: string;
 }
 

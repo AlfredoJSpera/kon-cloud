@@ -18,6 +18,7 @@ import {
 } from "@/components/chakraui/dialog";
 import { Field } from "@/components/chakraui/field";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
+import type { IDueOutput } from "@backend-interfaces/due";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
 import axios from "axios";
@@ -27,6 +28,7 @@ interface DueModalProps {
 	onClose: () => void;
 	tenants: ITenantOutput[];
 	defaultTenantId?: number;
+	editingDue?: IDueOutput | null;
 	onSuccess: () => void;
 }
 
@@ -35,14 +37,23 @@ export function DueModal({
 	onClose,
 	tenants,
 	defaultTenantId,
+	editingDue,
 	onSuccess,
 }: DueModalProps) {
 	const { t } = useTranslation();
 	const [tenantId, setTenantId] = useState<string>(
-		defaultTenantId ? String(defaultTenantId) : "",
+		editingDue
+			? String(editingDue.tenantId)
+			: defaultTenantId
+				? String(defaultTenantId)
+				: "",
 	);
-	const [amount, setAmount] = useState<string>("");
-	const [reason, setReason] = useState<string>("");
+	const [amount, setAmount] = useState<string>(
+		editingDue ? String(editingDue.amount) : "",
+	);
+	const [reason, setReason] = useState<string>(
+		editingDue ? editingDue.reason : "",
+	);
 
 	const modalTenantCollection = useMemo(() => {
 		return createListCollection({
@@ -63,19 +74,33 @@ export function DueModal({
 	const [prevDefaultTenant, setPrevDefaultTenant] = useState<
 		number | undefined
 	>(defaultTenantId);
+	const [prevEditingDue, setPrevEditingDue] = useState<
+		IDueOutput | null | undefined
+	>(editingDue);
 
-	if (open !== prevOpen || defaultTenantId !== prevDefaultTenant) {
+	if (
+		open !== prevOpen ||
+		defaultTenantId !== prevDefaultTenant ||
+		editingDue !== prevEditingDue
+	) {
 		setPrevOpen(open);
 		setPrevDefaultTenant(defaultTenantId);
-		setTenantId(
-			defaultTenantId
-				? String(defaultTenantId)
-				: tenants.length > 0
-					? String(tenants[0].tenantId)
-					: "",
-		);
-		setAmount("");
-		setReason("");
+		setPrevEditingDue(editingDue);
+		if (editingDue) {
+			setTenantId(String(editingDue.tenantId));
+			setAmount(String(editingDue.amount));
+			setReason(editingDue.reason);
+		} else {
+			setTenantId(
+				defaultTenantId
+					? String(defaultTenantId)
+					: tenants.length > 0
+						? String(tenants[0].tenantId)
+						: "",
+			);
+			setAmount("");
+			setReason("");
+		}
 		setTenantError("");
 		setAmountError("");
 		setReasonError("");
@@ -92,7 +117,7 @@ export function DueModal({
 		let hasError = false;
 
 		const parsedTenantId = parseInt(tenantId, 10);
-		if (!tenantId || isNaN(parsedTenantId)) {
+		if (!editingDue && (!tenantId || isNaN(parsedTenantId))) {
 			setTenantError(t("register.fieldRequired"));
 			hasError = true;
 		}
@@ -116,28 +141,38 @@ export function DueModal({
 			// Enforce fixed 2 decimal places precision for monetary amounts
 			const fixedPrecisionAmount = Number(parsedAmount.toFixed(2));
 
-			await makeApiRequest.dues.create({
-				tenantId: parsedTenantId,
-				amount: fixedPrecisionAmount,
-				reason: reason.trim(),
-			});
-
-			toaster.create({
-				title: t("dues.dueCreatedSuccess"),
-				type: "success",
-			});
+			if (editingDue) {
+				await makeApiRequest.dues.update(editingDue.dueId, {
+					amount: fixedPrecisionAmount,
+					reason: reason.trim(),
+				});
+				toaster.create({
+					title: t("dues.dueUpdatedSuccess"),
+					type: "success",
+				});
+			} else {
+				await makeApiRequest.dues.create({
+					tenantId: parsedTenantId,
+					amount: fixedPrecisionAmount,
+					reason: reason.trim(),
+				});
+				toaster.create({
+					title: t("dues.dueCreatedSuccess"),
+					type: "success",
+				});
+			}
 
 			onSuccess();
 			onClose();
 		} catch (err: unknown) {
 			if (axios.isAxiosError(err) && err.response) {
 				setGeneralError(
-					err.response.data?.message || "Failed to create due amount",
+					err.response.data?.message || "Failed to save due amount",
 				);
 				toaster.create({
 					title: t("dashboard.errorTitle"),
 					description:
-						err.response.data?.message || "Failed to create due amount",
+						err.response.data?.message || "Failed to save due amount",
 					type: "error",
 				});
 			} else {
@@ -163,7 +198,9 @@ export function DueModal({
 			<DialogContent>
 				<form onSubmit={handleSubmit}>
 					<DialogHeader>
-						<DialogTitle>{t("dues.dueTitle")}</DialogTitle>
+						<DialogTitle>
+							{editingDue ? t("dues.editDueTitle") : t("dues.dueTitle")}
+						</DialogTitle>
 					</DialogHeader>
 					<DialogCloseTrigger />
 
@@ -173,53 +210,55 @@ export function DueModal({
 								<Field invalid errorText={generalError} />
 							)}
 
-							<Field
-								label={t("dues.tenant")}
-								required
-								invalid={!!tenantError}
-								errorText={tenantError}
-							>
-								<Select.Root
-									collection={modalTenantCollection}
-									size="sm"
-									value={tenantId ? [tenantId] : []}
-									onValueChange={(e) => {
-										const val = e.value[0] ?? "";
-										setTenantId(val);
-										if (tenantError) setTenantError("");
-									}}
-									data-testid="due-tenant-select"
+							{!editingDue && (
+								<Field
+									label={t("dues.tenant")}
+									required
+									invalid={!!tenantError}
+									errorText={tenantError}
 								>
-									<Select.HiddenSelect />
-									<Select.Control>
-										<Select.Trigger>
-											<Select.ValueText
-												placeholder={t(
-													"dues.selectTenant",
+									<Select.Root
+										collection={modalTenantCollection}
+										size="sm"
+										value={tenantId ? [tenantId] : []}
+										onValueChange={(e) => {
+											const val = e.value[0] ?? "";
+											setTenantId(val);
+											if (tenantError) setTenantError("");
+										}}
+										data-testid="due-tenant-select"
+									>
+										<Select.HiddenSelect />
+										<Select.Control>
+											<Select.Trigger>
+												<Select.ValueText
+													placeholder={t(
+														"dues.selectTenant",
+													)}
+												/>
+											</Select.Trigger>
+											<Select.IndicatorGroup>
+												<Select.Indicator />
+											</Select.IndicatorGroup>
+										</Select.Control>
+										<Select.Positioner>
+											<Select.Content>
+												{modalTenantCollection.items.map(
+													(item) => (
+														<Select.Item
+															item={item}
+															key={item.value}
+														>
+															{item.label}
+															<Select.ItemIndicator />
+														</Select.Item>
+													),
 												)}
-											/>
-										</Select.Trigger>
-										<Select.IndicatorGroup>
-											<Select.Indicator />
-										</Select.IndicatorGroup>
-									</Select.Control>
-									<Select.Positioner>
-										<Select.Content>
-											{modalTenantCollection.items.map(
-												(item) => (
-													<Select.Item
-														item={item}
-														key={item.value}
-													>
-														{item.label}
-														<Select.ItemIndicator />
-													</Select.Item>
-												),
-											)}
-										</Select.Content>
-									</Select.Positioner>
-								</Select.Root>
-							</Field>
+											</Select.Content>
+										</Select.Positioner>
+									</Select.Root>
+								</Field>
+							)}
 
 							<Field
 								label={t("dues.amount")}
@@ -273,7 +312,7 @@ export function DueModal({
 							type="submit"
 							data-testid="due-submit-btn"
 						>
-							{t("dues.saveDue")}
+							{editingDue ? t("dues.edit") : t("dues.saveDue")}
 						</Button>
 					</DialogFooter>
 				</form>

@@ -22,6 +22,7 @@ import {
 	LuPlus,
 	LuCreditCard,
 	LuTrash2,
+	LuPencil,
 	LuCoins,
 	LuArrowDownRight,
 	LuArrowUpRight,
@@ -67,6 +68,20 @@ export function DuesPage() {
 
 	const [isDueModalOpen, setIsDueModalOpen] = useState(false);
 	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+	const [editingDue, setEditingDue] = useState<IDueOutput | null>(null);
+	const [editingPayment, setEditingPayment] = useState<IPaymentOutput | null>(
+		null,
+	);
+
+	const handleEditDue = (due: IDueOutput) => {
+		setEditingDue(due);
+		setIsDueModalOpen(true);
+	};
+
+	const handleEditPayment = (payment: IPaymentOutput) => {
+		setEditingPayment(payment);
+		setIsPaymentModalOpen(true);
+	};
 
 	const loadData = useCallback(async () => {
 		if (!selectedCondominium) {
@@ -482,19 +497,33 @@ export function DuesPage() {
 																{due.reason}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<IconButton
-																	size="xs"
-																	variant="ghost"
-																	colorPalette="red"
-																	onClick={() =>
-																		handleDeleteDue(
-																			due.dueId,
-																		)
-																	}
-																	data-testid={`delete-due-${due.dueId}`}
-																>
-																	<LuTrash2 />
-																</IconButton>
+																<HStack gap="1" justify="flex-end">
+																	<IconButton
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="blue"
+																		onClick={() =>
+																			handleEditDue(due)
+																		}
+																		data-testid={`edit-due-${due.dueId}`}
+																		title={t("dues.edit")}
+																	>
+																		<LuPencil />
+																	</IconButton>
+																	<IconButton
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="red"
+																		onClick={() =>
+																			handleDeleteDue(
+																				due.dueId,
+																			)
+																		}
+																		data-testid={`delete-due-${due.dueId}`}
+																	>
+																		<LuTrash2 />
+																	</IconButton>
+																</HStack>
 															</Table.Cell>
 														</Table.Row>
 													))}
@@ -567,19 +596,35 @@ export function DuesPage() {
 																{payment.notes || "-"}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<IconButton
-																	size="xs"
-																	variant="ghost"
-																	colorPalette="red"
-																	onClick={() =>
-																		handleDeletePayment(
-																			payment.paymentId,
-																		)
-																	}
-																	data-testid={`delete-payment-${payment.paymentId}`}
-																>
-																	<LuTrash2 />
-																</IconButton>
+																<HStack gap="1" justify="flex-end">
+																	<IconButton
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="blue"
+																		onClick={() =>
+																			handleEditPayment(
+																				payment,
+																			)
+																		}
+																		data-testid={`edit-payment-${payment.paymentId}`}
+																		title={t("dues.edit")}
+																	>
+																		<LuPencil />
+																	</IconButton>
+																	<IconButton
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="red"
+																		onClick={() =>
+																			handleDeletePayment(
+																				payment.paymentId,
+																			)
+																		}
+																		data-testid={`delete-payment-${payment.paymentId}`}
+																	>
+																		<LuTrash2 />
+																	</IconButton>
+																</HStack>
 															</Table.Cell>
 														</Table.Row>
 													))}
@@ -594,25 +639,33 @@ export function DuesPage() {
 						{/* Modals */}
 						<DueModal
 							open={isDueModalOpen}
-							onClose={() => setIsDueModalOpen(false)}
+							onClose={() => {
+								setIsDueModalOpen(false);
+								setEditingDue(null);
+							}}
 							tenants={tenants}
 							defaultTenantId={
 								selectedTenantId
 									? parseInt(selectedTenantId, 10)
 									: undefined
 							}
+							editingDue={editingDue}
 							onSuccess={loadData}
 						/>
 
 						<PaymentModal
 							open={isPaymentModalOpen}
-							onClose={() => setIsPaymentModalOpen(false)}
+							onClose={() => {
+								setIsPaymentModalOpen(false);
+								setEditingPayment(null);
+							}}
 							tenants={tenants}
 							defaultTenantId={
 								selectedTenantId
 									? parseInt(selectedTenantId, 10)
 									: undefined
 							}
+							editingPayment={editingPayment}
 							onSuccess={loadData}
 						/>
 					</>

@@ -122,4 +122,28 @@ describe("Payment API Endpoints", () => {
 			expect(response.body.message).toBe("Payment deleted successfully.");
 		});
 	});
+
+	describe("PUT /payments/:id", () => {
+		it("updates an existing payment entry", async () => {
+			const updatedPayment = {
+				...mockPayment,
+				Amount: new Prisma.Decimal(180.0),
+				Notes: "Updated Wire Transfer",
+			};
+			mockPrisma.payment.findUnique.mockResolvedValue(mockPayment);
+			mockPrisma.payment.update.mockResolvedValue(updatedPayment);
+
+			const response = await request(app)
+				.put("/payments/200")
+				.set("Authorization", `Bearer ${authToken}`)
+				.send({
+					amount: 180.0,
+					notes: "Updated Wire Transfer",
+				});
+
+			expect(response.status).toBe(200);
+			expect(response.body.amount).toBe(180.0);
+			expect(response.body.notes).toBe("Updated Wire Transfer");
+		});
+	});
 });

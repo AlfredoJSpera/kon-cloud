@@ -245,4 +245,57 @@ describe("DuesPage", () => {
 			);
 		});
 	});
+
+	it("opens due modal in edit mode and updates an existing due amount", async () => {
+		const user = userEvent.setup();
+		localStorage.setItem("selected_condominium_id", "101");
+
+		vi.spyOn(makeApiRequest.condominiums, "list").mockResolvedValue({
+			data: mockCondos,
+		} as any);
+		vi.spyOn(makeApiRequest.tenants, "list").mockResolvedValue({
+			data: mockTenants,
+		} as any);
+		vi.spyOn(makeApiRequest.dues, "list").mockResolvedValue({
+			data: mockDues,
+		} as any);
+		vi.spyOn(makeApiRequest.payments, "list").mockResolvedValue({
+			data: mockPayments,
+		} as any);
+		vi.spyOn(makeApiRequest.dues, "balances").mockResolvedValue({
+			data: mockBalances,
+		} as any);
+
+		const updateDueSpy = vi
+			.spyOn(makeApiRequest.dues, "update")
+			.mockResolvedValue({
+				data: {
+					...mockDues[0],
+					amount: 250.0,
+					reason: "Updated Fee",
+				},
+			} as any);
+
+		renderPage();
+
+		const editBtn = await screen.findByTestId("edit-due-10");
+		await user.click(editBtn);
+
+		const amountInput = screen.getByTestId("due-amount-input");
+		const reasonInput = screen.getByTestId("due-reason-input");
+		const submitBtn = screen.getByTestId("due-submit-btn");
+
+		await user.clear(amountInput);
+		await user.type(amountInput, "250.00");
+		await user.clear(reasonInput);
+		await user.type(reasonInput, "Updated Fee");
+		await user.click(submitBtn);
+
+		await waitFor(() => {
+			expect(updateDueSpy).toHaveBeenCalledWith(10, {
+				amount: 250,
+				reason: "Updated Fee",
+			});
+		});
+	});
 });

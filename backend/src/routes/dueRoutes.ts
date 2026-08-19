@@ -6,6 +6,7 @@ import { authenticateToken } from "@middleware/authenticateTokenMW";
 import {
 	IDueCreateInput,
 	IDueOutput,
+	IDueUpdateInput,
 	ITenantBalanceOutput,
 } from "@interfaces/due";
 import {
@@ -294,6 +295,86 @@ router.delete(
 			});
 
 			res.status(200).json({ message: "Due deleted successfully." });
+		},
+	),
+);
+
+// PUT /dues/:id
+type UpdateDueApiContract = KonApiContract<
+	IDueUpdateInput,
+	IDueOutput,
+	{ id: string }
+>;
+router.put(
+	"/:id",
+	authenticateToken,
+	catchError(
+		async (
+			req: UpdateDueApiContract["Req"],
+			res: UpdateDueApiContract["Res"],
+		) => {
+			const adminId = req.administrator?.administratorId;
+			const dueId = parseInt(req.params.id, 10);
+
+			if (isNaN(dueId)) {
+				throw new KonNotFoundError();
+			}
+
+			const existing = await prisma.due.findUnique({
+				where: { DueID: dueId },
+				include: { Tenant: { include: { Condominium: true } } },
+			});
+
+			if (!existing) {
+				throw new KonNotFoundError("Due amount not found.");
+			}
+
+			if (existing.Tenant.Condominium.AdministratorID !== adminId) {
+				throw new KonAccessDeniedError();
+			}
+
+			const { amount, reason } = req.body;
+
+			if (
+				(amount !== undefined &&
+					(typeof amount !== "number" || isNaN(amount) || amount <= 0)) ||
+				(reason !== undefined && typeof reason !== "string")
+			) {
+				throw new KonIncorrectFieldTypeError("Invalid field types.");
+			}
+
+			const newAmount =
+				amount !== undefined
+					? new Prisma.Decimal(amount.toFixed(2))
+					: existing.Amount;
+
+			const newReason =
+				reason !== undefined ? reason.trim() : existing.Reason;
+
+			if (!newReason) {
+				throw new KonMissingRequiredFieldsError(
+					"Reason cannot be empty.",
+				);
+			}
+
+			const updated = await prisma.due.update({
+				where: { DueID: dueId },
+				data: {
+					Amount: newAmount,
+					Reason: newReason,
+				},
+				include: { Tenant: true },
+			});
+
+			res.status(200).json({
+				dueId: updated.DueID,
+				tenantId: updated.TenantID,
+				tenantName: `${updated.Tenant.FirstName} ${updated.Tenant.LastName}`,
+				apartmentNumber: updated.Tenant.ApartmentNumber,
+				amount: Number(updated.Amount.toFixed(2)),
+				reason: updated.Reason,
+				createdAt: updated.CreatedAt.toISOString(),
+			});
 		},
 	),
 );
