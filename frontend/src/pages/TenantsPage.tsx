@@ -22,6 +22,7 @@ import {
 	LuPhone,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
 import { makeApiRequest } from "@/api/api";
@@ -114,21 +115,7 @@ export function TenantsPage() {
 		>
 			<Stack gap="6">
 				{!selectedCondominium ? (
-					/* No Condominium Selected State */
-					<Box
-						borderWidth="1px"
-						borderRadius="lg"
-						p={{ base: "6", md: "12" }}
-						textAlign="center"
-						bg="bg.panel"
-					>
-						<Text color="gray.500" mb="2" fontWeight="medium">
-							{t("dashboard.noCondominiumSelected")}
-						</Text>
-						<Text fontSize="sm" color="gray.400">
-							{t("tenants.noCondominiumSelected")}
-						</Text>
-					</Box>
+					<NoCondominiumSelected />
 				) : (
 					<>
 						{/* Top Actions */}
@@ -218,7 +205,9 @@ export function TenantsPage() {
 													{t("tenants.contactMethod")}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader>
-													{t("tenants.currentBalance")}
+													{t(
+														"tenants.currentBalance",
+													)}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader
 													w="20"
@@ -280,21 +269,38 @@ export function TenantsPage() {
 													<Table.Cell>
 														<Badge
 															colorPalette={
-																(balancesMap[item.tenantId] ?? 0) > 0
+																(balancesMap[
+																	item
+																		.tenantId
+																] ?? 0) > 0
 																	? "orange"
-																	: (balancesMap[item.tenantId] ?? 0) < 0
+																	: (balancesMap[
+																				item
+																					.tenantId
+																		  ] ??
+																				0) <
+																		  0
 																		? "blue"
 																		: "green"
 															}
 															size="md"
 															data-testid={`tenant-balance-${item.tenantId}`}
 														>
-															{new Intl.NumberFormat("it-IT", {
-																style: "currency",
-																currency: "EUR",
-																minimumFractionDigits: 2,
-																maximumFractionDigits: 2,
-															}).format(balancesMap[item.tenantId] ?? 0)}
+															{new Intl.NumberFormat(
+																"it-IT",
+																{
+																	style: "currency",
+																	currency:
+																		"EUR",
+																	minimumFractionDigits: 2,
+																	maximumFractionDigits: 2,
+																},
+															).format(
+																balancesMap[
+																	item
+																		.tenantId
+																] ?? 0,
+															)}
 														</Badge>
 													</Table.Cell>
 													<Table.Cell textAlign="right">
@@ -387,28 +393,51 @@ export function TenantsPage() {
 														{item.firstName}{" "}
 														{item.lastName}
 													</Text>
-													<HStack gap="2" mt="1" mb="2">
+													<HStack
+														gap="2"
+														mt="1"
+														mb="2"
+													>
 														<Badge
 															colorPalette="teal"
 															variant="subtle"
 														>
-															{item.apartmentNumber}
+															{
+																item.apartmentNumber
+															}
 														</Badge>
 														<Badge
 															colorPalette={
-																(balancesMap[item.tenantId] ?? 0) > 0
+																(balancesMap[
+																	item
+																		.tenantId
+																] ?? 0) > 0
 																	? "orange"
-																	: (balancesMap[item.tenantId] ?? 0) < 0
+																	: (balancesMap[
+																				item
+																					.tenantId
+																		  ] ??
+																				0) <
+																		  0
 																		? "blue"
 																		: "green"
 															}
 														>
-															{new Intl.NumberFormat("it-IT", {
-																style: "currency",
-																currency: "EUR",
-																minimumFractionDigits: 2,
-																maximumFractionDigits: 2,
-															}).format(balancesMap[item.tenantId] ?? 0)}
+															{new Intl.NumberFormat(
+																"it-IT",
+																{
+																	style: "currency",
+																	currency:
+																		"EUR",
+																	minimumFractionDigits: 2,
+																	maximumFractionDigits: 2,
+																},
+															).format(
+																balancesMap[
+																	item
+																		.tenantId
+																] ?? 0,
+															)}
 														</Badge>
 													</HStack>
 													<Stack

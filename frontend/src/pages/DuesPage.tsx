@@ -30,6 +30,7 @@ import {
 	LuEllipsisVertical,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
 import type {
@@ -166,7 +167,10 @@ export function DuesPage() {
 
 	// Statistics calculations
 	const totalDuesIssued = dues.reduce((sum, d) => sum + d.amount, 0);
-	const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+	const totalPaymentsReceived = payments.reduce(
+		(sum, p) => sum + p.amount,
+		0,
+	);
 	const totalCondoCredits = balances.reduce(
 		(sum, b) => sum + b.currentBalance,
 		0,
@@ -205,20 +209,7 @@ export function DuesPage() {
 		>
 			<Stack gap="6">
 				{!selectedCondominium ? (
-					<Box
-						borderWidth="1px"
-						borderRadius="lg"
-						p={{ base: "6", md: "12" }}
-						textAlign="center"
-						bg="bg.panel"
-					>
-						<Text color="gray.500" mb="2" fontWeight="medium">
-							{t("dashboard.noCondominiumSelected")}
-						</Text>
-						<Text fontSize="sm" color="gray.400">
-							{t("dues.noCondominiumSelected")}
-						</Text>
-					</Box>
+					<NoCondominiumSelected />
 				) : (
 					<>
 						{/* Top Header Controls */}
@@ -229,7 +220,12 @@ export function DuesPage() {
 							gap="4"
 						>
 							<HStack gap="3" wrap="wrap">
-								<Badge colorPalette="blue" size="lg" px="3" py="1">
+								<Badge
+									colorPalette="blue"
+									size="lg"
+									px="3"
+									py="1"
+								>
 									{selectedCondominium.name}
 								</Badge>
 
@@ -248,7 +244,9 @@ export function DuesPage() {
 									<Select.Control>
 										<Select.Trigger>
 											<Select.ValueText
-												placeholder={t("dues.allTenants")}
+												placeholder={t(
+													"dues.allTenants",
+												)}
 											/>
 										</Select.Trigger>
 										<Select.IndicatorGroup>
@@ -326,7 +324,8 @@ export function DuesPage() {
 														selectedTenantBalance
 															? selectedTenantBalance.currentBalance >
 																0
-															: totalCondoCredits > 0
+															: totalCondoCredits >
+																0
 													)
 														? "orange.500"
 														: "green.500"
@@ -430,7 +429,12 @@ export function DuesPage() {
 								<Spinner size="lg" />
 							</Flex>
 						) : fetchError ? (
-							<Box p="4" bg="red.50" color="red.600" borderRadius="md">
+							<Box
+								p="4"
+								bg="red.50"
+								color="red.600"
+								borderRadius="md"
+							>
 								<Text>{fetchError}</Text>
 							</Box>
 						) : (
@@ -443,7 +447,8 @@ export function DuesPage() {
 									</Tabs.Trigger>
 									<Tabs.Trigger value="payments">
 										<LuCreditCard />
-										{t("dues.paymentsTab")} ({payments.length})
+										{t("dues.paymentsTab")} (
+										{payments.length})
 									</Tabs.Trigger>
 								</Tabs.List>
 
@@ -465,14 +470,19 @@ export function DuesPage() {
 											borderWidth="1px"
 											borderRadius="lg"
 										>
-											<Table.Root size="sm" variant="line">
+											<Table.Root
+												size="sm"
+												variant="line"
+											>
 												<Table.Header>
 													<Table.Row>
 														<Table.ColumnHeader>
 															{t("dues.tenant")}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
-															{t("tenants.apartmentNumber")}
+															{t(
+																"tenants.apartmentNumber",
+															)}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
 															{t("dues.amount")}
@@ -487,25 +497,33 @@ export function DuesPage() {
 												</Table.Header>
 												<Table.Body>
 													{dues.map((due) => (
-														<Table.Row key={due.dueId}>
+														<Table.Row
+															key={due.dueId}
+														>
 															<Table.Cell fontWeight="medium">
 																{due.tenantName}
 															</Table.Cell>
 															<Table.Cell>
-																{due.apartmentNumber}
+																{
+																	due.apartmentNumber
+																}
 															</Table.Cell>
 															<Table.Cell
 																fontWeight="bold"
 																color="red.600"
 															>
-																{formatCurrency(due.amount)}
+																{formatCurrency(
+																	due.amount,
+																)}
 															</Table.Cell>
 															<Table.Cell>
 																{due.reason}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
 																<MenuRoot>
-																	<MenuTrigger asChild>
+																	<MenuTrigger
+																		asChild
+																	>
 																		<IconButton
 																			aria-label="Actions"
 																			variant="ghost"
@@ -519,7 +537,9 @@ export function DuesPage() {
 																		<MenuItem
 																			value="edit"
 																			onClick={() =>
-																				handleEditDue(due)
+																				handleEditDue(
+																					due,
+																				)
 																			}
 																			data-testid={`edit-due-${due.dueId}`}
 																		>
@@ -583,14 +603,19 @@ export function DuesPage() {
 											borderWidth="1px"
 											borderRadius="lg"
 										>
-											<Table.Root size="sm" variant="line">
+											<Table.Root
+												size="sm"
+												variant="line"
+											>
 												<Table.Header>
 													<Table.Row>
 														<Table.ColumnHeader>
 															{t("dues.tenant")}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
-															{t("dues.paymentDate")}
+															{t(
+																"dues.paymentDate",
+															)}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
 															{t("dues.amount")}
@@ -606,10 +631,14 @@ export function DuesPage() {
 												<Table.Body>
 													{payments.map((payment) => (
 														<Table.Row
-															key={payment.paymentId}
+															key={
+																payment.paymentId
+															}
 														>
 															<Table.Cell fontWeight="medium">
-																{payment.tenantName}
+																{
+																	payment.tenantName
+																}
 															</Table.Cell>
 															<Table.Cell>
 																{formatDate(
@@ -625,11 +654,14 @@ export function DuesPage() {
 																)}
 															</Table.Cell>
 															<Table.Cell>
-																{payment.notes || "-"}
+																{payment.notes ||
+																	"-"}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
 																<MenuRoot>
-																	<MenuTrigger asChild>
+																	<MenuTrigger
+																		asChild
+																	>
 																		<IconButton
 																			aria-label="Actions"
 																			variant="ghost"

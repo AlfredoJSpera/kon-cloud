@@ -30,6 +30,7 @@ import {
 	LuFilter,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import type {
 	IExpenseOutput,
@@ -221,40 +222,7 @@ export function ExpensesPage() {
 			contentHeaderTitle={t("expenses.title")}
 		>
 			{!selectedCondominium ? (
-				<Flex
-					direction="column"
-					align="center"
-					justify="center"
-					minH="50vh"
-					borderWidth="1px"
-					borderRadius="lg"
-					p={{ base: "6", md: "12" }}
-					textAlign="center"
-					data-testid="no-condo-selected-container"
-				>
-					<Icon
-						as={LuBuilding}
-						boxSize="12"
-						color="gray.400"
-						mb="4"
-					/>
-					<Heading size="xl" mb="2">
-						{t("dashboard.noCondominiumSelected")}
-					</Heading>
-					<Text color="gray.500" mb="6" maxW="md">
-						{t("expenses.noCondominiumSelected")}
-					</Text>
-					<Button
-						colorPalette="blue"
-						onClick={() => navigate("/condominiums")}
-						data-testid="goto-condominiums-btn"
-					>
-						<HStack gap="2">
-							<Text>{t("condominiums.title")}</Text>
-							<LuArrowRight />
-						</HStack>
-					</Button>
-				</Flex>
+				<NoCondominiumSelected />
 			) : (
 				<Stack gap="6" data-testid="expenses-page-container">
 					{/* Financial Summary Cards */}

@@ -20,11 +20,11 @@ import {
 	LuWallet,
 	LuTrendingUp,
 	LuTrendingDown,
-	LuBuilding,
 	LuReceipt,
 	LuUsers,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -106,41 +106,7 @@ export function DashboardPage() {
 			contentHeaderTitle="Dashboard"
 		>
 			{!selectedCondominium ? (
-				/* Case 1: No Condominium Selected */
-				<Flex
-					direction="column"
-					align="center"
-					justify="center"
-					minH="50vh"
-					borderWidth="1px"
-					borderRadius="lg"
-					p={{ base: "6", md: "12" }}
-					textAlign="center"
-					data-testid="no-condo-selected-container"
-				>
-					<Icon
-						as={LuBuilding}
-						boxSize="12"
-						color="gray.400"
-						mb="4"
-					/>
-					<Heading size="xl" mb="2">
-						{t("dashboard.noCondominiumSelected")}
-					</Heading>
-					<Text color="gray.500" mb="6" maxW="md">
-						{t("dashboard.selectOrCreateFromCondominiumsPage")}
-					</Text>
-					<Button
-						colorPalette="blue"
-						onClick={() => navigate("/condominiums")}
-						data-testid="goto-condominiums-btn"
-					>
-						<HStack gap="2">
-							<Text>{t("condominiums.title")}</Text>
-							<LuArrowRight />
-						</HStack>
-					</Button>
-				</Flex>
+				<NoCondominiumSelected />
 			) : (
 				/* Case 2: Condominium Selected - Real Financial Overview */
 				<Stack gap="6" data-testid="condo-selected-container">
