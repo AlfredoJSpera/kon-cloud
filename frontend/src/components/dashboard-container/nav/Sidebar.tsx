@@ -8,7 +8,13 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import { useContext, type ReactNode } from "react";
-import { LuGrid2X2, LuSettings2, LuBuilding, LuUsers, LuReceipt } from "react-icons/lu";
+import {
+	LuGrid2X2,
+	LuBuilding,
+	LuUsers,
+	LuReceipt,
+	LuWallet,
+} from "react-icons/lu";
 import { DashboardContext } from "@/contexts/DashboardContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -27,14 +33,14 @@ export function Sidebar() {
 
 	const navItems: NavItem[] = [
 		{
-			label: "Dashboard",
-			path: "/",
-			icon: <Icon as={LuGrid2X2} />,
-		},
-		{
 			label: t("condominiums.title"),
 			path: "/condominiums",
 			icon: <Icon as={LuBuilding} />,
+		},
+		{
+			label: "Dashboard",
+			path: "/",
+			icon: <Icon as={LuGrid2X2} />,
 		},
 		{
 			label: t("tenants.title"),
@@ -47,9 +53,9 @@ export function Sidebar() {
 			icon: <Icon as={LuReceipt} />,
 		},
 		{
-			label: t("topbar.settings"),
-			path: "/settings",
-			icon: <Icon as={LuSettings2} />,
+			label: t("expenses.title"),
+			path: "/expenses",
+			icon: <Icon as={LuWallet} />,
 		},
 	];
 

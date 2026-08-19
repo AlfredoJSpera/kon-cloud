@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { DashboardPage } from "../DashboardPage";
 import { Provider } from "@/components/chakraui/provider";
 import { CondominiumContext } from "@/contexts/CondominiumContext";
 import i18n from "@/i18n/config";
 import type { ICondominiumOutput } from "@backend-interfaces/condominium";
+import { makeApiRequest } from "@/api/api";
 
 vi.mock("@/hooks/useAuth", () => ({
 	useAuth: () => ({
@@ -62,13 +63,44 @@ describe("DashboardPage Condominium state integration", () => {
 		expect(screen.getByTestId("goto-condominiums-btn")).toBeInTheDocument();
 	});
 
-	it("renders selected condominium data visualization when a condominium is active", async () => {
+	it("renders total cash balance and financial summary when a condominium is active", async () => {
 		const condo: ICondominiumOutput = {
 			condominiumId: 55,
 			administratorId: "admin-123",
 			name: "Grand Horizon Condos",
 			address: "100 Skyline Dr",
 		};
+
+		vi.spyOn(makeApiRequest.expenses, "getCashBalance").mockResolvedValue({
+			data: {
+				condominiumId: 55,
+				totalPayments: 2000.0,
+				totalExpenses: 500.0,
+				cashBalance: 1500.0,
+			},
+			status: 200,
+			statusText: "OK",
+			headers: {},
+			config: {} as never,
+		});
+
+		vi.spyOn(makeApiRequest.expenses, "list").mockResolvedValue({
+			data: [
+				{
+					expenseId: 1,
+					condominiumId: 55,
+					category: "Utilities",
+					amount: 500.0,
+					expenseDate: "2026-08-19T10:00:00.000Z",
+					description: "Electricity",
+					createdAt: "2026-08-19T10:00:00.000Z",
+				},
+			],
+			status: 200,
+			statusText: "OK",
+			headers: {},
+			config: {} as never,
+		});
 
 		renderDashboard(condo);
 
@@ -78,8 +110,16 @@ describe("DashboardPage Condominium state integration", () => {
 		expect(
 			screen.getAllByText("Grand Horizon Condos")[0],
 		).toBeInTheDocument();
-		expect(
-			screen.getByText("Condominium data visualization"),
-		).toBeInTheDocument();
+
+		await waitFor(() => {
+			expect(
+				screen.getByTestId("dashboard-cash-balance-card"),
+			).toBeInTheDocument();
+		});
+
+		// Check that template placeholders are removed
+		expect(screen.queryByText("Project files")).not.toBeInTheDocument();
+		expect(screen.queryByText("Active sessions")).not.toBeInTheDocument();
+		expect(screen.queryByText("Placeholder tiles for the dashboard view shown in the mockup.")).not.toBeInTheDocument();
 	});
 });

@@ -236,10 +236,34 @@ router.delete(
 				throw new KonAccessDeniedError();
 			}
 
-			await prisma.condominium.delete({
-				where: {
-					CondominiumID: condominiumId,
-				},
+			await prisma.$transaction(async (tx) => {
+				const tenants = (await tx.tenant.findMany({
+					where: { CondominiumID: condominiumId },
+					select: { TenantID: true },
+				})) || [];
+				const tenantIds = Array.isArray(tenants) ? tenants.map((t) => t.TenantID) : [];
+
+				if (tenantIds.length > 0) {
+					await tx.payment.deleteMany({
+						where: { TenantID: { in: tenantIds } },
+					});
+					await tx.due.deleteMany({
+						where: { TenantID: { in: tenantIds } },
+					});
+					await tx.tenant.deleteMany({
+						where: { CondominiumID: condominiumId },
+					});
+				}
+
+				await tx.expense.deleteMany({
+					where: { CondominiumID: condominiumId },
+				});
+
+				await tx.condominium.delete({
+					where: {
+						CondominiumID: condominiumId,
+					},
+				});
 			});
 
 			res.status(200).json({

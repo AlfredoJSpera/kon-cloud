@@ -12,25 +12,13 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	LuPlus,
-	LuEllipsisVertical,
-	LuPencil,
-	LuTrash2,
-	LuCircleCheck,
-	LuCircle,
-} from "react-icons/lu";
+import { LuPlus, LuCircleCheck, LuCircle } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useCondominium } from "@/hooks/useCondominium";
 import type { ICondominiumOutput } from "@backend-interfaces/condominium";
 import { CondominiumModal } from "@/components/condominiums/CondominiumModal";
 import { DeleteCondominiumDialog } from "@/components/condominiums/DeleteCondominiumDialog";
-import {
-	MenuContent,
-	MenuItem,
-	MenuRoot,
-	MenuTrigger,
-} from "@/components/chakraui/menu";
+import { ActionMenu } from "@/components/common/ActionMenu";
 
 export function CondominiumsPage() {
 	const { t } = useTranslation();
@@ -105,12 +93,9 @@ export function CondominiumsPage() {
 						p={{ base: "6", md: "12" }}
 						textAlign="center"
 					>
-						<Text color="gray.500" mb="4">
+						<Text color="gray.500">
 							{t("condominiums.noCondominiumsFound")}
 						</Text>
-						<Button onClick={handleOpenAdd}>
-							<LuPlus /> {t("condominiums.addNew")}
-						</Button>
 					</Box>
 				) : (
 					<>
@@ -221,60 +206,19 @@ export function CondominiumsPage() {
 
 												{/* Actions column */}
 												<Table.Cell textAlign="right">
-													<MenuRoot>
-														<MenuTrigger asChild>
-															<IconButton
-																aria-label="Actions"
-																variant="ghost"
-																size="sm"
-																data-testid={`actions-btn-${item.condominiumId}`}
-															>
-																<LuEllipsisVertical />
-															</IconButton>
-														</MenuTrigger>
-														<MenuContent>
-															<MenuItem
-																value="edit"
-																onClick={() =>
-																	handleOpenEdit(
-																		item,
-																	)
-																}
-																data-testid={`edit-btn-${item.condominiumId}`}
-															>
-																<HStack gap="2">
-																	<LuPencil />
-																	<Text>
-																		{t(
-																			"condominiums.edit",
-																		)}
-																	</Text>
-																</HStack>
-															</MenuItem>
-															<MenuItem
-																value="delete"
-																color="red.500"
-																onClick={() =>
-																	handleOpenDelete(
-																		item,
-																	)
-																}
-																data-testid={`delete-btn-${item.condominiumId}`}
-															>
-																<HStack
-																	gap="2"
-																	color="red.500"
-																>
-																	<LuTrash2 />
-																	<Text color="red.500">
-																		{t(
-																			"condominiums.delete",
-																		)}
-																	</Text>
-																</HStack>
-															</MenuItem>
-														</MenuContent>
-													</MenuRoot>
+													<ActionMenu
+														onEdit={() =>
+															handleOpenEdit(item)
+														}
+														onDelete={() =>
+															handleOpenDelete(
+																item,
+															)
+														}
+														triggerTestId={`actions-btn-${item.condominiumId}`}
+														editTestId={`edit-btn-${item.condominiumId}`}
+														deleteTestId={`delete-btn-${item.condominiumId}`}
+													/>
 												</Table.Cell>
 											</Table.Row>
 										);
@@ -365,55 +309,14 @@ export function CondominiumsPage() {
 												</Box>
 											</HStack>
 
-											<MenuRoot>
-												<MenuTrigger asChild>
-													<IconButton
-														aria-label="Actions"
-														variant="ghost"
-														size="sm"
-													>
-														<LuEllipsisVertical />
-													</IconButton>
-												</MenuTrigger>
-												<MenuContent>
-													<MenuItem
-														value="edit"
-														onClick={() =>
-															handleOpenEdit(item)
-														}
-													>
-														<HStack gap="2">
-															<LuPencil />
-															<Text>
-																{t(
-																	"condominiums.edit",
-																)}
-															</Text>
-														</HStack>
-													</MenuItem>
-													<MenuItem
-														value="delete"
-														color="red.500"
-														onClick={() =>
-															handleOpenDelete(
-																item,
-															)
-														}
-													>
-														<HStack
-															gap="2"
-															color="red.500"
-														>
-															<LuTrash2 />
-															<Text color="red.500">
-																{t(
-																	"condominiums.delete",
-																)}
-															</Text>
-														</HStack>
-													</MenuItem>
-												</MenuContent>
-											</MenuRoot>
+											<ActionMenu
+												onEdit={() =>
+													handleOpenEdit(item)
+												}
+												onDelete={() =>
+													handleOpenDelete(item)
+												}
+											/>
 										</Flex>
 									</Box>
 								);

@@ -4,7 +4,6 @@ import {
 	Button,
 	Flex,
 	HStack,
-	IconButton,
 	Spinner,
 	Stack,
 	Table,
@@ -12,27 +11,15 @@ import {
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	LuPlus,
-	LuEllipsisVertical,
-	LuPencil,
-	LuTrash2,
-	LuUserCheck,
-	LuMail,
-	LuPhone,
-} from "react-icons/lu";
+import { LuPlus, LuUserCheck, LuMail, LuPhone } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
 import { makeApiRequest } from "@/api/api";
 import { TenantModal } from "@/components/tenants/TenantModal";
 import { DeleteTenantDialog } from "@/components/tenants/DeleteTenantDialog";
-import {
-	MenuContent,
-	MenuItem,
-	MenuRoot,
-	MenuTrigger,
-} from "@/components/chakraui/menu";
+import { ActionMenu } from "@/components/common/ActionMenu";
 
 export function TenantsPage() {
 	const { t } = useTranslation();
@@ -114,21 +101,7 @@ export function TenantsPage() {
 		>
 			<Stack gap="6">
 				{!selectedCondominium ? (
-					/* No Condominium Selected State */
-					<Box
-						borderWidth="1px"
-						borderRadius="lg"
-						p={{ base: "6", md: "12" }}
-						textAlign="center"
-						bg="bg.panel"
-					>
-						<Text color="gray.500" mb="2" fontWeight="medium">
-							{t("dashboard.noCondominiumSelected")}
-						</Text>
-						<Text fontSize="sm" color="gray.400">
-							{t("tenants.noCondominiumSelected")}
-						</Text>
-					</Box>
+					<NoCondominiumSelected />
 				) : (
 					<>
 						{/* Top Actions */}
@@ -183,12 +156,9 @@ export function TenantsPage() {
 								p={{ base: "6", md: "12" }}
 								textAlign="center"
 							>
-								<Text color="gray.500" mb="4">
+								<Text color="gray.500">
 									{t("tenants.noTenantsFound")}
 								</Text>
-								<Button onClick={handleOpenAdd}>
-									<LuPlus /> {t("tenants.addNew")}
-								</Button>
 							</Box>
 						) : (
 							<>
@@ -218,7 +188,9 @@ export function TenantsPage() {
 													{t("tenants.contactMethod")}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader>
-													{t("tenants.currentBalance")}
+													{t(
+														"tenants.currentBalance",
+													)}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader
 													w="20"
@@ -280,80 +252,56 @@ export function TenantsPage() {
 													<Table.Cell>
 														<Badge
 															colorPalette={
-																(balancesMap[item.tenantId] ?? 0) > 0
+																(balancesMap[
+																	item
+																		.tenantId
+																] ?? 0) > 0
 																	? "orange"
-																	: (balancesMap[item.tenantId] ?? 0) < 0
+																	: (balancesMap[
+																				item
+																					.tenantId
+																		  ] ??
+																				0) <
+																		  0
 																		? "blue"
 																		: "green"
 															}
 															size="md"
 															data-testid={`tenant-balance-${item.tenantId}`}
 														>
-															{new Intl.NumberFormat("it-IT", {
-																style: "currency",
-																currency: "EUR",
-																minimumFractionDigits: 2,
-																maximumFractionDigits: 2,
-															}).format(balancesMap[item.tenantId] ?? 0)}
+															{new Intl.NumberFormat(
+																"it-IT",
+																{
+																	style: "currency",
+																	currency:
+																		"EUR",
+																	minimumFractionDigits: 2,
+																	maximumFractionDigits: 2,
+																},
+															).format(
+																balancesMap[
+																	item
+																		.tenantId
+																] ?? 0,
+															)}
 														</Badge>
 													</Table.Cell>
 													<Table.Cell textAlign="right">
-														<MenuRoot>
-															<MenuTrigger
-																asChild
-															>
-																<IconButton
-																	aria-label="Actions"
-																	variant="ghost"
-																	size="sm"
-																	data-testid={`tenant-actions-btn-${item.tenantId}`}
-																>
-																	<LuEllipsisVertical />
-																</IconButton>
-															</MenuTrigger>
-															<MenuContent>
-																<MenuItem
-																	value="edit"
-																	onClick={() =>
-																		handleOpenEdit(
-																			item,
-																		)
-																	}
-																	data-testid={`tenant-edit-btn-${item.tenantId}`}
-																>
-																	<HStack gap="2">
-																		<LuPencil />
-																		<Text>
-																			{t(
-																				"condominiums.edit",
-																			)}
-																		</Text>
-																	</HStack>
-																</MenuItem>
-																<MenuItem
-																	value="delete"
-																	color="red.500"
-																	onClick={() =>
-																		handleOpenDelete(
-																			item,
-																		)
-																	}
-																	data-testid={`tenant-delete-btn-${item.tenantId}`}
-																>
-																	<HStack
-																		gap="2"
-																		color="red.500"
-																	>
-																		<LuTrash2 />
-																		<Text color="red.500">
-																			{t(
-																				"condominiums.delete",
-																			)}
-																		</Text>
-																	</HStack>
-																</MenuItem>
-															</MenuContent>
-														</MenuRoot>
+														<ActionMenu
+															onEdit={() =>
+																handleOpenEdit(
+																	item,
+																)
+															}
+															onDelete={() =>
+																handleOpenDelete(
+																	item,
+																)
+															}
+															triggerTestId={`tenant-actions-btn-${item.tenantId}`}
+															editTestId={`tenant-edit-btn-${item.tenantId}`}
+															deleteTestId={`tenant-delete-btn-${item.tenantId}`}
+														/>
 													</Table.Cell>
 												</Table.Row>
 											))}
@@ -387,28 +335,51 @@ export function TenantsPage() {
 														{item.firstName}{" "}
 														{item.lastName}
 													</Text>
-													<HStack gap="2" mt="1" mb="2">
+													<HStack
+														gap="2"
+														mt="1"
+														mb="2"
+													>
 														<Badge
 															colorPalette="teal"
 															variant="subtle"
 														>
-															{item.apartmentNumber}
+															{
+																item.apartmentNumber
+															}
 														</Badge>
 														<Badge
 															colorPalette={
-																(balancesMap[item.tenantId] ?? 0) > 0
+																(balancesMap[
+																	item
+																		.tenantId
+																] ?? 0) > 0
 																	? "orange"
-																	: (balancesMap[item.tenantId] ?? 0) < 0
+																	: (balancesMap[
+																				item
+																					.tenantId
+																		  ] ??
+																				0) <
+																		  0
 																		? "blue"
 																		: "green"
 															}
 														>
-															{new Intl.NumberFormat("it-IT", {
-																style: "currency",
-																currency: "EUR",
-																minimumFractionDigits: 2,
-																maximumFractionDigits: 2,
-															}).format(balancesMap[item.tenantId] ?? 0)}
+															{new Intl.NumberFormat(
+																"it-IT",
+																{
+																	style: "currency",
+																	currency:
+																		"EUR",
+																	minimumFractionDigits: 2,
+																	maximumFractionDigits: 2,
+																},
+															).format(
+																balancesMap[
+																	item
+																		.tenantId
+																] ?? 0,
+															)}
 														</Badge>
 													</HStack>
 													<Stack
@@ -434,57 +405,14 @@ export function TenantsPage() {
 													</Stack>
 												</Box>
 
-												<MenuRoot>
-													<MenuTrigger asChild>
-														<IconButton
-															aria-label="Actions"
-															variant="ghost"
-															size="sm"
-														>
-															<LuEllipsisVertical />
-														</IconButton>
-													</MenuTrigger>
-													<MenuContent>
-														<MenuItem
-															value="edit"
-															onClick={() =>
-																handleOpenEdit(
-																	item,
-																)
-															}
-														>
-															<HStack gap="2">
-																<LuPencil />
-																<Text>
-																	{t(
-																		"condominiums.edit",
-																	)}
-																</Text>
-															</HStack>
-														</MenuItem>
-														<MenuItem
-															value="delete"
-															color="red.500"
-															onClick={() =>
-																handleOpenDelete(
-																	item,
-																)
-															}
-														>
-															<HStack
-																gap="2"
-																color="red.500"
-															>
-																<LuTrash2 />
-																<Text color="red.500">
-																	{t(
-																		"condominiums.delete",
-																	)}
-																</Text>
-															</HStack>
-														</MenuItem>
-													</MenuContent>
-												</MenuRoot>
+												<ActionMenu
+													onEdit={() =>
+														handleOpenEdit(item)
+													}
+													onDelete={() =>
+														handleOpenDelete(item)
+													}
+												/>
 											</Flex>
 										</Box>
 									))}

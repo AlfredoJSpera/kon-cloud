@@ -7,7 +7,6 @@ import {
 	Flex,
 	Grid,
 	HStack,
-	IconButton,
 	Portal,
 	Select,
 	Spinner,
@@ -19,17 +18,15 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-	LuPlus,
 	LuCreditCard,
-	LuTrash2,
-	LuPencil,
 	LuCoins,
 	LuArrowDownRight,
 	LuArrowUpRight,
 	LuWallet,
-	LuEllipsisVertical,
+	LuReceipt,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
 import { useCondominium } from "@/hooks/useCondominium";
 import type { ITenantOutput } from "@backend-interfaces/tenant";
 import type {
@@ -41,12 +38,7 @@ import { makeApiRequest } from "@/api/api";
 import { DueModal } from "@/components/dues/DueModal";
 import { PaymentModal } from "@/components/dues/PaymentModal";
 import { toaster } from "@/components/chakraui/toaster";
-import {
-	MenuContent,
-	MenuItem,
-	MenuRoot,
-	MenuTrigger,
-} from "@/components/chakraui/menu";
+import { ActionMenu } from "@/components/common/ActionMenu";
 
 export function DuesPage() {
 	const { t } = useTranslation();
@@ -166,7 +158,10 @@ export function DuesPage() {
 
 	// Statistics calculations
 	const totalDuesIssued = dues.reduce((sum, d) => sum + d.amount, 0);
-	const totalPaymentsReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+	const totalPaymentsReceived = payments.reduce(
+		(sum, p) => sum + p.amount,
+		0,
+	);
 	const totalCondoCredits = balances.reduce(
 		(sum, b) => sum + b.currentBalance,
 		0,
@@ -205,20 +200,7 @@ export function DuesPage() {
 		>
 			<Stack gap="6">
 				{!selectedCondominium ? (
-					<Box
-						borderWidth="1px"
-						borderRadius="lg"
-						p={{ base: "6", md: "12" }}
-						textAlign="center"
-						bg="bg.panel"
-					>
-						<Text color="gray.500" mb="2" fontWeight="medium">
-							{t("dashboard.noCondominiumSelected")}
-						</Text>
-						<Text fontSize="sm" color="gray.400">
-							{t("dues.noCondominiumSelected")}
-						</Text>
-					</Box>
+					<NoCondominiumSelected />
 				) : (
 					<>
 						{/* Top Header Controls */}
@@ -229,7 +211,12 @@ export function DuesPage() {
 							gap="4"
 						>
 							<HStack gap="3" wrap="wrap">
-								<Badge colorPalette="blue" size="lg" px="3" py="1">
+								<Badge
+									colorPalette="blue"
+									size="lg"
+									px="3"
+									py="1"
+								>
 									{selectedCondominium.name}
 								</Badge>
 
@@ -248,7 +235,9 @@ export function DuesPage() {
 									<Select.Control>
 										<Select.Trigger>
 											<Select.ValueText
-												placeholder={t("dues.allTenants")}
+												placeholder={t(
+													"dues.allTenants",
+												)}
 											/>
 										</Select.Trigger>
 										<Select.IndicatorGroup>
@@ -278,17 +267,15 @@ export function DuesPage() {
 							<HStack gap="3">
 								<Button
 									onClick={() => setIsDueModalOpen(true)}
-									colorPalette="blue"
 									data-testid="issue-due-btn"
 								>
-									<LuPlus />
+									<LuReceipt />
 									<Text>{t("dues.issueDue")}</Text>
 								</Button>
 
 								<Button
 									onClick={() => setIsPaymentModalOpen(true)}
 									variant="outline"
-									colorPalette="green"
 									data-testid="record-payment-btn"
 								>
 									<LuCreditCard />
@@ -326,7 +313,8 @@ export function DuesPage() {
 														selectedTenantBalance
 															? selectedTenantBalance.currentBalance >
 																0
-															: totalCondoCredits > 0
+															: totalCondoCredits >
+																0
 													)
 														? "orange.500"
 														: "green.500"
@@ -430,7 +418,12 @@ export function DuesPage() {
 								<Spinner size="lg" />
 							</Flex>
 						) : fetchError ? (
-							<Box p="4" bg="red.50" color="red.600" borderRadius="md">
+							<Box
+								p="4"
+								bg="red.50"
+								color="red.600"
+								borderRadius="md"
+							>
 								<Text>{fetchError}</Text>
 							</Box>
 						) : (
@@ -443,7 +436,8 @@ export function DuesPage() {
 									</Tabs.Trigger>
 									<Tabs.Trigger value="payments">
 										<LuCreditCard />
-										{t("dues.paymentsTab")} ({payments.length})
+										{t("dues.paymentsTab")} (
+										{payments.length})
 									</Tabs.Trigger>
 								</Tabs.List>
 
@@ -465,14 +459,19 @@ export function DuesPage() {
 											borderWidth="1px"
 											borderRadius="lg"
 										>
-											<Table.Root size="sm" variant="line">
+											<Table.Root
+												size="sm"
+												variant="line"
+											>
 												<Table.Header>
 													<Table.Row>
 														<Table.ColumnHeader>
 															{t("dues.tenant")}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
-															{t("tenants.apartmentNumber")}
+															{t(
+																"tenants.apartmentNumber",
+															)}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
 															{t("dues.amount")}
@@ -487,75 +486,44 @@ export function DuesPage() {
 												</Table.Header>
 												<Table.Body>
 													{dues.map((due) => (
-														<Table.Row key={due.dueId}>
+														<Table.Row
+															key={due.dueId}
+														>
 															<Table.Cell fontWeight="medium">
 																{due.tenantName}
 															</Table.Cell>
 															<Table.Cell>
-																{due.apartmentNumber}
+																{
+																	due.apartmentNumber
+																}
 															</Table.Cell>
 															<Table.Cell
 																fontWeight="bold"
 																color="red.600"
 															>
-																{formatCurrency(due.amount)}
+																{formatCurrency(
+																	due.amount,
+																)}
 															</Table.Cell>
 															<Table.Cell>
 																{due.reason}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<MenuRoot>
-																	<MenuTrigger asChild>
-																		<IconButton
-																			aria-label="Actions"
-																			variant="ghost"
-																			size="sm"
-																			data-testid={`due-actions-btn-${due.dueId}`}
-																		>
-																			<LuEllipsisVertical />
-																		</IconButton>
-																	</MenuTrigger>
-																	<MenuContent>
-																		<MenuItem
-																			value="edit"
-																			onClick={() =>
-																				handleEditDue(due)
-																			}
-																			data-testid={`edit-due-${due.dueId}`}
-																		>
-																			<HStack gap="2">
-																				<LuPencil />
-																				<Text>
-																					{t(
-																						"dues.edit",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																		<MenuItem
-																			value="delete"
-																			color="red.500"
-																			onClick={() =>
-																				handleDeleteDue(
-																					due.dueId,
-																				)
-																			}
-																			data-testid={`delete-due-${due.dueId}`}
-																		>
-																			<HStack
-																				gap="2"
-																				color="red.500"
-																			>
-																				<LuTrash2 />
-																				<Text color="red.500">
-																					{t(
-																						"condominiums.delete",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																	</MenuContent>
-																</MenuRoot>
+																<ActionMenu
+																	onEdit={() =>
+																		handleEditDue(
+																			due,
+																		)
+																	}
+																	onDelete={() =>
+																		handleDeleteDue(
+																			due.dueId,
+																		)
+																	}
+																	triggerTestId={`due-actions-btn-${due.dueId}`}
+																	editTestId={`edit-due-${due.dueId}`}
+																	deleteTestId={`delete-due-${due.dueId}`}
+																/>
 															</Table.Cell>
 														</Table.Row>
 													))}
@@ -583,14 +551,19 @@ export function DuesPage() {
 											borderWidth="1px"
 											borderRadius="lg"
 										>
-											<Table.Root size="sm" variant="line">
+											<Table.Root
+												size="sm"
+												variant="line"
+											>
 												<Table.Header>
 													<Table.Row>
 														<Table.ColumnHeader>
 															{t("dues.tenant")}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
-															{t("dues.paymentDate")}
+															{t(
+																"dues.paymentDate",
+															)}
 														</Table.ColumnHeader>
 														<Table.ColumnHeader>
 															{t("dues.amount")}
@@ -606,10 +579,14 @@ export function DuesPage() {
 												<Table.Body>
 													{payments.map((payment) => (
 														<Table.Row
-															key={payment.paymentId}
+															key={
+																payment.paymentId
+															}
 														>
 															<Table.Cell fontWeight="medium">
-																{payment.tenantName}
+																{
+																	payment.tenantName
+																}
 															</Table.Cell>
 															<Table.Cell>
 																{formatDate(
@@ -625,63 +602,25 @@ export function DuesPage() {
 																)}
 															</Table.Cell>
 															<Table.Cell>
-																{payment.notes || "-"}
+																{payment.notes ||
+																	"-"}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<MenuRoot>
-																	<MenuTrigger asChild>
-																		<IconButton
-																			aria-label="Actions"
-																			variant="ghost"
-																			size="sm"
-																			data-testid={`payment-actions-btn-${payment.paymentId}`}
-																		>
-																			<LuEllipsisVertical />
-																		</IconButton>
-																	</MenuTrigger>
-																	<MenuContent>
-																		<MenuItem
-																			value="edit"
-																			onClick={() =>
-																				handleEditPayment(
-																					payment,
-																				)
-																			}
-																			data-testid={`edit-payment-${payment.paymentId}`}
-																		>
-																			<HStack gap="2">
-																				<LuPencil />
-																				<Text>
-																					{t(
-																						"dues.edit",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																		<MenuItem
-																			value="delete"
-																			color="red.500"
-																			onClick={() =>
-																				handleDeletePayment(
-																					payment.paymentId,
-																				)
-																			}
-																			data-testid={`delete-payment-${payment.paymentId}`}
-																		>
-																			<HStack
-																				gap="2"
-																				color="red.500"
-																			>
-																				<LuTrash2 />
-																				<Text color="red.500">
-																					{t(
-																						"condominiums.delete",
-																					)}
-																				</Text>
-																			</HStack>
-																		</MenuItem>
-																	</MenuContent>
-																</MenuRoot>
+																<ActionMenu
+																	onEdit={() =>
+																		handleEditPayment(
+																			payment,
+																		)
+																	}
+																	onDelete={() =>
+																		handleDeletePayment(
+																			payment.paymentId,
+																		)
+																	}
+																	triggerTestId={`payment-actions-btn-${payment.paymentId}`}
+																	editTestId={`edit-payment-${payment.paymentId}`}
+																	deleteTestId={`delete-payment-${payment.paymentId}`}
+																/>
 															</Table.Cell>
 														</Table.Row>
 													))}

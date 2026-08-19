@@ -32,6 +32,7 @@ model Condominium {
   Address         String?       @db.NVarChar(255)
   Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
   Tenants         Tenant[]
+  Expenses        Expense[]
   @@index([AdministratorID])
 }
 
@@ -77,5 +78,19 @@ model Payment {
   @@index([TenantID])
   @@index([DueID])
 }
+
+model Expense {
+  ExpenseID     Int         @id @default(autoincrement())
+  CondominiumID Int
+  Category      String      @db.NVarChar(50)
+  Amount        Decimal     @db.Decimal(18, 2)
+  Description   String?     @db.NVarChar(255)
+  ExpenseDate   DateTime    @default(now()) @db.DateTime2
+  CreatedAt     DateTime    @default(now()) @db.DateTime2
+  Condominium   Condominium @relation(fields: [CondominiumID], references: [CondominiumID], onDelete: Cascade)
+
+  @@index([CondominiumID])
+}
+
 
 

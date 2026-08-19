@@ -27,6 +27,12 @@ import type {
 	IPaymentUpdateInput,
 	ITenantBalanceOutput,
 } from "@backend-interfaces/due";
+import type {
+	IExpenseCreateInput,
+	IExpenseOutput,
+	IExpenseUpdateInput,
+	ICashBalanceOutput,
+} from "@backend-interfaces/expense";
 import axios, { type AxiosRequestConfig } from "axios";
 
 declare global {
@@ -161,5 +167,26 @@ export const makeApiRequest = {
 		) => api.put<IPaymentOutput>(`/payments/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/payments/${id}`, options),
+	},
+	expenses: {
+		list: (condominiumId: number, options?: AxiosRequestConfig) =>
+			api.get<IExpenseOutput[]>(
+				`/expenses?condominiumId=${condominiumId}`,
+				options,
+			),
+		getCashBalance: (condominiumId: number, options?: AxiosRequestConfig) =>
+			api.get<ICashBalanceOutput>(
+				`/expenses/cash-balance?condominiumId=${condominiumId}`,
+				options,
+			),
+		create: (data: IExpenseCreateInput, options?: AxiosRequestConfig) =>
+			api.post<IExpenseOutput>("/expenses", data, options),
+		update: (
+			id: number,
+			data: IExpenseUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<IExpenseOutput>(`/expenses/${id}`, data, options),
+		delete: (id: number, options?: AxiosRequestConfig) =>
+			api.delete<{ message: string }>(`/expenses/${id}`, options),
 	},
 };

@@ -424,8 +424,16 @@ router.delete(
 				throw new KonAccessDeniedError();
 			}
 
-			await prisma.tenant.delete({
-				where: { TenantID: tenantId },
+			await prisma.$transaction(async (tx) => {
+				await tx.payment.deleteMany({
+					where: { TenantID: tenantId },
+				});
+				await tx.due.deleteMany({
+					where: { TenantID: tenantId },
+				});
+				await tx.tenant.delete({
+					where: { TenantID: tenantId },
+				});
 			});
 
 			res.status(200).json({
