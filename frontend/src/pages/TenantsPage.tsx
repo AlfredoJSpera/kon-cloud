@@ -48,8 +48,9 @@ export function TenantsPage() {
 	);
 
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-	const [deletingTenant, setDeletingTenant] =
-		useState<ITenantOutput | null>(null);
+	const [deletingTenant, setDeletingTenant] = useState<ITenantOutput | null>(
+		null,
+	);
 
 	const loadTenants = useCallback(async () => {
 		if (!selectedCondominium) {
@@ -125,7 +126,12 @@ export function TenantsPage() {
 							gap="4"
 						>
 							<HStack gap="2">
-								<Badge colorPalette="blue" size="lg" px="3" py="1">
+								<Badge
+									colorPalette="blue"
+									size="lg"
+									px="3"
+									py="1"
+								>
 									{selectedCondominium.name}
 								</Badge>
 							</HStack>
@@ -183,9 +189,7 @@ export function TenantsPage() {
 									<Table.Root size="md" variant="line">
 										<Table.Header>
 											<Table.Row>
-												<Table.ColumnHeader w="12">
-													<LuUserCheck />
-												</Table.ColumnHeader>
+												<Table.ColumnHeader w="12"></Table.ColumnHeader>
 												<Table.ColumnHeader>
 													{t("tenants.firstName")}
 												</Table.ColumnHeader>
@@ -193,7 +197,9 @@ export function TenantsPage() {
 													{t("tenants.lastName")}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader>
-													{t("tenants.apartmentNumber")}
+													{t(
+														"tenants.apartmentNumber",
+													)}
 												</Table.ColumnHeader>
 												<Table.ColumnHeader>
 													{t("tenants.contactMethod")}
@@ -226,7 +232,9 @@ export function TenantsPage() {
 															colorPalette="teal"
 															variant="subtle"
 														>
-															{item.apartmentNumber}
+															{
+																item.apartmentNumber
+															}
 														</Badge>
 													</Table.Cell>
 													<Table.Cell color="gray.600">
@@ -235,7 +243,9 @@ export function TenantsPage() {
 																<HStack gap="2">
 																	<LuMail />
 																	<Text fontSize="sm">
-																		{item.email}
+																		{
+																			item.email
+																		}
 																	</Text>
 																</HStack>
 															)}
@@ -243,7 +253,9 @@ export function TenantsPage() {
 																<HStack gap="2">
 																	<LuPhone />
 																	<Text fontSize="sm">
-																		{item.phone}
+																		{
+																			item.phone
+																		}
 																	</Text>
 																</HStack>
 															)}
@@ -251,7 +263,9 @@ export function TenantsPage() {
 													</Table.Cell>
 													<Table.Cell textAlign="right">
 														<MenuRoot>
-															<MenuTrigger asChild>
+															<MenuTrigger
+																asChild
+															>
 																<IconButton
 																	aria-label="Actions"
 																	variant="ghost"
@@ -325,7 +339,10 @@ export function TenantsPage() {
 											bg="bg.panel"
 											data-testid={`tenant-card-${item.tenantId}`}
 										>
-											<Flex justify="space-between" align="start">
+											<Flex
+												justify="space-between"
+												align="start"
+											>
 												<Box>
 													<Text
 														fontWeight="bold"
@@ -342,17 +359,24 @@ export function TenantsPage() {
 													>
 														{item.apartmentNumber}
 													</Badge>
-													<Stack gap="1" fontSize="sm">
+													<Stack
+														gap="1"
+														fontSize="sm"
+													>
 														{item.email && (
 															<HStack gap="2">
 																<LuMail />
-																<Text>{item.email}</Text>
+																<Text>
+																	{item.email}
+																</Text>
 															</HStack>
 														)}
 														{item.phone && (
 															<HStack gap="2">
 																<LuPhone />
-																<Text>{item.phone}</Text>
+																<Text>
+																	{item.phone}
+																</Text>
 															</HStack>
 														)}
 													</Stack>
@@ -372,7 +396,9 @@ export function TenantsPage() {
 														<MenuItem
 															value="edit"
 															onClick={() =>
-																handleOpenEdit(item)
+																handleOpenEdit(
+																	item,
+																)
 															}
 														>
 															<HStack gap="2">
@@ -388,7 +414,9 @@ export function TenantsPage() {
 															value="delete"
 															color="red.500"
 															onClick={() =>
-																handleOpenDelete(item)
+																handleOpenDelete(
+																	item,
+																)
 															}
 														>
 															<HStack
