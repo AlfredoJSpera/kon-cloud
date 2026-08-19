@@ -3,12 +3,15 @@ import {
 	Box,
 	Button,
 	Card,
+	createListCollection,
 	Flex,
 	Grid,
 	HStack,
 	Icon,
 	Input,
 	NativeSelect,
+	Portal,
+	Select,
 	Spinner,
 	Stack,
 	Table,
@@ -55,6 +58,19 @@ export function ExpensesPage() {
 		useState<ICashBalanceOutput | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+
+	const categoryCollection = useMemo(() => {
+		return createListCollection({
+			items: [
+				{ label: t("expenses.allCategories"), value: "ALL" },
+				{ label: t("expenses.categories.Utilities"), value: "Utilities" },
+				{ label: t("expenses.categories.Cleaning"), value: "Cleaning" },
+				{ label: t("expenses.categories.Maintenance"), value: "Maintenance" },
+				{ label: t("expenses.categories.Insurance"), value: "Insurance" },
+				{ label: t("expenses.categories.Other"), value: "Other" },
+			],
+		});
+	}, [t]);
 
 	// Modal states
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -232,34 +248,43 @@ export function ExpensesPage() {
 							<Badge colorPalette="blue" size="lg" px="3" py="1">
 								{selectedCondominium.name}
 							</Badge>
-							<NativeSelect.Root size="sm" maxW="200px">
-								<NativeSelect.Field
-									value={categoryFilter}
-									onChange={(e) =>
-										setCategoryFilter(e.target.value)
-									}
-									data-testid="category-filter-select"
-								>
-									<option value="ALL">
-										{t("expenses.allCategories")}
-									</option>
-									<option value="Utilities">
-										{t("expenses.categories.Utilities")}
-									</option>
-									<option value="Cleaning">
-										{t("expenses.categories.Cleaning")}
-									</option>
-									<option value="Maintenance">
-										{t("expenses.categories.Maintenance")}
-									</option>
-									<option value="Insurance">
-										{t("expenses.categories.Insurance")}
-									</option>
-									<option value="Other">
-										{t("expenses.categories.Other")}
-									</option>
-								</NativeSelect.Field>
-							</NativeSelect.Root>
+							<Select.Root
+								collection={categoryCollection}
+								size="sm"
+								width="220px"
+								value={[categoryFilter]}
+								onValueChange={(e) =>
+									setCategoryFilter(e.value[0] ?? "ALL")
+								}
+								data-testid="category-filter-select"
+							>
+								<Select.HiddenSelect />
+								<Select.Control>
+									<Select.Trigger>
+										<Select.ValueText
+											placeholder={t("expenses.allCategories")}
+										/>
+									</Select.Trigger>
+									<Select.IndicatorGroup>
+										<Select.Indicator />
+									</Select.IndicatorGroup>
+								</Select.Control>
+								<Portal>
+									<Select.Positioner>
+										<Select.Content>
+											{categoryCollection.items.map((item) => (
+												<Select.Item
+													item={item}
+													key={item.value}
+												>
+													{item.label}
+													<Select.ItemIndicator />
+												</Select.Item>
+											))}
+										</Select.Content>
+									</Select.Positioner>
+								</Portal>
+							</Select.Root>
 						</HStack>
 
 						<Button
