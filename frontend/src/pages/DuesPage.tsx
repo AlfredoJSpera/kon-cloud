@@ -27,6 +27,7 @@ import {
 	LuArrowDownRight,
 	LuArrowUpRight,
 	LuWallet,
+	LuEllipsisVertical,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useCondominium } from "@/hooks/useCondominium";
@@ -40,6 +41,12 @@ import { makeApiRequest } from "@/api/api";
 import { DueModal } from "@/components/dues/DueModal";
 import { PaymentModal } from "@/components/dues/PaymentModal";
 import { toaster } from "@/components/chakraui/toaster";
+import {
+	MenuContent,
+	MenuItem,
+	MenuRoot,
+	MenuTrigger,
+} from "@/components/chakraui/menu";
 
 export function DuesPage() {
 	const { t } = useTranslation();
@@ -497,33 +504,58 @@ export function DuesPage() {
 																{due.reason}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<HStack gap="1" justify="flex-end">
-																	<IconButton
-																		size="xs"
-																		variant="ghost"
-																		colorPalette="blue"
-																		onClick={() =>
-																			handleEditDue(due)
-																		}
-																		data-testid={`edit-due-${due.dueId}`}
-																		title={t("dues.edit")}
-																	>
-																		<LuPencil />
-																	</IconButton>
-																	<IconButton
-																		size="xs"
-																		variant="ghost"
-																		colorPalette="red"
-																		onClick={() =>
-																			handleDeleteDue(
-																				due.dueId,
-																			)
-																		}
-																		data-testid={`delete-due-${due.dueId}`}
-																	>
-																		<LuTrash2 />
-																	</IconButton>
-																</HStack>
+																<MenuRoot>
+																	<MenuTrigger asChild>
+																		<IconButton
+																			aria-label="Actions"
+																			variant="ghost"
+																			size="sm"
+																			data-testid={`due-actions-btn-${due.dueId}`}
+																		>
+																			<LuEllipsisVertical />
+																		</IconButton>
+																	</MenuTrigger>
+																	<MenuContent>
+																		<MenuItem
+																			value="edit"
+																			onClick={() =>
+																				handleEditDue(due)
+																			}
+																			data-testid={`edit-due-${due.dueId}`}
+																		>
+																			<HStack gap="2">
+																				<LuPencil />
+																				<Text>
+																					{t(
+																						"dues.edit",
+																					)}
+																				</Text>
+																			</HStack>
+																		</MenuItem>
+																		<MenuItem
+																			value="delete"
+																			color="red.500"
+																			onClick={() =>
+																				handleDeleteDue(
+																					due.dueId,
+																				)
+																			}
+																			data-testid={`delete-due-${due.dueId}`}
+																		>
+																			<HStack
+																				gap="2"
+																				color="red.500"
+																			>
+																				<LuTrash2 />
+																				<Text color="red.500">
+																					{t(
+																						"condominiums.delete",
+																					)}
+																				</Text>
+																			</HStack>
+																		</MenuItem>
+																	</MenuContent>
+																</MenuRoot>
 															</Table.Cell>
 														</Table.Row>
 													))}
@@ -596,35 +628,60 @@ export function DuesPage() {
 																{payment.notes || "-"}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
-																<HStack gap="1" justify="flex-end">
-																	<IconButton
-																		size="xs"
-																		variant="ghost"
-																		colorPalette="blue"
-																		onClick={() =>
-																			handleEditPayment(
-																				payment,
-																			)
-																		}
-																		data-testid={`edit-payment-${payment.paymentId}`}
-																		title={t("dues.edit")}
-																	>
-																		<LuPencil />
-																	</IconButton>
-																	<IconButton
-																		size="xs"
-																		variant="ghost"
-																		colorPalette="red"
-																		onClick={() =>
-																			handleDeletePayment(
-																				payment.paymentId,
-																			)
-																		}
-																		data-testid={`delete-payment-${payment.paymentId}`}
-																	>
-																		<LuTrash2 />
-																	</IconButton>
-																</HStack>
+																<MenuRoot>
+																	<MenuTrigger asChild>
+																		<IconButton
+																			aria-label="Actions"
+																			variant="ghost"
+																			size="sm"
+																			data-testid={`payment-actions-btn-${payment.paymentId}`}
+																		>
+																			<LuEllipsisVertical />
+																		</IconButton>
+																	</MenuTrigger>
+																	<MenuContent>
+																		<MenuItem
+																			value="edit"
+																			onClick={() =>
+																				handleEditPayment(
+																					payment,
+																				)
+																			}
+																			data-testid={`edit-payment-${payment.paymentId}`}
+																		>
+																			<HStack gap="2">
+																				<LuPencil />
+																				<Text>
+																					{t(
+																						"dues.edit",
+																					)}
+																				</Text>
+																			</HStack>
+																		</MenuItem>
+																		<MenuItem
+																			value="delete"
+																			color="red.500"
+																			onClick={() =>
+																				handleDeletePayment(
+																					payment.paymentId,
+																				)
+																			}
+																			data-testid={`delete-payment-${payment.paymentId}`}
+																		>
+																			<HStack
+																				gap="2"
+																				color="red.500"
+																			>
+																				<LuTrash2 />
+																				<Text color="red.500">
+																					{t(
+																						"condominiums.delete",
+																					)}
+																				</Text>
+																			</HStack>
+																		</MenuItem>
+																	</MenuContent>
+																</MenuRoot>
 															</Table.Cell>
 														</Table.Row>
 													))}

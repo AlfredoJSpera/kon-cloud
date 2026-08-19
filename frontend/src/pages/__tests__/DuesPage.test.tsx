@@ -278,6 +278,9 @@ describe("DuesPage", () => {
 
 		renderPage();
 
+		const actionsBtn = await screen.findByTestId("due-actions-btn-10");
+		await user.click(actionsBtn);
+
 		const editBtn = await screen.findByTestId("edit-due-10");
 		await user.click(editBtn);
 
