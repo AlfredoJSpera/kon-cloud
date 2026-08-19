@@ -155,7 +155,7 @@ describe("TenantsPage", () => {
 		});
 	});
 
-	it("prevents submission when contact info is missing", async () => {
+	it("allows submission without email or phone", async () => {
 		const user = userEvent.setup();
 		localStorage.setItem("selected_condominium_id", "101");
 
@@ -167,7 +167,18 @@ describe("TenantsPage", () => {
 			data: [],
 		} as any);
 
-		const createSpy = vi.spyOn(makeApiRequest.tenants, "create");
+		const createSpy = vi
+			.spyOn(makeApiRequest.tenants, "create")
+			.mockResolvedValue({
+				data: {
+					tenantId: 3,
+					condominiumId: 101,
+					firstName: "Luigi",
+					lastName: "Verdi",
+					apartmentNumber: "Apartment 12 - Staircase B",
+					registrationDate: "2026-08-19T11:00:00.000Z",
+				},
+			} as any);
 
 		renderPage();
 
@@ -186,11 +197,15 @@ describe("TenantsPage", () => {
 		// Neither email nor phone is typed
 		await user.click(submitBtn);
 
-		expect(createSpy).not.toHaveBeenCalled();
-		expect(
-			screen.getAllByText(
-				"At least one contact method (email or phone number) must be provided.",
-			)[0],
-		).toBeInTheDocument();
+		await waitFor(() => {
+			expect(createSpy).toHaveBeenCalledWith({
+				condominiumId: 101,
+				firstName: "Luigi",
+				lastName: "Verdi",
+				email: undefined,
+				phone: undefined,
+				apartmentNumber: "Apartment 12 - Staircase B",
+			});
+		});
 	});
 });

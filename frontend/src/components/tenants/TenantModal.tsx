@@ -42,7 +42,6 @@ export function TenantModal({
 	const [firstNameError, setFirstNameError] = useState("");
 	const [lastNameError, setLastNameError] = useState("");
 	const [apartmentError, setApartmentError] = useState("");
-	const [contactError, setContactError] = useState("");
 	const [generalError, setGeneralError] = useState("");
 
 	const [prevEditing, setPrevEditing] = useState<ITenantOutput | null>(null);
@@ -60,7 +59,6 @@ export function TenantModal({
 		setFirstNameError("");
 		setLastNameError("");
 		setApartmentError("");
-		setContactError("");
 		setGeneralError("");
 	}
 
@@ -69,7 +67,6 @@ export function TenantModal({
 		setFirstNameError("");
 		setLastNameError("");
 		setApartmentError("");
-		setContactError("");
 		setGeneralError("");
 
 		let hasError = false;
@@ -86,11 +83,6 @@ export function TenantModal({
 
 		if (!apartmentNumber.trim()) {
 			setApartmentError(t("register.fieldRequired"));
-			hasError = true;
-		}
-
-		if (!email.trim() && !phone.trim()) {
-			setContactError(t("tenants.contactRequired"));
 			hasError = true;
 		}
 
@@ -236,34 +228,20 @@ export function TenantModal({
 								/>
 							</Field>
 
-							<Field
-								label={t("tenants.email")}
-								invalid={!!contactError}
-								errorText={contactError}
-							>
+							<Field label={t("tenants.email")}>
 								<Input
 									type="email"
 									value={email}
-									onChange={(e) => {
-										setEmail(e.target.value);
-										if (contactError) setContactError("");
-									}}
+									onChange={(e) => setEmail(e.target.value)}
 									placeholder="email@example.com"
 									data-testid="tenant-email-input"
 								/>
 							</Field>
 
-							<Field
-								label={t("tenants.phone")}
-								invalid={!!contactError}
-								errorText={contactError}
-							>
+							<Field label={t("tenants.phone")}>
 								<Input
 									value={phone}
-									onChange={(e) => {
-										setPhone(e.target.value);
-										if (contactError) setContactError("");
-									}}
+									onChange={(e) => setPhone(e.target.value)}
 									placeholder="+39 333 1234567"
 									data-testid="tenant-phone-input"
 								/>

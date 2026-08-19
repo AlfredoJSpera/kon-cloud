@@ -129,7 +129,15 @@ describe("Tenant API Endpoints", () => {
 			expect(response.body.errorCode).toBe("MISSING_REQUIRED_FIELDS");
 		});
 
-		it("rejects creation when neither email nor phone is provided", async () => {
+		it("creates tenant successfully without email or phone", async () => {
+			mockPrisma.condominium.findUnique.mockResolvedValue(mockCondo);
+			mockPrisma.tenant.findFirst.mockResolvedValue(null);
+			mockPrisma.tenant.create.mockResolvedValue({
+				...mockTenantData,
+				Email: null,
+				Phone: null,
+			});
+
 			const response = await request(app)
 				.post("/tenants")
 				.set("Authorization", `Bearer ${authToken}`)
@@ -140,8 +148,10 @@ describe("Tenant API Endpoints", () => {
 					apartmentNumber: "Apt 1",
 				});
 
-			expect(response.status).toBe(400);
-			expect(response.body.errorCode).toBe("MISSING_REQUIRED_FIELDS");
+			expect(response.status).toBe(201);
+			expect(response.body.firstName).toBe("Mario");
+			expect(response.body.email).toBeUndefined();
+			expect(response.body.phone).toBeUndefined();
 		});
 
 		it("rejects creation when email format is invalid", async () => {

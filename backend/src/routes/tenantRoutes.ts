@@ -121,17 +121,10 @@ router.post(
 				);
 			}
 
-			// Must provide at least email or phone number
 			const trimmedEmail =
 				typeof email === "string" ? email.trim() : undefined;
 			const trimmedPhone =
 				typeof phone === "string" ? phone.trim() : undefined;
-
-			if (!trimmedEmail && !trimmedPhone) {
-				throw new KonMissingRequiredFieldsError(
-					"At least one contact method (email or phone number) must be provided.",
-				);
-			}
 
 			if (
 				typeof condominiumId !== "number" ||
@@ -329,12 +322,6 @@ router.put(
 			if (!newFirstName || !newLastName || !newApartmentNumber) {
 				throw new KonMissingRequiredFieldsError(
 					"First name, last name, and apartment number cannot be empty.",
-				);
-			}
-
-			if (!newEmail && !newPhone) {
-				throw new KonMissingRequiredFieldsError(
-					"At least one contact method (email or phone number) must be provided.",
 				);
 			}
 
