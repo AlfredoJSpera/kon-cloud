@@ -1,5 +1,11 @@
-import { Button, Input, NativeSelect, Stack } from "@chakra-ui/react";
-import { useState } from "react";
+import {
+	Button,
+	createListCollection,
+	Input,
+	Select,
+	Stack,
+} from "@chakra-ui/react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	DialogBody,
@@ -37,6 +43,15 @@ export function DueModal({
 	);
 	const [amount, setAmount] = useState<string>("");
 	const [reason, setReason] = useState<string>("");
+
+	const modalTenantCollection = useMemo(() => {
+		return createListCollection({
+			items: tenants.map((tenant) => ({
+				label: `${tenant.firstName} ${tenant.lastName} (${tenant.apartmentNumber})`,
+				value: String(tenant.tenantId),
+			})),
+		});
+	}, [tenants]);
 
 	const [loading, setLoading] = useState(false);
 	const [tenantError, setTenantError] = useState("");
@@ -164,29 +179,46 @@ export function DueModal({
 								invalid={!!tenantError}
 								errorText={tenantError}
 							>
-								<NativeSelect.Root>
-									<NativeSelect.Field
-										value={tenantId}
-										onChange={(e) => {
-											setTenantId(e.target.value);
-											if (tenantError) setTenantError("");
-										}}
-										data-testid="due-tenant-select"
-									>
-										<option value="">
-											{t("dues.selectTenant")}
-										</option>
-										{tenants.map((tenant) => (
-											<option
-												key={tenant.tenantId}
-												value={tenant.tenantId}
-											>
-												{tenant.firstName} {tenant.lastName}{" "}
-												({tenant.apartmentNumber})
-											</option>
-										))}
-									</NativeSelect.Field>
-								</NativeSelect.Root>
+								<Select.Root
+									collection={modalTenantCollection}
+									size="sm"
+									value={tenantId ? [tenantId] : []}
+									onValueChange={(e) => {
+										const val = e.value[0] ?? "";
+										setTenantId(val);
+										if (tenantError) setTenantError("");
+									}}
+									data-testid="due-tenant-select"
+								>
+									<Select.HiddenSelect />
+									<Select.Control>
+										<Select.Trigger>
+											<Select.ValueText
+												placeholder={t(
+													"dues.selectTenant",
+												)}
+											/>
+										</Select.Trigger>
+										<Select.IndicatorGroup>
+											<Select.Indicator />
+										</Select.IndicatorGroup>
+									</Select.Control>
+									<Select.Positioner>
+										<Select.Content>
+											{modalTenantCollection.items.map(
+												(item) => (
+													<Select.Item
+														item={item}
+														key={item.value}
+													>
+														{item.label}
+														<Select.ItemIndicator />
+													</Select.Item>
+												),
+											)}
+										</Select.Content>
+									</Select.Positioner>
+								</Select.Root>
 							</Field>
 
 							<Field

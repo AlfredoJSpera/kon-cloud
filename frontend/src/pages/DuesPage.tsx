@@ -3,18 +3,20 @@ import {
 	Box,
 	Button,
 	Card,
+	createListCollection,
 	Flex,
 	Grid,
 	HStack,
 	IconButton,
-	NativeSelect,
+	Portal,
+	Select,
 	Spinner,
 	Stack,
 	Table,
 	Tabs,
 	Text,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	LuPlus,
@@ -47,6 +49,18 @@ export function DuesPage() {
 	const [payments, setPayments] = useState<IPaymentOutput[]>([]);
 	const [balances, setBalances] = useState<ITenantBalanceOutput[]>([]);
 	const [selectedTenantId, setSelectedTenantId] = useState<string>("");
+
+	const tenantCollection = useMemo(() => {
+		return createListCollection({
+			items: [
+				{ label: t("dues.allTenants"), value: "" },
+				...tenants.map((tenant) => ({
+					label: `${tenant.firstName} ${tenant.lastName} (${tenant.apartmentNumber})`,
+					value: String(tenant.tenantId),
+				})),
+			],
+		});
+	}, [tenants, t]);
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [fetchError, setFetchError] = useState<string | null>(null);
@@ -198,28 +212,45 @@ export function DuesPage() {
 								</Badge>
 
 								{/* Tenant Filter Selector */}
-								<NativeSelect.Root size="sm" w="220px">
-									<NativeSelect.Field
-										value={selectedTenantId}
-										onChange={(e) =>
-											setSelectedTenantId(e.target.value)
-										}
-										data-testid="tenant-filter-select"
-									>
-										<option value="">
-											{t("dues.allTenants")}
-										</option>
-										{tenants.map((tenant) => (
-											<option
-												key={tenant.tenantId}
-												value={tenant.tenantId}
-											>
-												{tenant.firstName} {tenant.lastName}{" "}
-												({tenant.apartmentNumber})
-											</option>
-										))}
-									</NativeSelect.Field>
-								</NativeSelect.Root>
+								<Select.Root
+									collection={tenantCollection}
+									size="sm"
+									width="240px"
+									value={[selectedTenantId]}
+									onValueChange={(e) =>
+										setSelectedTenantId(e.value[0] ?? "")
+									}
+									data-testid="tenant-filter-select"
+								>
+									<Select.HiddenSelect />
+									<Select.Control>
+										<Select.Trigger>
+											<Select.ValueText
+												placeholder={t("dues.allTenants")}
+											/>
+										</Select.Trigger>
+										<Select.IndicatorGroup>
+											<Select.Indicator />
+										</Select.IndicatorGroup>
+									</Select.Control>
+									<Portal>
+										<Select.Positioner>
+											<Select.Content>
+												{tenantCollection.items.map(
+													(item) => (
+														<Select.Item
+															item={item}
+															key={item.value}
+														>
+															{item.label}
+															<Select.ItemIndicator />
+														</Select.Item>
+													),
+												)}
+											</Select.Content>
+										</Select.Positioner>
+									</Portal>
+								</Select.Root>
 							</HStack>
 
 							<HStack gap="3">
