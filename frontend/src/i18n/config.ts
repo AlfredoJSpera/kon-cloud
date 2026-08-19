@@ -167,6 +167,7 @@ export const resources = {
 				fillRequiredFields: "Please fill in all required fields.",
 				duplicateError: "A tenant with the same details already exists in this condominium.",
 				contactRequired: "At least one contact method (email or phone number) must be provided.",
+				currentBalance: "Current Balance",
 			},
 			dues: {
 				title: "Dues & Payments",
@@ -375,6 +376,7 @@ export const resources = {
 				fillRequiredFields: "Compila tutti i campi obbligatori.",
 				duplicateError: "Un inquilino con gli stessi dettagli esiste già in questo condominio.",
 				contactRequired: "Fornisci almeno un metodo di contatto (e-mail o numero di telefono).",
+				currentBalance: "Saldo Attuale",
 			},
 			dues: {
 				title: "Quote e Pagamenti",

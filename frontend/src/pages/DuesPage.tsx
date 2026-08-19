@@ -392,10 +392,6 @@ export function DuesPage() {
 										<LuCreditCard />
 										{t("dues.paymentsTab")} ({payments.length})
 									</Tabs.Trigger>
-									<Tabs.Trigger value="balances">
-										<LuWallet />
-										{t("dues.ledgerTab")} ({balances.length})
-									</Tabs.Trigger>
 								</Tabs.List>
 
 								{/* Dues Tab Content */}
@@ -566,72 +562,6 @@ export function DuesPage() {
 											</Table.Root>
 										</Table.ScrollArea>
 									)}
-								</Tabs.Content>
-
-								{/* Balances Tab Content */}
-								<Tabs.Content value="balances" pt="4">
-									<Table.ScrollArea
-										borderWidth="1px"
-										borderRadius="lg"
-									>
-										<Table.Root size="sm" variant="line">
-											<Table.Header>
-												<Table.Row>
-													<Table.ColumnHeader>
-														{t("dues.tenant")}
-													</Table.ColumnHeader>
-													<Table.ColumnHeader>
-														{t("tenants.apartmentNumber")}
-													</Table.ColumnHeader>
-													<Table.ColumnHeader>
-														{t("dues.totalDues")}
-													</Table.ColumnHeader>
-													<Table.ColumnHeader>
-														{t("dues.totalPayments")}
-													</Table.ColumnHeader>
-													<Table.ColumnHeader>
-														{t("dues.currentBalance")}
-													</Table.ColumnHeader>
-												</Table.Row>
-											</Table.Header>
-											<Table.Body>
-												{balances.map((b) => (
-													<Table.Row key={b.tenantId}>
-														<Table.Cell fontWeight="medium">
-															{b.tenantName}
-														</Table.Cell>
-														<Table.Cell>
-															{b.apartmentNumber}
-														</Table.Cell>
-														<Table.Cell>
-															{formatCurrency(b.totalDues)}
-														</Table.Cell>
-														<Table.Cell color="green.600">
-															{formatCurrency(
-																b.totalPayments,
-															)}
-														</Table.Cell>
-														<Table.Cell>
-															<Badge
-																colorPalette={
-																	b.currentBalance > 0
-																		? "orange"
-																		: b.currentBalance < 0
-																			? "blue"
-																			: "green"
-																}
-																size="lg"
-															>
-																{formatCurrency(
-																	b.currentBalance,
-																)}
-															</Badge>
-														</Table.Cell>
-													</Table.Row>
-												))}
-											</Table.Body>
-										</Table.Root>
-									</Table.ScrollArea>
 								</Tabs.Content>
 							</Tabs.Root>
 						)}

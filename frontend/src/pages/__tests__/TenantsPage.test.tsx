@@ -74,7 +74,7 @@ describe("TenantsPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders heading and tenant list for selected condominium", async () => {
+	it("renders heading and tenant list with current balance for selected condominium", async () => {
 		localStorage.setItem("selected_condominium_id", "101");
 		vi.spyOn(makeApiRequest.condominiums, "list").mockResolvedValue({
 			data: mockCondos,
@@ -82,6 +82,19 @@ describe("TenantsPage", () => {
 
 		vi.spyOn(makeApiRequest.tenants, "list").mockResolvedValue({
 			data: mockTenants,
+		} as any);
+
+		vi.spyOn(makeApiRequest.dues, "balances").mockResolvedValue({
+			data: [
+				{
+					tenantId: 1,
+					tenantName: "Mario Rossi",
+					apartmentNumber: "Apartment 4 - Staircase A",
+					totalDues: 150.0,
+					totalPayments: 50.0,
+					currentBalance: 100.0,
+				},
+			],
 		} as any);
 
 		renderPage();
@@ -94,6 +107,7 @@ describe("TenantsPage", () => {
 		expect(
 			screen.getAllByText("mario.rossi@example.com")[0],
 		).toBeInTheDocument();
+		expect(screen.getByTestId("tenant-balance-1")).toBeInTheDocument();
 	});
 
 	it("opens unified entry form modal and creates a new tenant", async () => {

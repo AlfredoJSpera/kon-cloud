@@ -39,6 +39,7 @@ export function TenantsPage() {
 	const { selectedCondominium } = useCondominium();
 
 	const [tenants, setTenants] = useState<ITenantOutput[]>([]);
+	const [balancesMap, setBalancesMap] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<boolean>(false);
 	const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -55,16 +56,28 @@ export function TenantsPage() {
 	const loadTenants = useCallback(async () => {
 		if (!selectedCondominium) {
 			setTenants([]);
+			setBalancesMap({});
 			return;
 		}
 
 		setLoading(true);
 		setFetchError(null);
 		try {
-			const res = await makeApiRequest.tenants.list(
-				selectedCondominium.condominiumId,
-			);
+			const [res, balancesRes] = await Promise.all([
+				makeApiRequest.tenants.list(selectedCondominium.condominiumId),
+				makeApiRequest.dues
+					.balances(selectedCondominium.condominiumId)
+					.catch(() => ({ data: [] })),
+			]);
 			setTenants(res.data);
+
+			const map: Record<number, number> = {};
+			if (balancesRes && Array.isArray(balancesRes.data)) {
+				balancesRes.data.forEach((b) => {
+					map[b.tenantId] = b.currentBalance;
+				});
+			}
+			setBalancesMap(map);
 		} catch (error: unknown) {
 			setFetchError("Failed to load tenants");
 		} finally {
@@ -204,6 +217,9 @@ export function TenantsPage() {
 												<Table.ColumnHeader>
 													{t("tenants.contactMethod")}
 												</Table.ColumnHeader>
+												<Table.ColumnHeader>
+													{t("tenants.currentBalance")}
+												</Table.ColumnHeader>
 												<Table.ColumnHeader
 													w="20"
 													textAlign="right"
@@ -260,6 +276,26 @@ export function TenantsPage() {
 																</HStack>
 															)}
 														</Stack>
+													</Table.Cell>
+													<Table.Cell>
+														<Badge
+															colorPalette={
+																(balancesMap[item.tenantId] ?? 0) > 0
+																	? "orange"
+																	: (balancesMap[item.tenantId] ?? 0) < 0
+																		? "blue"
+																		: "green"
+															}
+															size="md"
+															data-testid={`tenant-balance-${item.tenantId}`}
+														>
+															{new Intl.NumberFormat("it-IT", {
+																style: "currency",
+																currency: "EUR",
+																minimumFractionDigits: 2,
+																maximumFractionDigits: 2,
+															}).format(balancesMap[item.tenantId] ?? 0)}
+														</Badge>
 													</Table.Cell>
 													<Table.Cell textAlign="right">
 														<MenuRoot>
@@ -351,14 +387,30 @@ export function TenantsPage() {
 														{item.firstName}{" "}
 														{item.lastName}
 													</Text>
-													<Badge
-														colorPalette="teal"
-														variant="subtle"
-														mt="1"
-														mb="2"
-													>
-														{item.apartmentNumber}
-													</Badge>
+													<HStack gap="2" mt="1" mb="2">
+														<Badge
+															colorPalette="teal"
+															variant="subtle"
+														>
+															{item.apartmentNumber}
+														</Badge>
+														<Badge
+															colorPalette={
+																(balancesMap[item.tenantId] ?? 0) > 0
+																	? "orange"
+																	: (balancesMap[item.tenantId] ?? 0) < 0
+																		? "blue"
+																		: "green"
+															}
+														>
+															{new Intl.NumberFormat("it-IT", {
+																style: "currency",
+																currency: "EUR",
+																minimumFractionDigits: 2,
+																maximumFractionDigits: 2,
+															}).format(balancesMap[item.tenantId] ?? 0)}
+														</Badge>
+													</HStack>
 													<Stack
 														gap="1"
 														fontSize="sm"
