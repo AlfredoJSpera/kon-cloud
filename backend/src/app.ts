@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "@routes/authenticationRoutes";
 import administratorsRoutes from "@routes/administratorRoutes";
 import condominiumRoutes from "@routes/condominiumRoutes";
+import tenantRoutes from "@routes/tenantRoutes";
 import { routeErrorHandler } from "@middleware/errorHandlerMW";
 import { loggerHttp } from "@middleware/loggerMW";
 import { rateLimit } from "express-rate-limit";
@@ -45,6 +46,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/administrators", administratorsRoutes);
 app.use("/condominiums", condominiumRoutes);
+app.use("/tenants", tenantRoutes);
 
 // Automatic error handling
 //! Must be directly below the endpoints

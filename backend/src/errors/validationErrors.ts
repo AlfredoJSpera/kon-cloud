@@ -23,3 +23,12 @@ export class KonEmailAlreadyExistsError extends KonBaseError {
 		super(message, 409, "EMAIL_ALREADY_EXISTS");
 	}
 }
+
+export class KonTenantAlreadyExistsError extends KonBaseError {
+	constructor(
+		message: string = "A tenant with the same details already exists in this condominium.",
+	) {
+		super(message, 409, "TENANT_ALREADY_EXISTS");
+	}
+}
+

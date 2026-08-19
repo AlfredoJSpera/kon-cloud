@@ -31,5 +31,21 @@ model Condominium {
   Name            String        @db.NVarChar(150)
   Address         String?       @db.NVarChar(255)
   Administrator   Administrator @relation(fields: [AdministratorID], references: [AdministratorID], onDelete: Cascade)
+  Tenants         Tenant[]
   @@index([AdministratorID])
 }
+
+model Tenant {
+  TenantID         Int         @id @default(autoincrement())
+  CondominiumID    Int
+  FirstName        String      @db.NVarChar(100)
+  LastName         String      @db.NVarChar(100)
+  Email            String?     @db.NVarChar(255)
+  Phone            String?     @db.NVarChar(50)
+  ApartmentNumber  String      @db.NVarChar(150)
+  RegistrationDate DateTime    @default(now()) @db.DateTime2
+  Condominium      Condominium @relation(fields: [CondominiumID], references: [CondominiumID], onDelete: Cascade)
+
+  @@index([CondominiumID])
+}
+
