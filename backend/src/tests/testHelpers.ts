@@ -43,6 +43,7 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			deleteMany: jest.fn(),
 		},
 		tenant: {
 			findMany: jest.fn(),
@@ -51,6 +52,7 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			deleteMany: jest.fn(),
 		},
 		due: {
 			findMany: jest.fn(),
@@ -59,6 +61,7 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			deleteMany: jest.fn(),
 		},
 		payment: {
 			findMany: jest.fn(),
@@ -67,6 +70,8 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			deleteMany: jest.fn(),
+			updateMany: jest.fn(),
 			aggregate: jest.fn(),
 		},
 		expense: {
@@ -76,8 +81,15 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			deleteMany: jest.fn(),
 			aggregate: jest.fn(),
 		},
+		$transaction: jest.fn((cbOrArray: unknown) => {
+			if (typeof cbOrArray === "function") {
+				return (cbOrArray as (tx: unknown) => unknown)(prisma);
+			}
+			return Promise.all(cbOrArray as Promise<unknown>[]);
+		}),
 	},
 }));
 
@@ -93,6 +105,7 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		deleteMany: jest.Mock;
 	};
 	tenant: {
 		findMany: jest.Mock;
@@ -101,6 +114,7 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		deleteMany: jest.Mock;
 	};
 	due: {
 		findMany: jest.Mock;
@@ -109,6 +123,7 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		deleteMany: jest.Mock;
 	};
 	payment: {
 		findMany: jest.Mock;
@@ -117,6 +132,8 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		deleteMany: jest.Mock;
+		updateMany: jest.Mock;
 		aggregate: jest.Mock;
 	};
 	expense: {
@@ -126,8 +143,10 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		deleteMany: jest.Mock;
 		aggregate: jest.Mock;
 	};
+	$transaction: jest.Mock;
 };
 
 export const adminRecord = {

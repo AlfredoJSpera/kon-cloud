@@ -290,8 +290,14 @@ router.delete(
 				throw new KonAccessDeniedError();
 			}
 
-			await prisma.due.delete({
-				where: { DueID: dueId },
+			await prisma.$transaction(async (tx) => {
+				await tx.payment.updateMany({
+					where: { DueID: dueId },
+					data: { DueID: null },
+				});
+				await tx.due.delete({
+					where: { DueID: dueId },
+				});
 			});
 
 			res.status(200).json({ message: "Due deleted successfully." });
