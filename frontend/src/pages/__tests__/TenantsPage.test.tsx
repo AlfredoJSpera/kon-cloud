@@ -208,4 +208,53 @@ describe("TenantsPage", () => {
 			});
 		});
 	});
+
+	it("sends empty string values to clear email and phone on update", async () => {
+		const user = userEvent.setup();
+		localStorage.setItem("selected_condominium_id", "101");
+
+		vi.spyOn(makeApiRequest.condominiums, "list").mockResolvedValue({
+			data: mockCondos,
+		} as any);
+
+		vi.spyOn(makeApiRequest.tenants, "list").mockResolvedValue({
+			data: mockTenants,
+		} as any);
+
+		const updateSpy = vi
+			.spyOn(makeApiRequest.tenants, "update")
+			.mockResolvedValue({
+				data: {
+					...mockTenants[0],
+					email: undefined,
+					phone: undefined,
+				},
+			} as any);
+
+		renderPage();
+
+		const actionsBtn = await screen.findByTestId("tenant-actions-btn-1");
+		await user.click(actionsBtn);
+
+		const editBtn = await screen.findByTestId("tenant-edit-btn-1");
+		await user.click(editBtn);
+
+		const emailInput = screen.getByTestId("tenant-email-input");
+		const phoneInput = screen.getByTestId("tenant-phone-input");
+		const submitBtn = screen.getByTestId("tenant-submit-btn");
+
+		await user.clear(emailInput);
+		await user.clear(phoneInput);
+		await user.click(submitBtn);
+
+		await waitFor(() => {
+			expect(updateSpy).toHaveBeenCalledWith(1, {
+				firstName: "Mario",
+				lastName: "Rossi",
+				email: "",
+				phone: "",
+				apartmentNumber: "Apartment 4 - Staircase A",
+			});
+		});
+	});
 });

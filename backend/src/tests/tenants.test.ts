@@ -253,6 +253,44 @@ describe("Tenant API Endpoints", () => {
 				"Apartment 5 - Staircase B",
 			);
 		});
+
+		it("clears email and phone number when empty strings are passed on update", async () => {
+			mockPrisma.tenant.findUnique.mockResolvedValue({
+				...mockTenantData,
+				Condominium: mockCondo,
+			});
+			mockPrisma.tenant.findFirst.mockResolvedValue(null);
+			mockPrisma.tenant.update.mockResolvedValue({
+				...mockTenantData,
+				Email: null,
+				Phone: null,
+			});
+
+			const response = await request(app)
+				.put("/tenants/10")
+				.set("Authorization", `Bearer ${authToken}`)
+				.send({
+					firstName: "Mario",
+					lastName: "Rossi",
+					apartmentNumber: "Apartment 4 - Staircase A",
+					email: "",
+					phone: "",
+				});
+
+			expect(response.status).toBe(200);
+			expect(mockPrisma.tenant.update).toHaveBeenCalledWith({
+				where: { TenantID: 10 },
+				data: {
+					FirstName: "Mario",
+					LastName: "Rossi",
+					ApartmentNumber: "Apartment 4 - Staircase A",
+					Email: null,
+					Phone: null,
+				},
+			});
+			expect(response.body.email).toBeUndefined();
+			expect(response.body.phone).toBeUndefined();
+		});
 	});
 
 	describe("DELETE /tenants/:id", () => {

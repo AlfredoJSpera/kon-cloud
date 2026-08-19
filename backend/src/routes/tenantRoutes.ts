@@ -312,12 +312,16 @@ router.put(
 					: existing.ApartmentNumber;
 			const newEmail =
 				email !== undefined
-					? email.trim() || undefined
-					: existing.Email || undefined;
+					? typeof email === "string" && email.trim().length > 0
+						? email.trim()
+						: null
+					: existing.Email;
 			const newPhone =
 				phone !== undefined
-					? phone.trim() || undefined
-					: existing.Phone || undefined;
+					? typeof phone === "string" && phone.trim().length > 0
+						? phone.trim()
+						: null
+					: existing.Phone;
 
 			if (!newFirstName || !newLastName || !newApartmentNumber) {
 				throw new KonMissingRequiredFieldsError(
@@ -359,8 +363,8 @@ router.put(
 				data: {
 					FirstName: newFirstName,
 					LastName: newLastName,
-					Email: newEmail || null,
-					Phone: newPhone || null,
+					Email: newEmail,
+					Phone: newPhone,
 					ApartmentNumber: newApartmentNumber,
 				},
 			});

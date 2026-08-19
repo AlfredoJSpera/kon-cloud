@@ -95,8 +95,8 @@ export function TenantModal({
 				await makeApiRequest.tenants.update(editingTenant.tenantId, {
 					firstName: firstName.trim(),
 					lastName: lastName.trim(),
-					email: email.trim() || undefined,
-					phone: phone.trim() || undefined,
+					email: email.trim(),
+					phone: phone.trim(),
 					apartmentNumber: apartmentNumber.trim(),
 				});
 				toaster.create({
