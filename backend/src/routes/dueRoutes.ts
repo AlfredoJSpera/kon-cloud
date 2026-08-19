@@ -171,7 +171,6 @@ router.get(
 				apartmentNumber: d.Tenant ? d.Tenant.ApartmentNumber : undefined,
 				amount: Number(d.Amount.toFixed(2)),
 				reason: d.Reason,
-				dueDate: d.DueDate.toISOString(),
 				createdAt: d.CreatedAt.toISOString(),
 			}));
 
@@ -191,7 +190,7 @@ router.post(
 			res: CreateDueApiContract["Res"],
 		) => {
 			const adminId = req.administrator?.administratorId;
-			const { tenantId, amount, reason, dueDate } = req.body;
+			const { tenantId, amount, reason } = req.body;
 
 			if (tenantId === undefined || amount === undefined || !reason) {
 				throw new KonMissingRequiredFieldsError(
@@ -204,8 +203,7 @@ router.post(
 				typeof amount !== "number" ||
 				typeof reason !== "string" ||
 				isNaN(amount) ||
-				amount <= 0 ||
-				(dueDate !== undefined && typeof dueDate !== "string")
+				amount <= 0
 			) {
 				throw new KonIncorrectFieldTypeError(
 					"Invalid types or invalid amount (amount must be positive).",
@@ -234,14 +232,12 @@ router.post(
 
 			// Ensure fixed precision 2 decimal places
 			const fixedAmount = new Prisma.Decimal(amount.toFixed(2));
-			const parsedDueDate = dueDate ? new Date(dueDate) : new Date();
 
 			const created = await prisma.due.create({
 				data: {
 					TenantID: tenantId,
 					Amount: fixedAmount,
 					Reason: trimmedReason,
-					DueDate: parsedDueDate,
 				},
 				include: { Tenant: true },
 			});
@@ -253,7 +249,6 @@ router.post(
 				apartmentNumber: created.Tenant.ApartmentNumber,
 				amount: Number(created.Amount.toFixed(2)),
 				reason: created.Reason,
-				dueDate: created.DueDate.toISOString(),
 				createdAt: created.CreatedAt.toISOString(),
 			});
 		},

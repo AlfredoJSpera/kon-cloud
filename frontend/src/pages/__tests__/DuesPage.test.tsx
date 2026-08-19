@@ -52,7 +52,6 @@ describe("DuesPage", () => {
 			apartmentNumber: "Apartment 4 - Staircase A",
 			amount: 150.0,
 			reason: "Monthly Fee",
-			dueDate: "2026-09-01T00:00:00.000Z",
 			createdAt: "2026-08-19T12:00:00.000Z",
 		},
 	];
@@ -165,7 +164,6 @@ describe("DuesPage", () => {
 					tenantName: "Mario Rossi",
 					amount: 200.0,
 					reason: "Elevator repair",
-					dueDate: "2026-09-15T00:00:00.000Z",
 					createdAt: "2026-08-19T12:00:00.000Z",
 				},
 			} as any);
@@ -188,7 +186,6 @@ describe("DuesPage", () => {
 				tenantId: 1,
 				amount: 200,
 				reason: "Elevator repair",
-				dueDate: undefined,
 			});
 		});
 	});

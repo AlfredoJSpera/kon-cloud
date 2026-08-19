@@ -57,7 +57,6 @@ model Due {
   TenantID  Int
   Amount    Decimal   @db.Decimal(18, 2)
   Reason    String    @db.NVarChar(255)
-  DueDate   DateTime  @default(now()) @db.DateTime2
   CreatedAt DateTime  @default(now()) @db.DateTime2
   Tenant    Tenant    @relation(fields: [TenantID], references: [TenantID], onDelete: Cascade)
   Payments  Payment[]

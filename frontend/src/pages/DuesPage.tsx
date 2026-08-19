@@ -427,9 +427,6 @@ export function DuesPage() {
 														<Table.ColumnHeader>
 															{t("dues.reason")}
 														</Table.ColumnHeader>
-														<Table.ColumnHeader>
-															{t("dues.dueDate")}
-														</Table.ColumnHeader>
 														<Table.ColumnHeader textAlign="end">
 															{t("dues.actions")}
 														</Table.ColumnHeader>
@@ -452,9 +449,6 @@ export function DuesPage() {
 															</Table.Cell>
 															<Table.Cell>
 																{due.reason}
-															</Table.Cell>
-															<Table.Cell>
-																{formatDate(due.dueDate)}
 															</Table.Cell>
 															<Table.Cell textAlign="end">
 																<IconButton

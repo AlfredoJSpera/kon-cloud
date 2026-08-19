@@ -37,7 +37,6 @@ export function DueModal({
 	);
 	const [amount, setAmount] = useState<string>("");
 	const [reason, setReason] = useState<string>("");
-	const [dueDate, setDueDate] = useState<string>("");
 
 	const [loading, setLoading] = useState(false);
 	const [tenantError, setTenantError] = useState("");
@@ -62,7 +61,6 @@ export function DueModal({
 		);
 		setAmount("");
 		setReason("");
-		setDueDate("");
 		setTenantError("");
 		setAmountError("");
 		setReasonError("");
@@ -107,7 +105,6 @@ export function DueModal({
 				tenantId: parsedTenantId,
 				amount: fixedPrecisionAmount,
 				reason: reason.trim(),
-				dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
 			});
 
 			toaster.create({
@@ -226,15 +223,6 @@ export function DueModal({
 									}}
 									placeholder={t("dues.reasonPlaceholder")}
 									data-testid="due-reason-input"
-								/>
-							</Field>
-
-							<Field label={t("dues.dueDate")}>
-								<Input
-									type="date"
-									value={dueDate}
-									onChange={(e) => setDueDate(e.target.value)}
-									data-testid="due-date-input"
 								/>
 							</Field>
 						</Stack>

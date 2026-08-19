@@ -2,7 +2,6 @@ export interface IDueCreateInput {
 	tenantId: number;
 	amount: number;
 	reason: string;
-	dueDate?: string;
 }
 
 export interface IDueOutput {
@@ -12,7 +11,6 @@ export interface IDueOutput {
 	apartmentNumber?: string;
 	amount: number;
 	reason: string;
-	dueDate: string;
 	createdAt: string;
 }
 

@@ -29,7 +29,6 @@ describe("Due API Endpoints", () => {
 		TenantID: 10,
 		Amount: new Prisma.Decimal(150.5),
 		Reason: "Monthly Condo Maintenance",
-		DueDate: new Date("2026-09-01T00:00:00.000Z"),
 		CreatedAt: new Date("2026-08-19T12:00:00.000Z"),
 		Tenant: mockTenant,
 	};
@@ -60,7 +59,6 @@ describe("Due API Endpoints", () => {
 					tenantId: 10,
 					amount: 150.5,
 					reason: "Monthly Condo Maintenance",
-					dueDate: "2026-09-01T00:00:00.000Z",
 				});
 
 			expect(response.status).toBe(201);
@@ -71,7 +69,6 @@ describe("Due API Endpoints", () => {
 				apartmentNumber: "Apartment 4 - Staircase A",
 				amount: 150.5,
 				reason: "Monthly Condo Maintenance",
-				dueDate: "2026-09-01T00:00:00.000Z",
 				createdAt: "2026-08-19T12:00:00.000Z",
 			});
 		});
