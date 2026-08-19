@@ -10,7 +10,6 @@ import {
 import { useContext, type ReactNode } from "react";
 import {
 	LuGrid2X2,
-	LuSettings2,
 	LuBuilding,
 	LuUsers,
 	LuReceipt,
@@ -57,11 +56,6 @@ export function Sidebar() {
 			label: t("expenses.title"),
 			path: "/expenses",
 			icon: <Icon as={LuWallet} />,
-		},
-		{
-			label: t("topbar.settings"),
-			path: "/settings",
-			icon: <Icon as={LuSettings2} />,
 		},
 	];
 

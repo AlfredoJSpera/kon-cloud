@@ -85,13 +85,6 @@ export function DashboardTopBar() {
 					{/* Menu items */}
 					<MenuContent>
 						<MenuItem
-							value="profile"
-							onClick={() => navigate("/profile")}
-						>
-							{t("topbar.profile")}
-						</MenuItem>
-
-						<MenuItem
 							value="toggle-color"
 							onClick={() => toggleColorMode()}
 							display={{

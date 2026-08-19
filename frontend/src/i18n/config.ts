@@ -275,7 +275,7 @@ export const resources = {
 			topbar: {
 				profile: "Profilo",
 				settings: "Impostazioni",
-				logout: "Disconnettersi",
+				logout: "Logout",
 				darkMode: "Modalità scura",
 				lightMode: "Modalità chiara",
 				language: "Lingua",
