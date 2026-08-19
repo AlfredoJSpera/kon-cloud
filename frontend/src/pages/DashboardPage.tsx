@@ -2,63 +2,92 @@ import {
 	Badge,
 	Box,
 	Button,
+	Card,
 	Flex,
 	Grid,
 	Heading,
 	HStack,
 	Icon,
-	Separator,
 	SimpleGrid,
+	Spinner,
 	Stack,
+	Table,
 	Text,
 } from "@chakra-ui/react";
-import { useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
 	LuArrowRight,
-	LuChartBar,
-	LuBookOpen,
-	LuFolderKanban,
-	LuShieldCheck,
+	LuWallet,
+	LuTrendingUp,
+	LuTrendingDown,
 	LuBuilding,
+	LuReceipt,
+	LuUsers,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { useCondominium } from "@/hooks/useCondominium";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { makeApiRequest } from "@/api/api";
+import type {
+	ICashBalanceOutput,
+	IExpenseOutput,
+	ExpenseCategory,
+} from "@backend-interfaces/expense";
+
+const CATEGORY_COLOR_MAP: Record<ExpenseCategory, string> = {
+	Utilities: "blue",
+	Cleaning: "green",
+	Maintenance: "orange",
+	Insurance: "purple",
+	Other: "gray",
+};
 
 export function DashboardPage() {
 	const { t } = useTranslation();
 	const { selectedCondominium } = useCondominium();
 	const navigate = useNavigate();
 
-	const cards = useMemo(
-		() => [
-			{
-				title: t("dashboard.projectFiles"),
-				value: "24",
-				icon: LuFolderKanban,
-			},
-			{
-				title: t("dashboard.activeSessions"),
-				value: "12",
-				icon: LuChartBar,
-			},
-			{ title: t("dashboard.sharedNotes"), value: "8", icon: LuBookOpen },
-			{
-				title: t("dashboard.securityChecks"),
-				value: "99%",
-				icon: LuShieldCheck,
-			},
-		],
-		[t],
-	);
+	const [cashBalanceInfo, setCashBalanceInfo] =
+		useState<ICashBalanceOutput | null>(null);
+	const [recentExpenses, setRecentExpenses] = useState<IExpenseOutput[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
 
-	const quickActions = useMemo(
-		() => [
-			{ label: t("dashboard.actionOpenSettings"), path: "/settings" },
-			{ label: t("condominiums.title"), path: "/condominiums" },
-		],
-		[t],
+	const fetchDashboardData = useCallback(async () => {
+		if (!selectedCondominium) return;
+		setLoading(true);
+		try {
+			const [cashRes, expensesRes] = await Promise.all([
+				makeApiRequest.expenses.getCashBalance(
+					selectedCondominium.condominiumId,
+				),
+				makeApiRequest.expenses.list(selectedCondominium.condominiumId),
+			]);
+			setCashBalanceInfo(cashRes.data);
+			setRecentExpenses(expensesRes.data.slice(0, 5)); // top 5 recent
+		} catch (err: unknown) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	}, [selectedCondominium]);
+
+	useEffect(() => {
+		if (selectedCondominium) {
+			fetchDashboardData();
+		} else {
+			setCashBalanceInfo(null);
+			setRecentExpenses([]);
+		}
+	}, [selectedCondominium, fetchDashboardData]);
+
+	// Calculate breakdown per category
+	const categoryBreakdown = recentExpenses.reduce(
+		(acc, exp) => {
+			acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+			return acc;
+		},
+		{} as Record<ExpenseCategory, number>,
 	);
 
 	return (
@@ -113,9 +142,14 @@ export function DashboardPage() {
 					</Button>
 				</Flex>
 			) : (
-				/* Case 2: Condominium Selected, sample elements */
+				/* Case 2: Condominium Selected - Real Financial Overview */
 				<Stack gap="6" data-testid="condo-selected-container">
-					<Box borderWidth="1px" p={{ base: "4", md: "6" }}>
+					{/* Condominium Header Banner */}
+					<Box
+						borderWidth="1px"
+						borderRadius="lg"
+						p={{ base: "4", md: "6" }}
+					>
 						<Flex
 							justify="space-between"
 							align="center"
@@ -141,87 +175,317 @@ export function DashboardPage() {
 							</Badge>
 						</Flex>
 
-						<SimpleGrid
-							columns={{ base: 1, md: 2, xl: 4 }}
-							gap="4"
-							mt="6"
-						>
-							{cards.map((card) => (
-								<Box key={card.title} borderWidth="1px" p="4">
-									<HStack
-										justify="space-between"
-										align="start"
-									>
-										<Stack gap="1">
-											<Text fontSize="sm">
-												{card.title}
-											</Text>
-											<Heading size="xl">
-												{card.value}
-											</Heading>
-										</Stack>
-										<Box p="1">
-											<Icon as={card.icon} />
-										</Box>
-									</HStack>
-									<Separator my="4" />
-									<Text fontSize="sm">
-										{t("dashboard.placeholderTiles")}
-									</Text>
-								</Box>
-							))}
-						</SimpleGrid>
+						{/* Real Financial Cards */}
+						{loading ? (
+							<Flex justify="center" py="8">
+								<Spinner size="lg" />
+							</Flex>
+						) : (
+							<SimpleGrid
+								columns={{ base: 1, md: 3 }}
+								gap="4"
+								mt="6"
+							>
+								{/* Total Cash Balance */}
+								<Card.Root
+									borderWidth="2px"
+									borderColor={
+										(cashBalanceInfo?.cashBalance ?? 0) >= 0
+											? "green.500"
+											: "red.500"
+									}
+									bg={
+										(cashBalanceInfo?.cashBalance ?? 0) >= 0
+											? "green.50/30"
+											: "red.50/30"
+									}
+									data-testid="dashboard-cash-balance-card"
+								>
+									<Card.Body p="5">
+										<HStack
+											justify="space-between"
+											align="start"
+										>
+											<Stack gap="1">
+												<Text
+													fontSize="xs"
+													fontWeight="semibold"
+													textTransform="uppercase"
+													color="gray.600"
+												>
+													{t(
+														"expenses.totalCashBalance",
+													)}
+												</Text>
+												<Heading
+													size="xl"
+													color={
+														(cashBalanceInfo?.cashBalance ??
+															0) >= 0
+															? "green.700"
+															: "red.700"
+													}
+													data-testid="dashboard-cash-balance-value"
+												>
+													{new Intl.NumberFormat(
+														"de-DE",
+														{
+															style: "currency",
+															currency: "EUR",
+														},
+													).format(
+														cashBalanceInfo?.cashBalance ??
+															0,
+													)}
+												</Heading>
+											</Stack>
+											<Icon
+												as={LuWallet}
+												boxSize="8"
+												color={
+													(cashBalanceInfo?.cashBalance ??
+														0) >= 0
+														? "green.600"
+														: "red.600"
+												}
+											/>
+										</HStack>
+									</Card.Body>
+								</Card.Root>
+
+								{/* Total Tenant Payments */}
+								<Card.Root
+									borderWidth="1px"
+									data-testid="dashboard-total-payments-card"
+								>
+									<Card.Body p="5">
+										<HStack
+											justify="space-between"
+											align="start"
+										>
+											<Stack gap="1">
+												<Text
+													fontSize="xs"
+													fontWeight="semibold"
+													textTransform="uppercase"
+													color="gray.600"
+												>
+													{t(
+														"expenses.totalPayments",
+													)}
+												</Text>
+												<Heading
+													size="xl"
+													color="blue.600"
+												>
+													{new Intl.NumberFormat(
+														"de-DE",
+														{
+															style: "currency",
+															currency: "EUR",
+														},
+													).format(
+														cashBalanceInfo?.totalPayments ??
+															0,
+													)}
+												</Heading>
+											</Stack>
+											<Icon
+												as={LuTrendingUp}
+												boxSize="8"
+												color="blue.500"
+											/>
+										</HStack>
+									</Card.Body>
+								</Card.Root>
+
+								{/* Total Expenses Paid */}
+								<Card.Root
+									borderWidth="1px"
+									data-testid="dashboard-total-expenses-card"
+								>
+									<Card.Body p="5">
+										<HStack
+											justify="space-between"
+											align="start"
+										>
+											<Stack gap="1">
+												<Text
+													fontSize="xs"
+													fontWeight="semibold"
+													textTransform="uppercase"
+													color="gray.600"
+												>
+													{t(
+														"expenses.totalExpenses",
+													)}
+												</Text>
+												<Heading
+													size="xl"
+													color="purple.600"
+												>
+													{new Intl.NumberFormat(
+														"de-DE",
+														{
+															style: "currency",
+															currency: "EUR",
+														},
+													).format(
+														cashBalanceInfo?.totalExpenses ??
+															0,
+													)}
+												</Heading>
+											</Stack>
+											<Icon
+												as={LuTrendingDown}
+												boxSize="8"
+												color="purple.500"
+											/>
+										</HStack>
+									</Card.Body>
+								</Card.Root>
+							</SimpleGrid>
+						)}
 					</Box>
 
-					<SimpleGrid columns={{ base: 1, xl: 2 }} gap="6">
-						<Box borderWidth="1px" p="6">
+					{/* Section: Category Breakdown & Quick Actions */}
+					<Grid
+						templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
+						gap="6"
+					>
+						{/* Recent Expenses List */}
+						<Box borderWidth="1px" borderRadius="lg" p="6">
 							<Flex justify="space-between" align="center" mb="4">
-								<Box>
-									<Text fontSize="sm">
-										{t("dashboard.primaryArea")}
-									</Text>
-									<Heading size="md">
-										{selectedCondominium.name}
-									</Heading>
-								</Box>
-								<Badge variant="subtle">
-									{t("dashboard.liveBadge")}
-								</Badge>
+								<Heading size="md">
+									{t("dashboard.recentExpenses")}
+								</Heading>
+								<Button
+									size="sm"
+									variant="ghost"
+									colorPalette="blue"
+									onClick={() => navigate("/expenses")}
+								>
+									<HStack gap="1">
+										<Text>
+											{t("dashboard.manageExpenses")}
+										</Text>
+										<LuArrowRight />
+									</HStack>
+								</Button>
 							</Flex>
-							<Grid
-								templateColumns="repeat(2, minmax(0, 1fr))"
-								gap="4"
-							>
-								{Array.from({ length: 4 }).map((_, index) => (
-									<Box
-										key={index}
-										borderWidth="1px"
-										h="24"
-										borderRadius="sm"
-									/>
-								))}
-							</Grid>
+
+							{recentExpenses.length === 0 ? (
+								<Text color="gray.500" fontSize="sm">
+									{t("expenses.noExpensesFound")}
+								</Text>
+							) : (
+								<Table.Root size="sm" variant="line">
+									<Table.Header>
+										<Table.Row>
+											<Table.ColumnHeader>
+												{t("expenses.expenseDate")}
+											</Table.ColumnHeader>
+											<Table.ColumnHeader>
+												{t("expenses.category")}
+											</Table.ColumnHeader>
+											<Table.ColumnHeader>
+												{t("expenses.description")}
+											</Table.ColumnHeader>
+											<Table.ColumnHeader textAlign="right">
+												{t("expenses.amount")}
+											</Table.ColumnHeader>
+										</Table.Row>
+									</Table.Header>
+									<Table.Body>
+										{recentExpenses.map((expense) => (
+											<Table.Row key={expense.expenseId}>
+												<Table.Cell>
+													{new Date(
+														expense.expenseDate,
+													).toLocaleDateString()}
+												</Table.Cell>
+												<Table.Cell>
+													<Badge
+														colorPalette={
+															CATEGORY_COLOR_MAP[
+																expense.category
+															] || "gray"
+														}
+														variant="subtle"
+														size="xs"
+													>
+														{t(
+															`expenses.categories.${expense.category}` as unknown as TemplateStringsArray,
+														)}
+													</Badge>
+												</Table.Cell>
+												<Table.Cell fontSize="xs">
+													{expense.description || "-"}
+												</Table.Cell>
+												<Table.Cell
+													textAlign="right"
+													fontWeight="semibold"
+												>
+													{new Intl.NumberFormat(
+														"de-DE",
+														{
+															style: "currency",
+															currency: "EUR",
+														},
+													).format(expense.amount)}
+												</Table.Cell>
+											</Table.Row>
+										))}
+									</Table.Body>
+								</Table.Root>
+							)}
 						</Box>
 
-						<Box borderWidth="1px" p="6">
+						{/* Quick Actions & Navigation */}
+						<Box borderWidth="1px" borderRadius="lg" p="6">
 							<Heading size="md" mb="4">
 								{t("dashboard.quickActions")}
 							</Heading>
 							<Stack gap="3">
-								{quickActions.map((action) => (
-									<Button
-										key={action.path}
-										variant="outline"
-										justifyContent="space-between"
-										onClick={() => navigate(action.path)}
-									>
-										<Text>{action.label}</Text>
-										<LuArrowRight />
-									</Button>
-								))}
+								<Button
+									variant="outline"
+									justifyContent="space-between"
+									onClick={() => navigate("/expenses")}
+									data-testid="goto-expenses-btn"
+								>
+									<HStack gap="2">
+										<LuWallet />
+										<Text>{t("expenses.title")}</Text>
+									</HStack>
+									<LuArrowRight />
+								</Button>
+								<Button
+									variant="outline"
+									justifyContent="space-between"
+									onClick={() => navigate("/dues")}
+									data-testid="goto-dues-btn"
+								>
+									<HStack gap="2">
+										<LuReceipt />
+										<Text>{t("dues.title")}</Text>
+									</HStack>
+									<LuArrowRight />
+								</Button>
+								<Button
+									variant="outline"
+									justifyContent="space-between"
+									onClick={() => navigate("/tenants")}
+									data-testid="goto-tenants-btn"
+								>
+									<HStack gap="2">
+										<LuUsers />
+										<Text>{t("tenants.title")}</Text>
+									</HStack>
+									<LuArrowRight />
+								</Button>
 							</Stack>
 						</Box>
-					</SimpleGrid>
+					</Grid>
 				</Stack>
 			)}
 		</DashboardContainer>

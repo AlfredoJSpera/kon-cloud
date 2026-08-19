@@ -67,6 +67,16 @@ jest.mock("@lib/prisma", () => ({
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			aggregate: jest.fn(),
+		},
+		expense: {
+			findMany: jest.fn(),
+			findUnique: jest.fn(),
+			findFirst: jest.fn(),
+			create: jest.fn(),
+			update: jest.fn(),
+			delete: jest.fn(),
+			aggregate: jest.fn(),
 		},
 	},
 }));
@@ -107,6 +117,16 @@ export const mockPrisma = prisma as unknown as {
 		create: jest.Mock;
 		update: jest.Mock;
 		delete: jest.Mock;
+		aggregate: jest.Mock;
+	};
+	expense: {
+		findMany: jest.Mock;
+		findUnique: jest.Mock;
+		findFirst: jest.Mock;
+		create: jest.Mock;
+		update: jest.Mock;
+		delete: jest.Mock;
+		aggregate: jest.Mock;
 	};
 };
 
