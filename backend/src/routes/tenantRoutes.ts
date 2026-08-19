@@ -18,10 +18,18 @@ import { KonApiContract } from "@utils/apiContract";
 
 const router = Router();
 
-// Helper to validate email format
+// Helper to validate email format without ReDoS vulnerability
 const isValidEmail = (email: string): boolean => {
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	return emailRegex.test(email);
+	if (!email || email.length > 254) return false;
+	const atIndex = email.indexOf("@");
+	if (atIndex <= 0 || atIndex !== email.lastIndexOf("@")) return false;
+	const local = email.slice(0, atIndex);
+	const domain = email.slice(atIndex + 1);
+	if (!local || !domain || local.includes(" ") || domain.includes(" "))
+		return false;
+	const dotIndex = domain.lastIndexOf(".");
+	if (dotIndex <= 0 || dotIndex === domain.length - 1) return false;
+	return true;
 };
 
 type ListTenantsApiContract = KonApiContract<
