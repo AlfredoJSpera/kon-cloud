@@ -46,6 +46,36 @@ model Tenant {
   RegistrationDate DateTime    @default(now()) @db.DateTime2
   Condominium      Condominium @relation(fields: [CondominiumID], references: [CondominiumID], onDelete: Cascade)
 
+  Dues             Due[]
+  Payments         Payment[]
+
   @@index([CondominiumID])
 }
+
+model Due {
+  DueID     Int       @id @default(autoincrement())
+  TenantID  Int
+  Amount    Decimal   @db.Decimal(18, 2)
+  Reason    String    @db.NVarChar(255)
+  CreatedAt DateTime  @default(now()) @db.DateTime2
+  Tenant    Tenant    @relation(fields: [TenantID], references: [TenantID], onDelete: Cascade)
+  Payments  Payment[]
+
+  @@index([TenantID])
+}
+
+model Payment {
+  PaymentID   Int      @id @default(autoincrement())
+  TenantID    Int
+  DueID       Int?
+  Amount      Decimal  @db.Decimal(18, 2)
+  PaymentDate DateTime @default(now()) @db.DateTime2
+  Notes       String?  @db.NVarChar(255)
+  Tenant      Tenant   @relation(fields: [TenantID], references: [TenantID], onDelete: NoAction, onUpdate: NoAction)
+  Due         Due?     @relation(fields: [DueID], references: [DueID], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([TenantID])
+  @@index([DueID])
+}
+
 

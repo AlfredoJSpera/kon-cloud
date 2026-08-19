@@ -18,6 +18,15 @@ import type {
 	ITenantOutput,
 	ITenantUpdateInput,
 } from "@backend-interfaces/tenant";
+import type {
+	IDueCreateInput,
+	IDueOutput,
+	IDueUpdateInput,
+	IPaymentCreateInput,
+	IPaymentOutput,
+	IPaymentUpdateInput,
+	ITenantBalanceOutput,
+} from "@backend-interfaces/due";
 import axios, { type AxiosRequestConfig } from "axios";
 
 declare global {
@@ -105,5 +114,52 @@ export const makeApiRequest = {
 		) => api.put<ITenantOutput>(`/tenants/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/tenants/${id}`, options),
+	},
+	dues: {
+		list: (
+			condominiumId: number,
+			tenantId?: number,
+			options?: AxiosRequestConfig,
+		) => {
+			const query = tenantId
+				? `tenantId=${tenantId}`
+				: `condominiumId=${condominiumId}`;
+			return api.get<IDueOutput[]>(`/dues?${query}`, options);
+		},
+		balances: (condominiumId: number, options?: AxiosRequestConfig) =>
+			api.get<ITenantBalanceOutput[]>(
+				`/dues/balances?condominiumId=${condominiumId}`,
+				options,
+			),
+		create: (data: IDueCreateInput, options?: AxiosRequestConfig) =>
+			api.post<IDueOutput>("/dues", data, options),
+		update: (
+			id: number,
+			data: IDueUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<IDueOutput>(`/dues/${id}`, data, options),
+		delete: (id: number, options?: AxiosRequestConfig) =>
+			api.delete<{ message: string }>(`/dues/${id}`, options),
+	},
+	payments: {
+		list: (
+			condominiumId: number,
+			tenantId?: number,
+			options?: AxiosRequestConfig,
+		) => {
+			const query = tenantId
+				? `tenantId=${tenantId}`
+				: `condominiumId=${condominiumId}`;
+			return api.get<IPaymentOutput[]>(`/payments?${query}`, options);
+		},
+		create: (data: IPaymentCreateInput, options?: AxiosRequestConfig) =>
+			api.post<IPaymentOutput>("/payments", data, options),
+		update: (
+			id: number,
+			data: IPaymentUpdateInput,
+			options?: AxiosRequestConfig,
+		) => api.put<IPaymentOutput>(`/payments/${id}`, data, options),
+		delete: (id: number, options?: AxiosRequestConfig) =>
+			api.delete<{ message: string }>(`/payments/${id}`, options),
 	},
 };
