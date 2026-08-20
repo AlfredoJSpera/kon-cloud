@@ -734,6 +734,7 @@ export function ExpensesPage() {
 					alignItems="center"
 					justifyContent="center"
 					p="4"
+					overflowY="auto"
 				>
 					<Box
 						bg="white"
@@ -742,7 +743,11 @@ export function ExpensesPage() {
 						boxShadow="xl"
 						maxW="500px"
 						w="full"
+						maxH="90vh"
+						display="flex"
+						flexDirection="column"
 						p="6"
+						overflowY="auto"
 					>
 						<Heading size="md" mb="4">
 							{editingExpense
@@ -892,58 +897,60 @@ export function ExpensesPage() {
 											>
 												{t("expenses.attachments")}:
 											</Text>
-											<Stack gap="1">
-												{modalAttachments.map((att) => (
-													<HStack
-														key={att.attachmentId}
-														justify="space-between"
-														bg="gray.50"
-														_dark={{
-															bg: "gray.700",
-														}}
-														p="2"
-														borderRadius="md"
-													>
-														<HStack gap="2">
-															<Icon as={LuPaperclip} boxSize="4" />
-															<Text
-																fontSize="xs"
-																fontWeight="medium"
-															>
-																{att.fileName}
-															</Text>
+											<Box maxH="160px" overflowY="auto" pr="1">
+												<Stack gap="1">
+													{modalAttachments.map((att) => (
+														<HStack
+															key={att.attachmentId}
+															justify="space-between"
+															bg="gray.50"
+															_dark={{
+																bg: "gray.700",
+															}}
+															p="2"
+															borderRadius="md"
+														>
+															<HStack gap="2">
+																<Icon as={LuPaperclip} boxSize="4" />
+																<Text
+																	fontSize="xs"
+																	fontWeight="medium"
+																>
+																	{att.fileName}
+																</Text>
+															</HStack>
+															<HStack gap="1">
+																<Button
+																	size="xs"
+																	variant="ghost"
+																	onClick={() =>
+																		handleDownloadAttachment(
+																			att.expenseId,
+																			att.attachmentId,
+																			att.fileName,
+																		)
+																	}
+																>
+																	<LuDownload />
+																</Button>
+																<Button
+																	size="xs"
+																	variant="ghost"
+																	colorPalette="red"
+																	onClick={() =>
+																		handleDeleteAttachment(
+																			att.expenseId,
+																			att.attachmentId,
+																		)
+																	}
+																>
+																	<LuTrash2 />
+																</Button>
+															</HStack>
 														</HStack>
-														<HStack gap="1">
-															<Button
-																size="xs"
-																variant="ghost"
-																onClick={() =>
-																	handleDownloadAttachment(
-																		att.expenseId,
-																		att.attachmentId,
-																		att.fileName,
-																	)
-																}
-															>
-																<LuDownload />
-															</Button>
-															<Button
-																size="xs"
-																variant="ghost"
-																colorPalette="red"
-																onClick={() =>
-																	handleDeleteAttachment(
-																		att.expenseId,
-																		att.attachmentId,
-																	)
-																}
-															>
-																<LuTrash2 />
-															</Button>
-														</HStack>
-													</HStack>
-												))}
-											</Stack>
+													))}
+												</Stack>
+											</Box>
 										</Box>
 									)}
 								</Box>
