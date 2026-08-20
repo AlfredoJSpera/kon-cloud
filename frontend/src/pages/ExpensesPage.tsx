@@ -224,7 +224,7 @@ export function ExpensesPage() {
 		if (modalAttachments.length + selectedFiles.length > 5) {
 			toaster.create({
 				title: t("expenses.maxFilesExceeded"),
-				type: "error",
+				type: "warning",
 			});
 			return;
 		}
@@ -881,12 +881,18 @@ export function ExpensesPage() {
 									</Text>
 									<FileUpload.Root
 										maxFiles={Math.max(0, 5 - modalAttachments.length)}
+										onFileReject={() => {
+											toaster.create({
+												title: t("expenses.maxFilesExceeded"),
+												type: "warning",
+											});
+										}}
 										onFileChange={(details) => {
 											const allowedRemaining = 5 - modalAttachments.length;
 											if (details.acceptedFiles.length > allowedRemaining) {
 												toaster.create({
 													title: t("expenses.maxFilesExceeded"),
-													type: "error",
+													type: "warning",
 												});
 												setSelectedFiles(details.acceptedFiles.slice(0, allowedRemaining));
 											} else {
@@ -897,7 +903,20 @@ export function ExpensesPage() {
 									>
 										<FileUpload.HiddenInput data-testid="modal-files-input" />
 										<FileUpload.Trigger asChild>
-											<Button variant="outline" size="sm" w="full">
+											<Button
+												variant="outline"
+												size="sm"
+												w="full"
+												onClick={(e) => {
+													if (modalAttachments.length + selectedFiles.length >= 5) {
+														e.preventDefault();
+														toaster.create({
+															title: t("expenses.maxFilesExceeded"),
+															type: "warning",
+														});
+													}
+												}}
+											>
 												<LuPaperclip />
 												<Text>{t("expenses.attachFiles")}</Text>
 											</Button>
