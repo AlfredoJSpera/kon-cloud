@@ -314,9 +314,23 @@ router.post(
 			throw new KonAccessDeniedError();
 		}
 
-		const files = req.files as Express.Multer.File[] | undefined;
-		if (!files || files.length === 0) {
+		const rawFiles = req.files;
+		if (!Array.isArray(rawFiles) || rawFiles.length === 0) {
 			throw new KonMissingRequiredFieldsError("No files uploaded.");
+		}
+
+		const files = rawFiles.filter(
+			(file): file is Express.Multer.File =>
+				!!file &&
+				typeof file === "object" &&
+				typeof file.originalname === "string" &&
+				typeof file.mimetype === "string" &&
+				typeof file.size === "number" &&
+				Buffer.isBuffer(file.buffer),
+		);
+
+		if (files.length !== rawFiles.length) {
+			throw new KonIncorrectFieldTypeError("Invalid uploaded file format.");
 		}
 
 		const existingCount = await prisma.expenseAttachment.count({
