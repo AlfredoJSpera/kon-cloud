@@ -135,4 +135,28 @@ describe("SettingsPage", () => {
 			});
 		});
 	});
+
+	it("updates profile when email is edited directly", async () => {
+		const user = userEvent.setup();
+		renderComponent();
+
+		mockUpdateProfile.mockResolvedValue({
+			...mockUser,
+			email: "newemail@example.com",
+		});
+
+		const emailInput = screen.getByDisplayValue("ada@example.com");
+		await user.clear(emailInput);
+		await user.type(emailInput, "newemail@example.com");
+
+		const saveButton = screen.getByRole("button", { name: /save changes/i });
+		await user.click(saveButton);
+
+		await waitFor(() => {
+			expect(mockUpdateProfile).toHaveBeenCalledWith({
+				email: "newemail@example.com",
+			});
+		});
+	});
 });
+

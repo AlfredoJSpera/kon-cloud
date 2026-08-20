@@ -31,7 +31,6 @@ export function SettingsPage() {
 	const [firstName, setFirstName] = useState(user?.firstName ?? "");
 	const [lastName, setLastName] = useState(user?.lastName ?? "");
 	const [email, setEmail] = useState(user?.email ?? "");
-	const [newEmail, setNewEmail] = useState("");
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +44,7 @@ export function SettingsPage() {
 	}, [user]);
 
 	const handleSave = async () => {
-		const targetEmail = newEmail.trim() || email.trim();
+		const targetEmail = email.trim();
 
 		if (newPassword.trim() && !currentPassword.trim()) {
 			toaster.create({
@@ -73,7 +72,6 @@ export function SettingsPage() {
 				title: t("settings.updatedSuccess"),
 				type: "success",
 			});
-			setNewEmail("");
 			setCurrentPassword("");
 			setNewPassword("");
 		} catch {
@@ -103,12 +101,6 @@ export function SettingsPage() {
 							<Heading size="lg">{fullName}</Heading>
 							<Text>{t("settings.administrator")}</Text>
 						</Box>
-						<Text fontSize="sm">
-							{t("settings.uploadDescription")}
-						</Text>
-						<Button variant="outline" width="full">
-							{t("settings.uploadPicture")}
-						</Button>
 					</Stack>
 				</Box>
 
@@ -142,15 +134,6 @@ export function SettingsPage() {
 									value={email}
 									onChange={(event) =>
 										setEmail(event.target.value)
-									}
-								/>
-							</Field>
-							<Field label={t("settings.newEmailLabel")}>
-								<Input
-									placeholder={t("settings.newEmailPlaceholder")}
-									value={newEmail}
-									onChange={(event) =>
-										setNewEmail(event.target.value)
 									}
 								/>
 							</Field>
