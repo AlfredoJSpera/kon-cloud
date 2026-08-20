@@ -201,6 +201,19 @@ describe("Expense API Endpoints & Pure Cash Flow", () => {
 			expect(response.body[0].fileName).toBe("receipt.pdf");
 		});
 
+		it("returns 400 when attempting to exceed 5 attachments per expense", async () => {
+			mockPrisma.expense.findUnique.mockResolvedValue(mockExpense);
+			mockPrisma.expenseAttachment.count.mockResolvedValue(5);
+
+			const response = await request(app)
+				.post("/expenses/300/attachments")
+				.set("Authorization", `Bearer ${authToken}`)
+				.attach("files", Buffer.from("extra file"), "extra.pdf");
+
+			expect(response.status).toBe(400);
+			expect(response.body.errorCode).toBe("INCORRECT_FIELD_TYPE");
+		});
+
 		it("GET /expenses/:id/attachments/:attachmentId/download downloads attachment file stream", async () => {
 			mockPrisma.expenseAttachment.findUnique.mockResolvedValue(mockAttachmentRecord);
 

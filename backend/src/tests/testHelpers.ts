@@ -107,6 +107,7 @@ jest.mock("@lib/prisma", () => ({
 			update: jest.fn(),
 			delete: jest.fn(),
 			deleteMany: jest.fn(),
+			count: jest.fn(),
 		},
 		$transaction: jest.fn((cbOrArray: unknown) => {
 			if (typeof cbOrArray === "function") {
@@ -178,6 +179,7 @@ export const mockPrisma = prisma as unknown as {
 		update: jest.Mock;
 		delete: jest.Mock;
 		deleteMany: jest.Mock;
+		count: jest.Mock;
 	};
 	$transaction: jest.Mock;
 };

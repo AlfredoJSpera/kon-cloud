@@ -221,6 +221,14 @@ export function ExpensesPage() {
 			return;
 		}
 
+		if (modalAttachments.length + selectedFiles.length > 5) {
+			toaster.create({
+				title: t("expenses.maxFilesExceeded"),
+				type: "error",
+			});
+			return;
+		}
+
 		setSubmitting(true);
 		try {
 			let targetExpenseId: number;
@@ -872,9 +880,18 @@ export function ExpensesPage() {
 										{t("expenses.attachFiles")}
 									</Text>
 									<FileUpload.Root
-										maxFiles={10}
+										maxFiles={Math.max(0, 5 - modalAttachments.length)}
 										onFileChange={(details) => {
-											setSelectedFiles(details.acceptedFiles);
+											const allowedRemaining = 5 - modalAttachments.length;
+											if (details.acceptedFiles.length > allowedRemaining) {
+												toaster.create({
+													title: t("expenses.maxFilesExceeded"),
+													type: "error",
+												});
+												setSelectedFiles(details.acceptedFiles.slice(0, allowedRemaining));
+											} else {
+												setSelectedFiles(details.acceptedFiles);
+											}
 										}}
 										data-testid="modal-files-upload"
 									>

@@ -319,6 +319,16 @@ router.post(
 			throw new KonMissingRequiredFieldsError("No files uploaded.");
 		}
 
+		const existingCount = await prisma.expenseAttachment.count({
+			where: { ExpenseID: expenseId },
+		});
+
+		if (existingCount + files.length > 5) {
+			throw new KonIncorrectFieldTypeError(
+				"Maximum of 5 file attachments per expense allowed.",
+			);
+		}
+
 		const createdAttachments: IExpenseAttachmentOutput[] = [];
 
 		for (const file of files) {

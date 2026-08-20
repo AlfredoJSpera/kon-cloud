@@ -263,6 +263,7 @@ export const resources = {
 				attachmentUploadedSuccess: "Attachment uploaded successfully.",
 				attachmentDeletedSuccess: "Attachment deleted successfully.",
 				noAttachments: "No attachments",
+				maxFilesExceeded: "Maximum of 5 attachments allowed per expense.",
 				categories: {
 					Utilities: "Utilities",
 					Cleaning: "Cleaning",
@@ -533,6 +534,7 @@ export const resources = {
 				attachmentUploadedSuccess: "Allegato caricato con successo.",
 				attachmentDeletedSuccess: "Allegato eliminato con successo.",
 				noAttachments: "Nessun allegato",
+				maxFilesExceeded: "Massimo 5 allegati consentiti per spesa.",
 				categories: {
 					Utilities: "Utenze",
 					Cleaning: "Pulizie",
