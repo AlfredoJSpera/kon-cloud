@@ -12,9 +12,13 @@ function getContainerClient(): ContainerClient {
 		"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=YourAccountKey==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
 	const containerName =
 		process.env.AZURE_STORAGE_CONTAINER_NAME || "expense-attachments";
+	const serviceVersion =
+		process.env.AZURE_STORAGE_SERVICE_VERSION || "2023-11-03";
 
-	const blobServiceClient =
-		BlobServiceClient.fromConnectionString(connectionString);
+	const blobServiceClient = BlobServiceClient.fromConnectionString(
+		connectionString,
+		{ serviceVersion },
+	);
 	containerClientInstance =
 		blobServiceClient.getContainerClient(containerName);
 	return containerClientInstance;
@@ -39,9 +43,7 @@ export const storageService = {
 		});
 	},
 
-	async downloadAttachmentStream(
-		blobName: string,
-	): Promise<{
+	async downloadAttachmentStream(blobName: string): Promise<{
 		stream: NodeJS.ReadableStream | undefined;
 		contentType?: string;
 	}> {

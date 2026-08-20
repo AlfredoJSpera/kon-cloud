@@ -56,7 +56,7 @@ services:
     restart: unless-stopped
     ports:
       - "10000:10000"
-    command: "azurite-blob --blobHost 0.0.0.0"
+    command: "azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck"
     networks:
       - kon_network
 
