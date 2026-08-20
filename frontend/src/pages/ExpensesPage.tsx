@@ -176,6 +176,36 @@ export function ExpensesPage() {
 		}
 	};
 
+	const handleDownloadAttachment = async (
+		expenseId: number,
+		attachmentId: string,
+		fileName: string,
+	) => {
+		try {
+			const response = await makeApiRequest.expenses.downloadAttachment(
+				expenseId,
+				attachmentId,
+			);
+			const blob = new Blob([response.data], {
+				type: (response.headers["content-type"] as string) || "application/octet-stream",
+			});
+			const downloadUrl = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = downloadUrl;
+			link.setAttribute("download", fileName);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(downloadUrl);
+		} catch (err: unknown) {
+			console.error(err);
+			toaster.create({
+				title: t("dashboard.errorTitle"),
+				type: "error",
+			});
+		}
+	};
+
 	const handleSaveExpense = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!selectedCondominium) return;
@@ -617,12 +647,10 @@ export function ExpensesPage() {
 																		colorPalette="blue"
 																		px="1"
 																		onClick={() =>
-																			window.open(
-																				makeApiRequest.expenses.getAttachmentDownloadUrl(
-																					expense.expenseId,
-																					att.attachmentId,
-																				),
-																				"_blank",
+																			handleDownloadAttachment(
+																				expense.expenseId,
+																				att.attachmentId,
+																				att.fileName,
 																			)
 																		}
 																		data-testid={`download-attachment-btn-${att.attachmentId}`}
@@ -908,12 +936,10 @@ export function ExpensesPage() {
 																size="xs"
 																variant="ghost"
 																onClick={() =>
-																	window.open(
-																		makeApiRequest.expenses.getAttachmentDownloadUrl(
-																			att.expenseId,
-																			att.attachmentId,
-																		),
-																		"_blank",
+																	handleDownloadAttachment(
+																		att.expenseId,
+																		att.attachmentId,
+																		att.fileName,
 																	)
 																}
 															>

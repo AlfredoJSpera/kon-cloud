@@ -209,6 +209,18 @@ export const makeApiRequest = {
 				},
 			);
 		},
+		downloadAttachment: (
+			expenseId: number,
+			attachmentId: string,
+			options?: AxiosRequestConfig,
+		) =>
+			api.get<Blob>(
+				`/expenses/${expenseId}/attachments/${attachmentId}/download`,
+				{
+					...options,
+					responseType: "blob",
+				},
+			),
 		deleteAttachment: (
 			expenseId: number,
 			attachmentId: string,
