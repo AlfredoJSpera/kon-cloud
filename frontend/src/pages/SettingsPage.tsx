@@ -9,18 +9,20 @@ import {
 	Stack,
 	Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/chakraui/avatar";
 import { Field } from "@/components/chakraui/field";
 import { PasswordInput } from "@/components/chakraui/password-input";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
+import { toaster } from "@/components/chakraui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import type { IAdministratorUpdateInput } from "@backend-interfaces/administrator";
 
 export function SettingsPage() {
 	const { t } = useTranslation();
-	const { user } = useAuth();
+	const { user, updateProfile } = useAuth();
 	const navigate = useNavigate();
 
 	const fullName = user
@@ -29,6 +31,57 @@ export function SettingsPage() {
 	const [firstName, setFirstName] = useState(user?.firstName ?? "");
 	const [lastName, setLastName] = useState(user?.lastName ?? "");
 	const [email, setEmail] = useState(user?.email ?? "");
+	const [newEmail, setNewEmail] = useState("");
+	const [currentPassword, setCurrentPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	useEffect(() => {
+		if (user) {
+			setFirstName(user.firstName);
+			setLastName(user.lastName);
+			setEmail(user.email);
+		}
+	}, [user]);
+
+	const handleSave = async () => {
+		const targetEmail = newEmail.trim() || email.trim();
+
+		if (newPassword.trim() && !currentPassword.trim()) {
+			toaster.create({
+				title: t("settings.currentPasswordRequired"),
+				type: "error",
+			});
+			return;
+		}
+
+		const payload: IAdministratorUpdateInput = {};
+		if (firstName.trim() !== user?.firstName) payload.firstName = firstName.trim();
+		if (lastName.trim() !== user?.lastName) payload.lastName = lastName.trim();
+		if (targetEmail !== user?.email) payload.email = targetEmail;
+		if (currentPassword.trim()) payload.currentPassword = currentPassword.trim();
+		if (newPassword.trim()) payload.newPassword = newPassword.trim();
+
+		if (Object.keys(payload).length === 0) {
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			await updateProfile(payload);
+			toaster.create({
+				title: t("settings.updatedSuccess"),
+				type: "success",
+			});
+			setNewEmail("");
+			setCurrentPassword("");
+			setNewPassword("");
+		} catch {
+			// Error toast handled by AuthProvider
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
 	return (
 		<DashboardContainer
@@ -93,7 +146,13 @@ export function SettingsPage() {
 								/>
 							</Field>
 							<Field label={t("settings.newEmailLabel")}>
-								<Input placeholder={t("settings.newEmailPlaceholder")} />
+								<Input
+									placeholder={t("settings.newEmailPlaceholder")}
+									value={newEmail}
+									onChange={(event) =>
+										setNewEmail(event.target.value)
+									}
+								/>
 							</Field>
 						</SimpleGrid>
 
@@ -101,10 +160,22 @@ export function SettingsPage() {
 
 						<SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
 							<Field label={t("settings.passwordLabel")}>
-								<PasswordInput placeholder={t("settings.currentPasswordPlaceholder")} />
+								<PasswordInput
+									placeholder={t("settings.currentPasswordPlaceholder")}
+									value={currentPassword}
+									onChange={(e) =>
+										setCurrentPassword(e.target.value)
+									}
+								/>
 							</Field>
 							<Field label={t("settings.newPasswordLabel")}>
-								<PasswordInput placeholder={t("settings.newPasswordPlaceholder")} />
+								<PasswordInput
+									placeholder={t("settings.newPasswordPlaceholder")}
+									value={newPassword}
+									onChange={(e) =>
+										setNewPassword(e.target.value)
+									}
+								/>
 							</Field>
 						</SimpleGrid>
 
@@ -115,7 +186,12 @@ export function SettingsPage() {
 							>
 								{t("settings.cancel")}
 							</Button>
-							<Button>{t("settings.saveChanges")}</Button>
+							<Button
+								loading={isSubmitting}
+								onClick={handleSave}
+							>
+								{t("settings.saveChanges")}
+							</Button>
 						</HStack>
 					</Stack>
 				</Box>

@@ -163,4 +163,77 @@ describe("AuthProvider", () => {
 		expect(result.current.token).toBeUndefined();
 		expect(result.current.user).toBeUndefined();
 	});
+
+	it("should update profile successfully and update user state", async () => {
+		vi.spyOn(makeApiRequest.auth, "refreshToken").mockResolvedValue({
+			data: { accessToken: "valid-token" },
+		} as any);
+		vi.spyOn(makeApiRequest.administrators, "me").mockResolvedValue({
+			data: mockUser,
+		} as any);
+
+		const updatedUser = {
+			...mockUser,
+			firstName: "AliceUpdated",
+			lastName: "SmithUpdated",
+		};
+		vi.spyOn(makeApiRequest.administrators, "updateMe").mockResolvedValue({
+			data: updatedUser,
+		} as any);
+
+		const { result } = renderHook(() => useAuth(), { wrapper });
+
+		await waitFor(() => {
+			expect(result.current.user).toEqual(mockUser);
+		});
+
+		await act(async () => {
+			await result.current.updateProfile({
+				firstName: "AliceUpdated",
+				lastName: "SmithUpdated",
+			});
+		});
+
+		expect(result.current.user).toEqual(updatedUser);
+	});
+
+	it("should handle updateProfile errors and trigger error toast", async () => {
+		vi.spyOn(makeApiRequest.auth, "refreshToken").mockResolvedValue({
+			data: { accessToken: "valid-token" },
+		} as any);
+		vi.spyOn(makeApiRequest.administrators, "me").mockResolvedValue({
+			data: mockUser,
+		} as any);
+
+		const axiosError = {
+			isAxiosError: true,
+			response: {
+				data: { errorCode: "EMAIL_ALREADY_EXISTS" },
+			},
+		};
+		vi.spyOn(makeApiRequest.administrators, "updateMe").mockRejectedValue(
+			axiosError,
+		);
+
+		const { result } = renderHook(() => useAuth(), { wrapper });
+
+		await waitFor(() => {
+			expect(result.current.user).toEqual(mockUser);
+		});
+
+		await expect(
+			act(async () => {
+				await result.current.updateProfile({
+					email: "existing@example.com",
+				});
+			}),
+		).rejects.toBeDefined();
+
+		expect(toaster.create).toHaveBeenCalledWith({
+			title: "Update failed",
+			description: "That email is already in use. Try another.",
+			type: "error",
+		});
+	});
 });
+

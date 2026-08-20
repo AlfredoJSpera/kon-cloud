@@ -51,6 +51,7 @@ jest.mock("@lib/prisma", () => ({
 		administrator: {
 			findUnique: jest.fn(),
 			create: jest.fn(),
+			update: jest.fn(),
 		},
 		condominium: {
 			findMany: jest.fn(),
@@ -123,6 +124,7 @@ export const mockPrisma = prisma as unknown as {
 	administrator: {
 		findUnique: jest.Mock;
 		create: jest.Mock;
+		update: jest.Mock;
 	};
 	condominium: {
 		findMany: jest.Mock;
