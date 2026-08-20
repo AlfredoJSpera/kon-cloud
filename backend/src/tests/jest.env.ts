@@ -35,7 +35,10 @@ process.env.REFRESH_TOKEN_EXPIRES_IN =
 process.env.CSRF_TOKEN_SECRET =
 	process.env.CSRF_TOKEN_SECRET ?? "test-csrf-secret";
 
-process.env.FRONTEND_URL =
-	process.env.FRONTEND_URL || "http://localhost:5173";
+process.env.FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-
+process.env.AZURE_STORAGE_CONNECTION_STRING =
+	process.env.AZURE_STORAGE_CONNECTION_STRING ||
+	"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=YourAccountKey==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
+process.env.AZURE_STORAGE_CONTAINER_NAME =
+	process.env.AZURE_STORAGE_CONTAINER_NAME || "expense-attachments-test";

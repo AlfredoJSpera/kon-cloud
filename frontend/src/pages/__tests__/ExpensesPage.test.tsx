@@ -200,4 +200,64 @@ describe("ExpensesPage", () => {
 			});
 		});
 	});
+
+	it("renders attachments and supports file attachment actions", async () => {
+		const condo: ICondominiumOutput = {
+			condominiumId: 1,
+			administratorId: "admin-123",
+			name: "Sunset Condos",
+		};
+
+		vi.spyOn(makeApiRequest.expenses, "list").mockResolvedValue({
+			data: [
+				{
+					expenseId: 10,
+					condominiumId: 1,
+					category: "Utilities",
+					amount: 250.0,
+					expenseDate: "2026-08-19T10:00:00.000Z",
+					description: "Water bill",
+					createdAt: "2026-08-19T10:00:00.000Z",
+					attachments: [
+						{
+							attachmentId: "att-1",
+							expenseId: 10,
+							fileName: "invoice.pdf",
+							fileSize: 2048,
+							mimeType: "application/pdf",
+							uploadedAt: "2026-08-19T10:00:00.000Z",
+						},
+					],
+				},
+			],
+			status: 200,
+			statusText: "OK",
+			headers: {},
+			config: {} as never,
+		});
+
+		vi.spyOn(makeApiRequest.expenses, "getCashBalance").mockResolvedValue({
+			data: {
+				condominiumId: 1,
+				totalPayments: 1000.0,
+				totalExpenses: 250.0,
+				cashBalance: 750.0,
+			},
+			status: 200,
+			statusText: "OK",
+			headers: {},
+			config: {} as never,
+		});
+
+		renderExpensesPage(condo);
+
+		await waitFor(() => {
+			expect(screen.getByTestId("expense-attachments-10")).toBeInTheDocument();
+		});
+
+		expect(screen.getByText("invoice.pdf")).toBeInTheDocument();
+		expect(screen.getByTestId("download-attachment-btn-att-1")).toBeInTheDocument();
+		expect(screen.getByTestId("delete-attachment-btn-att-1")).toBeInTheDocument();
+	});
 });
+

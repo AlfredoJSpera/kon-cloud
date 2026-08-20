@@ -256,6 +256,13 @@ export const resources = {
 					"Are you sure you want to delete this expense?",
 				deleteSubtext:
 					"This action will increase the cash balance back.",
+				attachments: "Attachments",
+				attachFiles: "Attach Files",
+				downloadAttachment: "Download",
+				deleteAttachment: "Delete Attachment",
+				attachmentUploadedSuccess: "Attachment uploaded successfully.",
+				attachmentDeletedSuccess: "Attachment deleted successfully.",
+				noAttachments: "No attachments",
 				categories: {
 					Utilities: "Utilities",
 					Cleaning: "Cleaning",
@@ -519,6 +526,13 @@ export const resources = {
 				deleteConfirmation:
 					"Sei sicuro di voler eliminare questa spesa?",
 				deleteSubtext: "Questa azione ripristinerà il saldo di cassa.",
+				attachments: "Allegati",
+				attachFiles: "Allega File",
+				downloadAttachment: "Scarica",
+				deleteAttachment: "Elimina Allegato",
+				attachmentUploadedSuccess: "Allegato caricato con successo.",
+				attachmentDeletedSuccess: "Allegato eliminato con successo.",
+				noAttachments: "Nessun allegato",
 				categories: {
 					Utilities: "Utenze",
 					Cleaning: "Pulizie",

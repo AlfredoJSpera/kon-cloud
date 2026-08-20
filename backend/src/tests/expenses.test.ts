@@ -62,6 +62,7 @@ describe("Expense API Endpoints & Pure Cash Flow", () => {
 				expenseDate: "2026-08-19T10:00:00.000Z",
 				description: "Electricity Bill July",
 				createdAt: "2026-08-19T10:00:00.000Z",
+				attachments: [],
 			});
 		});
 
@@ -172,4 +173,56 @@ describe("Expense API Endpoints & Pure Cash Flow", () => {
 			expect(response.body.message).toBe("Expense deleted successfully.");
 		});
 	});
+
+	describe("Expense Attachments API Endpoints", () => {
+		const mockAttachmentRecord = {
+			AttachmentID: "att-uuid-123",
+			ExpenseID: 300,
+			FileName: "receipt.pdf",
+			BlobName: "expenses/300/123456-receipt.pdf",
+			FileSize: 1024,
+			MimeType: "application/pdf",
+			UploadedAt: new Date("2026-08-19T10:00:00.000Z"),
+			Expense: mockExpense,
+		};
+
+		it("POST /expenses/:id/attachments uploads one or more files to an expense", async () => {
+			mockPrisma.expense.findUnique.mockResolvedValue(mockExpense);
+			mockPrisma.expenseAttachment.create.mockResolvedValue(mockAttachmentRecord);
+
+			const response = await request(app)
+				.post("/expenses/300/attachments")
+				.set("Authorization", `Bearer ${authToken}`)
+				.attach("files", Buffer.from("dummy pdf content"), "receipt.pdf");
+
+			expect(response.status).toBe(201);
+			expect(response.body).toHaveLength(1);
+			expect(response.body[0].attachmentId).toBe("att-uuid-123");
+			expect(response.body[0].fileName).toBe("receipt.pdf");
+		});
+
+		it("GET /expenses/:id/attachments/:attachmentId/download downloads attachment file stream", async () => {
+			mockPrisma.expenseAttachment.findUnique.mockResolvedValue(mockAttachmentRecord);
+
+			const response = await request(app)
+				.get("/expenses/300/attachments/att-uuid-123/download")
+				.set("Authorization", `Bearer ${authToken}`);
+
+			expect(response.status).toBe(200);
+			expect(response.header["content-disposition"]).toContain("receipt.pdf");
+		});
+
+		it("DELETE /expenses/:id/attachments/:attachmentId deletes an attachment", async () => {
+			mockPrisma.expenseAttachment.findUnique.mockResolvedValue(mockAttachmentRecord);
+			mockPrisma.expenseAttachment.delete.mockResolvedValue(mockAttachmentRecord);
+
+			const response = await request(app)
+				.delete("/expenses/300/attachments/att-uuid-123")
+				.set("Authorization", `Bearer ${authToken}`);
+
+			expect(response.status).toBe(200);
+			expect(response.body.message).toBe("Attachment deleted successfully.");
+		});
+	});
 });
+

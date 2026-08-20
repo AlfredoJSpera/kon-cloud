@@ -26,6 +26,10 @@ import {
 	LuTrendingUp,
 	LuTrendingDown,
 	LuFilter,
+	LuPaperclip,
+	LuDownload,
+	LuTrash2,
+	LuFileText,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
@@ -35,6 +39,7 @@ import type {
 	IExpenseOutput,
 	ICashBalanceOutput,
 	ExpenseCategory,
+	IExpenseAttachmentOutput,
 } from "@backend-interfaces/expense";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
@@ -84,6 +89,8 @@ export function ExpensesPage() {
 		new Date().toISOString().split("T")[0],
 	);
 	const [modalDescription, setModalDescription] = useState<string>("");
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+	const [modalAttachments, setModalAttachments] = useState<IExpenseAttachmentOutput[]>([]);
 	const [submitting, setSubmitting] = useState<boolean>(false);
 
 	// Delete state
@@ -135,6 +142,8 @@ export function ExpensesPage() {
 		setModalAmount("");
 		setModalDate(new Date().toISOString().split("T")[0]);
 		setModalDescription("");
+		setSelectedFiles([]);
+		setModalAttachments([]);
 		setIsModalOpen(true);
 	};
 
@@ -144,7 +153,27 @@ export function ExpensesPage() {
 		setModalAmount(expense.amount.toString());
 		setModalDate(expense.expenseDate.split("T")[0]);
 		setModalDescription(expense.description || "");
+		setSelectedFiles([]);
+		setModalAttachments(expense.attachments || []);
 		setIsModalOpen(true);
+	};
+
+	const handleDeleteAttachment = async (expenseId: number, attachmentId: string) => {
+		try {
+			await makeApiRequest.expenses.deleteAttachment(expenseId, attachmentId);
+			toaster.create({
+				title: t("expenses.attachmentDeletedSuccess"),
+				type: "success",
+			});
+			setModalAttachments((prev) => prev.filter((a) => a.attachmentId !== attachmentId));
+			await fetchExpensesData();
+		} catch (err: unknown) {
+			console.error(err);
+			toaster.create({
+				title: t("dashboard.errorTitle"),
+				type: "error",
+			});
+		}
 	};
 
 	const handleSaveExpense = async (e: React.FormEvent) => {
@@ -163,30 +192,48 @@ export function ExpensesPage() {
 
 		setSubmitting(true);
 		try {
+			let targetExpenseId: number;
 			if (editingExpense) {
-				await makeApiRequest.expenses.update(editingExpense.expenseId, {
-					category: modalCategory,
-					amount: parsedAmount,
-					expenseDate: new Date(modalDate).toISOString(),
-					description: modalDescription || undefined,
-				});
+				const updated = await makeApiRequest.expenses.update(
+					editingExpense.expenseId,
+					{
+						category: modalCategory,
+						amount: parsedAmount,
+						expenseDate: new Date(modalDate).toISOString(),
+						description: modalDescription || undefined,
+					},
+				);
+				targetExpenseId = updated.data.expenseId;
 				toaster.create({
 					title: t("expenses.updatedSuccess"),
 					type: "success",
 				});
 			} else {
-				await makeApiRequest.expenses.create({
+				const created = await makeApiRequest.expenses.create({
 					condominiumId: selectedCondominium.condominiumId,
 					category: modalCategory,
 					amount: parsedAmount,
 					expenseDate: new Date(modalDate).toISOString(),
 					description: modalDescription || undefined,
 				});
+				targetExpenseId = created.data.expenseId;
 				toaster.create({
 					title: t("expenses.createdSuccess"),
 					type: "success",
 				});
 			}
+
+			if (selectedFiles.length > 0) {
+				await makeApiRequest.expenses.uploadAttachments(
+					targetExpenseId,
+					selectedFiles,
+				);
+				toaster.create({
+					title: t("expenses.attachmentUploadedSuccess"),
+					type: "success",
+				});
+			}
+
 			setIsModalOpen(false);
 			await fetchExpensesData();
 		} catch (err: unknown) {
@@ -478,6 +525,9 @@ export function ExpensesPage() {
 										<Table.ColumnHeader textAlign="right">
 											{t("expenses.amount")}
 										</Table.ColumnHeader>
+										<Table.ColumnHeader>
+											{t("expenses.attachments")}
+										</Table.ColumnHeader>
 										<Table.ColumnHeader textAlign="right">
 											{t("expenses.actions")}
 										</Table.ColumnHeader>
@@ -524,6 +574,96 @@ export function ExpensesPage() {
 														currency: "EUR",
 													},
 												).format(expense.amount)}
+											</Table.Cell>
+											<Table.Cell>
+												<Stack
+													gap="1"
+													data-testid={`expense-attachments-${expense.expenseId}`}
+												>
+													{expense.attachments &&
+													expense.attachments.length > 0 ? (
+														expense.attachments.map(
+															(att) => (
+																<HStack
+																	key={
+																		att.attachmentId
+																	}
+																	gap="2"
+																	align="center"
+																>
+																	<Icon
+																		as={
+																			LuPaperclip
+																		}
+																		size="xs"
+																		color="blue.500"
+																	/>
+																	<Text
+																		fontSize="xs"
+																		fontWeight="medium"
+																		truncate
+																		maxW="140px"
+																		title={
+																			att.fileName
+																		}
+																	>
+																		{
+																			att.fileName
+																		}
+																	</Text>
+																	<Button
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="blue"
+																		px="1"
+																		onClick={() =>
+																			window.open(
+																				makeApiRequest.expenses.getAttachmentDownloadUrl(
+																					expense.expenseId,
+																					att.attachmentId,
+																				),
+																				"_blank",
+																			)
+																		}
+																		data-testid={`download-attachment-btn-${att.attachmentId}`}
+																		title={t(
+																			"expenses.downloadAttachment",
+																		)}
+																	>
+																		<LuDownload />
+																	</Button>
+																	<Button
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="red"
+																		px="1"
+																		onClick={() =>
+																			handleDeleteAttachment(
+																				expense.expenseId,
+																				att.attachmentId,
+																			)
+																		}
+																		data-testid={`delete-attachment-btn-${att.attachmentId}`}
+																		title={t(
+																			"expenses.deleteAttachment",
+																		)}
+																	>
+																		<LuTrash2 />
+																	</Button>
+																</HStack>
+															),
+														)
+													) : (
+														<Text
+															fontSize="xs"
+															color="gray.400"
+														>
+															{t(
+																"expenses.noAttachments",
+															)}
+														</Text>
+													)}
+												</Stack>
 											</Table.Cell>
 											<Table.Cell textAlign="right">
 												<ActionMenu
@@ -687,6 +827,117 @@ export function ExpensesPage() {
 										}
 										data-testid="modal-description-input"
 									/>
+								</Box>
+
+								<Box>
+									<Text
+										fontSize="sm"
+										fontWeight="medium"
+										mb="1"
+									>
+										{t("expenses.attachFiles")}
+									</Text>
+									<Input
+										type="file"
+										multiple
+										onChange={(e) => {
+											if (e.target.files) {
+												setSelectedFiles(
+													Array.from(e.target.files),
+												);
+											}
+										}}
+										data-testid="modal-files-input"
+										p="1"
+									/>
+									{selectedFiles.length > 0 && (
+										<Stack gap="1" mt="2">
+											{selectedFiles.map((file, idx) => (
+												<HStack
+													key={idx}
+													justify="space-between"
+													fontSize="xs"
+													color="gray.600"
+												>
+													<Text truncate maxW="250px">
+														{file.name}
+													</Text>
+													<Text>
+														{(file.size / 1024).toFixed(
+															1,
+														)}{" "}
+														KB
+													</Text>
+												</HStack>
+											))}
+										</Stack>
+									)}
+									{modalAttachments.length > 0 && (
+										<Box mt="3">
+											<Text
+												fontSize="xs"
+												fontWeight="semibold"
+												color="gray.500"
+												mb="1"
+											>
+												{t("expenses.attachments")}:
+											</Text>
+											<Stack gap="1">
+												{modalAttachments.map((att) => (
+													<HStack
+														key={att.attachmentId}
+														justify="space-between"
+														bg="gray.50"
+														_dark={{
+															bg: "gray.700",
+														}}
+														p="2"
+														borderRadius="md"
+													>
+														<HStack gap="2">
+															<Icon as={LuPaperclip} boxSize="4" />
+															<Text
+																fontSize="xs"
+																fontWeight="medium"
+															>
+																{att.fileName}
+															</Text>
+														</HStack>
+														<HStack gap="1">
+															<Button
+																size="xs"
+																variant="ghost"
+																onClick={() =>
+																	window.open(
+																		makeApiRequest.expenses.getAttachmentDownloadUrl(
+																			att.expenseId,
+																			att.attachmentId,
+																		),
+																		"_blank",
+																	)
+																}
+															>
+																<LuDownload />
+															</Button>
+															<Button
+																size="xs"
+																variant="ghost"
+																colorPalette="red"
+																onClick={() =>
+																	handleDeleteAttachment(
+																		att.expenseId,
+																		att.attachmentId,
+																	)
+																}
+															>
+																<LuTrash2 />
+															</Button>
+														</HStack>
+													</HStack>
+												))}
+											</Stack>
+										</Box>
+									)}
 								</Box>
 
 								<HStack justify="end" gap="3" mt="4">

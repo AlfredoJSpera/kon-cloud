@@ -188,5 +188,37 @@ export const makeApiRequest = {
 		) => api.put<IExpenseOutput>(`/expenses/${id}`, data, options),
 		delete: (id: number, options?: AxiosRequestConfig) =>
 			api.delete<{ message: string }>(`/expenses/${id}`, options),
+		uploadAttachments: (
+			expenseId: number,
+			files: File[],
+			options?: AxiosRequestConfig,
+		) => {
+			const formData = new FormData();
+			for (const file of files) {
+				formData.append("files", file);
+			}
+			return api.post<IExpenseAttachmentOutput[]>(
+				`/expenses/${expenseId}/attachments`,
+				formData,
+				{
+					...options,
+					headers: {
+						"Content-Type": "multipart/form-data",
+						...(options?.headers || {}),
+					},
+				},
+			);
+		},
+		deleteAttachment: (
+			expenseId: number,
+			attachmentId: string,
+			options?: AxiosRequestConfig,
+		) =>
+			api.delete<{ message: string }>(
+				`/expenses/${expenseId}/attachments/${attachmentId}`,
+				options,
+			),
+		getAttachmentDownloadUrl: (expenseId: number, attachmentId: string) =>
+			`${backendUrl}/expenses/${expenseId}/attachments/${attachmentId}/download`,
 	},
 };

@@ -1,14 +1,18 @@
 import { Router } from "express";
+import { Readable } from "stream";
+import multer from "multer";
 import { prisma } from "@lib/prisma";
 import { Prisma } from "@generated/prisma/client";
 import { catchError } from "@middleware/errorHandlerMW";
 import { authenticateToken } from "@middleware/authenticateTokenMW";
+import { storageService } from "@lib/storageService";
 import {
 	ExpenseCategory,
 	ICashBalanceOutput,
 	IExpenseCreateInput,
 	IExpenseOutput,
 	IExpenseUpdateInput,
+	IExpenseAttachmentOutput,
 } from "@interfaces/expense";
 import {
 	KonIncorrectFieldTypeError,
@@ -25,6 +29,13 @@ const ALLOWED_CATEGORIES: ExpenseCategory[] = [
 	"Insurance",
 	"Other",
 ];
+
+const upload = multer({
+	storage: multer.memoryStorage(),
+	limits: {
+		fileSize: 15 * 1024 * 1024,
+	},
+});
 
 const router = Router();
 
@@ -69,7 +80,6 @@ router.get(
 				throw new KonAccessDeniedError();
 			}
 
-			// Aggregate total payments received for tenants in this condominium
 			const paymentsAggregate = await prisma.payment.aggregate({
 				where: {
 					Tenant: { CondominiumID: condoId },
@@ -79,7 +89,6 @@ router.get(
 				},
 			});
 
-			// Aggregate total paid expenses for this condominium
 			const expensesAggregate = await prisma.expense.aggregate({
 				where: {
 					CondominiumID: condoId,
@@ -150,6 +159,7 @@ router.get(
 
 			const expenses = await prisma.expense.findMany({
 				where: { CondominiumID: condoId },
+				include: { Attachments: true },
 				orderBy: { ExpenseDate: "desc" },
 			});
 
@@ -161,6 +171,14 @@ router.get(
 				expenseDate: e.ExpenseDate.toISOString(),
 				description: e.Description ?? undefined,
 				createdAt: e.CreatedAt.toISOString(),
+				attachments: e.Attachments?.map((att) => ({
+					attachmentId: att.AttachmentID,
+					expenseId: att.ExpenseID,
+					fileName: att.FileName,
+					fileSize: att.FileSize,
+					mimeType: att.MimeType,
+					uploadedAt: att.UploadedAt.toISOString(),
+				})) ?? [],
 			}));
 
 			res.status(200).json(result);
@@ -246,6 +264,7 @@ router.post(
 					ExpenseDate: parsedDate,
 					Description: trimmedDesc ?? null,
 				},
+				include: { Attachments: true },
 			});
 
 			res.status(201).json({
@@ -256,9 +275,180 @@ router.post(
 				expenseDate: created.ExpenseDate.toISOString(),
 				description: created.Description ?? undefined,
 				createdAt: created.CreatedAt.toISOString(),
+				attachments: created.Attachments?.map((att) => ({
+					attachmentId: att.AttachmentID,
+					expenseId: att.ExpenseID,
+					fileName: att.FileName,
+					fileSize: att.FileSize,
+					mimeType: att.MimeType,
+					uploadedAt: att.UploadedAt.toISOString(),
+				})) ?? [],
 			});
 		},
 	),
+);
+
+// POST /expenses/:id/attachments
+router.post(
+	"/:id/attachments",
+	authenticateToken,
+	upload.array("files"),
+	catchError(async (req, res) => {
+		const adminId = req.administrator?.administratorId;
+		const expenseId = parseInt(req.params.id, 10);
+
+		if (isNaN(expenseId)) {
+			throw new KonNotFoundError("Expense not found.");
+		}
+
+		const existing = await prisma.expense.findUnique({
+			where: { ExpenseID: expenseId },
+			include: { Condominium: true },
+		});
+
+		if (!existing) {
+			throw new KonNotFoundError("Expense not found.");
+		}
+
+		if (existing.Condominium.AdministratorID !== adminId) {
+			throw new KonAccessDeniedError();
+		}
+
+		const files = req.files as Express.Multer.File[] | undefined;
+		if (!files || files.length === 0) {
+			throw new KonMissingRequiredFieldsError("No files uploaded.");
+		}
+
+		const createdAttachments: IExpenseAttachmentOutput[] = [];
+
+		for (const file of files) {
+			const sanitizeFileName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+			const blobName = `expenses/${expenseId}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${sanitizeFileName}`;
+
+			await storageService.uploadAttachment(
+				blobName,
+				file.buffer,
+				file.mimetype || "application/octet-stream",
+			);
+
+			const attachmentRecord = await prisma.expenseAttachment.create({
+				data: {
+					ExpenseID: expenseId,
+					FileName: file.originalname,
+					BlobName: blobName,
+					FileSize: file.size,
+					MimeType: file.mimetype || "application/octet-stream",
+				},
+			});
+
+			createdAttachments.push({
+				attachmentId: attachmentRecord.AttachmentID,
+				expenseId: attachmentRecord.ExpenseID,
+				fileName: attachmentRecord.FileName,
+				fileSize: attachmentRecord.FileSize,
+				mimeType: attachmentRecord.MimeType,
+				uploadedAt: attachmentRecord.UploadedAt.toISOString(),
+			});
+		}
+
+		res.status(201).json(createdAttachments);
+	}),
+);
+
+// GET /expenses/:id/attachments/:attachmentId/download
+router.get(
+	"/:id/attachments/:attachmentId/download",
+	authenticateToken,
+	catchError(async (req, res) => {
+		const adminId = req.administrator?.administratorId;
+		const expenseId = parseInt(req.params.id, 10);
+		const attachmentId = req.params.attachmentId;
+
+		if (isNaN(expenseId) || !attachmentId) {
+			throw new KonNotFoundError("Attachment not found.");
+		}
+
+		const attachment = await prisma.expenseAttachment.findUnique({
+			where: { AttachmentID: attachmentId },
+			include: {
+				Expense: {
+					include: { Condominium: true },
+				},
+			},
+		});
+
+		if (!attachment || attachment.ExpenseID !== expenseId) {
+			throw new KonNotFoundError("Attachment not found.");
+		}
+
+		if (attachment.Expense.Condominium.AdministratorID !== adminId) {
+			throw new KonAccessDeniedError();
+		}
+
+		const { stream, contentType } = await storageService.downloadAttachmentStream(
+			attachment.BlobName,
+		);
+
+		if (!stream) {
+			throw new KonNotFoundError("Attachment content not found.");
+		}
+
+		res.setHeader(
+			"Content-Type",
+			contentType || attachment.MimeType || "application/octet-stream",
+		);
+		res.setHeader(
+			"Content-Disposition",
+			`attachment; filename="${encodeURIComponent(attachment.FileName)}"`,
+		);
+
+		if ("pipe" in stream && typeof stream.pipe === "function") {
+			stream.pipe(res);
+		} else {
+			const readableStream = Readable.from(stream as unknown as AsyncIterable<Uint8Array>);
+			readableStream.pipe(res);
+		}
+	}),
+);
+
+// DELETE /expenses/:id/attachments/:attachmentId
+router.delete(
+	"/:id/attachments/:attachmentId",
+	authenticateToken,
+	catchError(async (req, res) => {
+		const adminId = req.administrator?.administratorId;
+		const expenseId = parseInt(req.params.id, 10);
+		const attachmentId = req.params.attachmentId;
+
+		if (isNaN(expenseId) || !attachmentId) {
+			throw new KonNotFoundError("Attachment not found.");
+		}
+
+		const attachment = await prisma.expenseAttachment.findUnique({
+			where: { AttachmentID: attachmentId },
+			include: {
+				Expense: {
+					include: { Condominium: true },
+				},
+			},
+		});
+
+		if (!attachment || attachment.ExpenseID !== expenseId) {
+			throw new KonNotFoundError("Attachment not found.");
+		}
+
+		if (attachment.Expense.Condominium.AdministratorID !== adminId) {
+			throw new KonAccessDeniedError();
+		}
+
+		await storageService.deleteAttachment(attachment.BlobName);
+
+		await prisma.expenseAttachment.delete({
+			where: { AttachmentID: attachmentId },
+		});
+
+		res.status(200).json({ message: "Attachment deleted successfully." });
+	}),
 );
 
 // PUT /expenses/:id
@@ -284,7 +474,7 @@ router.put(
 
 			const existing = await prisma.expense.findUnique({
 				where: { ExpenseID: expenseId },
-				include: { Condominium: true },
+				include: { Condominium: true, Attachments: true },
 			});
 
 			if (!existing) {
@@ -341,6 +531,7 @@ router.put(
 					ExpenseDate: newExpenseDate,
 					Description: newDesc,
 				},
+				include: { Attachments: true },
 			});
 
 			res.status(200).json({
@@ -351,6 +542,14 @@ router.put(
 				expenseDate: updated.ExpenseDate.toISOString(),
 				description: updated.Description ?? undefined,
 				createdAt: updated.CreatedAt.toISOString(),
+				attachments: updated.Attachments?.map((att) => ({
+					attachmentId: att.AttachmentID,
+					expenseId: att.ExpenseID,
+					fileName: att.FileName,
+					fileSize: att.FileSize,
+					mimeType: att.MimeType,
+					uploadedAt: att.UploadedAt.toISOString(),
+				})) ?? [],
 			});
 		},
 	),
@@ -379,7 +578,7 @@ router.delete(
 
 			const expense = await prisma.expense.findUnique({
 				where: { ExpenseID: expenseId },
-				include: { Condominium: true },
+				include: { Condominium: true, Attachments: true },
 			});
 
 			if (!expense) {
@@ -388,6 +587,12 @@ router.delete(
 
 			if (expense.Condominium.AdministratorID !== adminId) {
 				throw new KonAccessDeniedError();
+			}
+
+			if (expense.Attachments && expense.Attachments.length > 0) {
+				for (const att of expense.Attachments) {
+					await storageService.deleteAttachment(att.BlobName).catch(() => {});
+				}
 			}
 
 			await prisma.expense.delete({
