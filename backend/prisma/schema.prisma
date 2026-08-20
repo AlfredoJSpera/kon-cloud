@@ -80,17 +80,32 @@ model Payment {
 }
 
 model Expense {
-  ExpenseID     Int         @id @default(autoincrement())
+  ExpenseID     Int                 @id @default(autoincrement())
   CondominiumID Int
-  Category      String      @db.NVarChar(50)
-  Amount        Decimal     @db.Decimal(18, 2)
-  Description   String?     @db.NVarChar(255)
-  ExpenseDate   DateTime    @default(now()) @db.DateTime2
-  CreatedAt     DateTime    @default(now()) @db.DateTime2
-  Condominium   Condominium @relation(fields: [CondominiumID], references: [CondominiumID], onDelete: Cascade)
+  Category      String              @db.NVarChar(50)
+  Amount        Decimal             @db.Decimal(18, 2)
+  Description   String?             @db.NVarChar(255)
+  ExpenseDate   DateTime            @default(now()) @db.DateTime2
+  CreatedAt     DateTime            @default(now()) @db.DateTime2
+  Condominium   Condominium         @relation(fields: [CondominiumID], references: [CondominiumID], onDelete: Cascade)
+  Attachments   ExpenseAttachment[]
 
   @@index([CondominiumID])
 }
+
+model ExpenseAttachment {
+  AttachmentID String   @id @default(dbgenerated("newid()")) @db.UniqueIdentifier
+  ExpenseID    Int
+  FileName     String   @db.NVarChar(255)
+  BlobName     String   @db.NVarChar(255)
+  FileSize     Int
+  MimeType     String   @db.NVarChar(100)
+  UploadedAt   DateTime @default(now()) @db.DateTime2
+  Expense      Expense  @relation(fields: [ExpenseID], references: [ExpenseID], onDelete: Cascade)
+
+  @@index([ExpenseID])
+}
+
 
 
 

@@ -4,6 +4,7 @@ import {
 	Button,
 	Card,
 	createListCollection,
+	FileUpload,
 	Flex,
 	Grid,
 	HStack,
@@ -26,6 +27,10 @@ import {
 	LuTrendingUp,
 	LuTrendingDown,
 	LuFilter,
+	LuPaperclip,
+	LuDownload,
+	LuTrash2,
+	LuFileText,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
@@ -35,6 +40,7 @@ import type {
 	IExpenseOutput,
 	ICashBalanceOutput,
 	ExpenseCategory,
+	IExpenseAttachmentOutput,
 } from "@backend-interfaces/expense";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
@@ -84,6 +90,8 @@ export function ExpensesPage() {
 		new Date().toISOString().split("T")[0],
 	);
 	const [modalDescription, setModalDescription] = useState<string>("");
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+	const [modalAttachments, setModalAttachments] = useState<IExpenseAttachmentOutput[]>([]);
 	const [submitting, setSubmitting] = useState<boolean>(false);
 
 	// Delete state
@@ -135,6 +143,8 @@ export function ExpensesPage() {
 		setModalAmount("");
 		setModalDate(new Date().toISOString().split("T")[0]);
 		setModalDescription("");
+		setSelectedFiles([]);
+		setModalAttachments([]);
 		setIsModalOpen(true);
 	};
 
@@ -144,7 +154,57 @@ export function ExpensesPage() {
 		setModalAmount(expense.amount.toString());
 		setModalDate(expense.expenseDate.split("T")[0]);
 		setModalDescription(expense.description || "");
+		setSelectedFiles([]);
+		setModalAttachments(expense.attachments || []);
 		setIsModalOpen(true);
+	};
+
+	const handleDeleteAttachment = async (expenseId: number, attachmentId: string) => {
+		try {
+			await makeApiRequest.expenses.deleteAttachment(expenseId, attachmentId);
+			toaster.create({
+				title: t("expenses.attachmentDeletedSuccess"),
+				type: "success",
+			});
+			setModalAttachments((prev) => prev.filter((a) => a.attachmentId !== attachmentId));
+			await fetchExpensesData();
+		} catch (err: unknown) {
+			console.error(err);
+			toaster.create({
+				title: t("dashboard.errorTitle"),
+				type: "error",
+			});
+		}
+	};
+
+	const handleDownloadAttachment = async (
+		expenseId: number,
+		attachmentId: string,
+		fileName: string,
+	) => {
+		try {
+			const response = await makeApiRequest.expenses.downloadAttachment(
+				expenseId,
+				attachmentId,
+			);
+			const blob = new Blob([response.data], {
+				type: (response.headers["content-type"] as string) || "application/octet-stream",
+			});
+			const downloadUrl = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = downloadUrl;
+			link.setAttribute("download", fileName);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(downloadUrl);
+		} catch (err: unknown) {
+			console.error(err);
+			toaster.create({
+				title: t("dashboard.errorTitle"),
+				type: "error",
+			});
+		}
 	};
 
 	const handleSaveExpense = async (e: React.FormEvent) => {
@@ -161,32 +221,58 @@ export function ExpensesPage() {
 			return;
 		}
 
+		if (modalAttachments.length + selectedFiles.length > 5) {
+			toaster.create({
+				title: t("expenses.maxFilesExceeded"),
+				type: "warning",
+			});
+			return;
+		}
+
 		setSubmitting(true);
 		try {
+			let targetExpenseId: number;
 			if (editingExpense) {
-				await makeApiRequest.expenses.update(editingExpense.expenseId, {
-					category: modalCategory,
-					amount: parsedAmount,
-					expenseDate: new Date(modalDate).toISOString(),
-					description: modalDescription || undefined,
-				});
+				const updated = await makeApiRequest.expenses.update(
+					editingExpense.expenseId,
+					{
+						category: modalCategory,
+						amount: parsedAmount,
+						expenseDate: new Date(modalDate).toISOString(),
+						description: modalDescription || undefined,
+					},
+				);
+				targetExpenseId = updated.data.expenseId;
 				toaster.create({
 					title: t("expenses.updatedSuccess"),
 					type: "success",
 				});
 			} else {
-				await makeApiRequest.expenses.create({
+				const created = await makeApiRequest.expenses.create({
 					condominiumId: selectedCondominium.condominiumId,
 					category: modalCategory,
 					amount: parsedAmount,
 					expenseDate: new Date(modalDate).toISOString(),
 					description: modalDescription || undefined,
 				});
+				targetExpenseId = created.data.expenseId;
 				toaster.create({
 					title: t("expenses.createdSuccess"),
 					type: "success",
 				});
 			}
+
+			if (selectedFiles.length > 0) {
+				await makeApiRequest.expenses.uploadAttachments(
+					targetExpenseId,
+					selectedFiles,
+				);
+				toaster.create({
+					title: t("expenses.attachmentUploadedSuccess"),
+					type: "success",
+				});
+			}
+
 			setIsModalOpen(false);
 			await fetchExpensesData();
 		} catch (err: unknown) {
@@ -478,6 +564,9 @@ export function ExpensesPage() {
 										<Table.ColumnHeader textAlign="right">
 											{t("expenses.amount")}
 										</Table.ColumnHeader>
+										<Table.ColumnHeader>
+											{t("expenses.attachments")}
+										</Table.ColumnHeader>
 										<Table.ColumnHeader textAlign="right">
 											{t("expenses.actions")}
 										</Table.ColumnHeader>
@@ -525,6 +614,94 @@ export function ExpensesPage() {
 													},
 												).format(expense.amount)}
 											</Table.Cell>
+											<Table.Cell>
+												<Stack
+													gap="1"
+													data-testid={`expense-attachments-${expense.expenseId}`}
+												>
+													{expense.attachments &&
+													expense.attachments.length > 0 ? (
+														expense.attachments.map(
+															(att) => (
+																<HStack
+																	key={
+																		att.attachmentId
+																	}
+																	gap="2"
+																	align="center"
+																>
+																	<Icon
+																		as={
+																			LuPaperclip
+																		}
+																		size="xs"
+																		color="blue.500"
+																	/>
+																	<Text
+																		fontSize="xs"
+																		fontWeight="medium"
+																		truncate
+																		maxW="140px"
+																		title={
+																			att.fileName
+																		}
+																	>
+																		{
+																			att.fileName
+																		}
+																	</Text>
+																	<Button
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="blue"
+																		px="1"
+																		onClick={() =>
+																			handleDownloadAttachment(
+																				expense.expenseId,
+																				att.attachmentId,
+																				att.fileName,
+																			)
+																		}
+																		data-testid={`download-attachment-btn-${att.attachmentId}`}
+																		title={t(
+																			"expenses.downloadAttachment",
+																		)}
+																	>
+																		<LuDownload />
+																	</Button>
+																	<Button
+																		size="xs"
+																		variant="ghost"
+																		colorPalette="red"
+																		px="1"
+																		onClick={() =>
+																			handleDeleteAttachment(
+																				expense.expenseId,
+																				att.attachmentId,
+																			)
+																		}
+																		data-testid={`delete-attachment-btn-${att.attachmentId}`}
+																		title={t(
+																			"expenses.deleteAttachment",
+																		)}
+																	>
+																		<LuTrash2 />
+																	</Button>
+																</HStack>
+															),
+														)
+													) : (
+														<Text
+															fontSize="xs"
+															color="gray.400"
+														>
+															{t(
+																"expenses.noAttachments",
+															)}
+														</Text>
+													)}
+												</Stack>
+											</Table.Cell>
 											<Table.Cell textAlign="right">
 												<ActionMenu
 													onEdit={() =>
@@ -565,6 +742,7 @@ export function ExpensesPage() {
 					alignItems="center"
 					justifyContent="center"
 					p="4"
+					overflowY="auto"
 				>
 					<Box
 						bg="white"
@@ -573,7 +751,11 @@ export function ExpensesPage() {
 						boxShadow="xl"
 						maxW="500px"
 						w="full"
+						maxH="90vh"
+						display="flex"
+						flexDirection="column"
 						p="6"
+						overflowY="auto"
 					>
 						<Heading size="md" mb="4">
 							{editingExpense
@@ -687,6 +869,126 @@ export function ExpensesPage() {
 										}
 										data-testid="modal-description-input"
 									/>
+								</Box>
+
+								<Box>
+									<Text
+										fontSize="sm"
+										fontWeight="medium"
+										mb="1"
+									>
+										{t("expenses.attachFiles")}
+									</Text>
+									<FileUpload.Root
+										maxFiles={Math.max(0, 5 - modalAttachments.length)}
+										onFileReject={() => {
+											toaster.create({
+												title: t("expenses.maxFilesExceeded"),
+												type: "warning",
+											});
+										}}
+										onFileChange={(details) => {
+											const allowedRemaining = 5 - modalAttachments.length;
+											if (details.acceptedFiles.length > allowedRemaining) {
+												toaster.create({
+													title: t("expenses.maxFilesExceeded"),
+													type: "warning",
+												});
+												setSelectedFiles(details.acceptedFiles.slice(0, allowedRemaining));
+											} else {
+												setSelectedFiles(details.acceptedFiles);
+											}
+										}}
+										data-testid="modal-files-upload"
+									>
+										<FileUpload.HiddenInput data-testid="modal-files-input" />
+										<FileUpload.Trigger asChild>
+											<Button
+												variant="outline"
+												size="sm"
+												w="full"
+												onClick={(e) => {
+													if (modalAttachments.length + selectedFiles.length >= 5) {
+														e.preventDefault();
+														toaster.create({
+															title: t("expenses.maxFilesExceeded"),
+															type: "warning",
+														});
+													}
+												}}
+											>
+												<LuPaperclip />
+												<Text>{t("expenses.attachFiles")}</Text>
+											</Button>
+										</FileUpload.Trigger>
+										<FileUpload.List clearable showSize />
+									</FileUpload.Root>
+									{modalAttachments.length > 0 && (
+										<Box mt="3">
+											<Text
+												fontSize="xs"
+												fontWeight="semibold"
+												color="gray.500"
+												mb="1"
+											>
+												{t("expenses.attachments")}:
+											</Text>
+											<Box maxH="160px" overflowY="auto" pr="1">
+												<Stack gap="1">
+													{modalAttachments.map((att) => (
+														<HStack
+															key={att.attachmentId}
+															justify="space-between"
+															bg="gray.50"
+															_dark={{
+																bg: "gray.700",
+															}}
+															p="2"
+															borderRadius="md"
+														>
+															<HStack gap="2">
+																<Icon as={LuPaperclip} boxSize="4" />
+																<Text
+																	fontSize="xs"
+																	fontWeight="medium"
+																>
+																	{att.fileName}
+																</Text>
+															</HStack>
+															<HStack gap="1">
+																<Button
+																	size="xs"
+																	variant="ghost"
+																	onClick={() =>
+																		handleDownloadAttachment(
+																			att.expenseId,
+																			att.attachmentId,
+																			att.fileName,
+																		)
+																	}
+																>
+																	<LuDownload />
+																</Button>
+																<Button
+																	size="xs"
+																	variant="ghost"
+																	colorPalette="red"
+																	onClick={() =>
+																		handleDeleteAttachment(
+																			att.expenseId,
+																			att.attachmentId,
+																		)
+																	}
+																>
+																	<LuTrash2 />
+																</Button>
+															</HStack>
+														</HStack>
+													))}
+												</Stack>
+											</Box>
+										</Box>
+									)}
 								</Box>
 
 								<HStack justify="end" gap="3" mt="4">

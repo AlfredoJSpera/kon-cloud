@@ -25,8 +25,11 @@ export function authenticateToken(
 ) {
 	const authHeader = req.headers["authorization"];
 
-	// Get the token after "Bearer"
-	const token = authHeader && authHeader?.split(" ")[1];
+	// Get the token after "Bearer" or from query parameter
+	const tokenFromHeader = authHeader && authHeader?.split(" ")[1];
+	const tokenFromQuery =
+		typeof req.query.token === "string" ? req.query.token : undefined;
+	const token = tokenFromHeader || tokenFromQuery;
 
 	if (!token) {
 		return next(new KonMissingAuthenticationTokenError());

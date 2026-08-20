@@ -31,6 +31,21 @@ jest.mock("bcrypt", () => ({
 	compare: jest.fn(),
 }));
 
+jest.mock("@lib/storageService", () => ({
+	storageService: {
+		ensureContainerExists: jest.fn().mockResolvedValue(undefined),
+		uploadAttachment: jest.fn().mockResolvedValue(undefined),
+		downloadAttachmentStream: jest.fn().mockImplementation(() => {
+			const { Readable } = require("stream");
+			return Promise.resolve({
+				stream: Readable.from([Buffer.from("test file content")]),
+				contentType: "application/pdf",
+			});
+		}),
+		deleteAttachment: jest.fn().mockResolvedValue(undefined),
+	},
+}));
+
 jest.mock("@lib/prisma", () => ({
 	prisma: {
 		administrator: {
@@ -83,6 +98,16 @@ jest.mock("@lib/prisma", () => ({
 			delete: jest.fn(),
 			deleteMany: jest.fn(),
 			aggregate: jest.fn(),
+		},
+		expenseAttachment: {
+			findMany: jest.fn(),
+			findUnique: jest.fn(),
+			findFirst: jest.fn(),
+			create: jest.fn(),
+			update: jest.fn(),
+			delete: jest.fn(),
+			deleteMany: jest.fn(),
+			count: jest.fn(),
 		},
 		$transaction: jest.fn((cbOrArray: unknown) => {
 			if (typeof cbOrArray === "function") {
@@ -145,6 +170,16 @@ export const mockPrisma = prisma as unknown as {
 		delete: jest.Mock;
 		deleteMany: jest.Mock;
 		aggregate: jest.Mock;
+	};
+	expenseAttachment: {
+		findMany: jest.Mock;
+		findUnique: jest.Mock;
+		findFirst: jest.Mock;
+		create: jest.Mock;
+		update: jest.Mock;
+		delete: jest.Mock;
+		deleteMany: jest.Mock;
+		count: jest.Mock;
 	};
 	$transaction: jest.Mock;
 };

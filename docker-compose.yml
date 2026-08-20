@@ -40,10 +40,23 @@ services:
     depends_on:
       mssql:
         condition: service_healthy
+      azurite:
+        condition: service_started
     env_file:
       - ./backend/.env
     environment:
       - FORCE_COLOR=1
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=YourAccountKey==;BlobEndpoint=http://azurite:10000/devstoreaccount1;}
+      - AZURE_STORAGE_CONTAINER_NAME=${AZURE_STORAGE_CONTAINER_NAME:-expense-attachments}
+    networks:
+      - kon_network
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    restart: unless-stopped
+    ports:
+      - "10000:10000"
+    command: "azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck"
     networks:
       - kon_network
 

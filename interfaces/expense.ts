@@ -5,6 +5,15 @@ export type ExpenseCategory =
 	| "Insurance"
 	| "Other";
 
+export interface IExpenseAttachmentOutput {
+	attachmentId: string;
+	expenseId: number;
+	fileName: string;
+	fileSize: number;
+	mimeType: string;
+	uploadedAt: string;
+}
+
 export interface IExpenseCreateInput {
 	condominiumId: number;
 	category: ExpenseCategory;
@@ -28,6 +37,7 @@ export interface IExpenseOutput {
 	expenseDate: string;
 	description?: string;
 	createdAt: string;
+	attachments?: IExpenseAttachmentOutput[];
 }
 
 export interface ICashBalanceOutput {
