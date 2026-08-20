@@ -4,6 +4,7 @@ import {
 	Button,
 	Card,
 	createListCollection,
+	FileUpload,
 	Flex,
 	Grid,
 	HStack,
@@ -865,41 +866,22 @@ export function ExpensesPage() {
 									>
 										{t("expenses.attachFiles")}
 									</Text>
-									<Input
-										type="file"
-										multiple
-										onChange={(e) => {
-											if (e.target.files) {
-												setSelectedFiles(
-													Array.from(e.target.files),
-												);
-											}
+									<FileUpload.Root
+										maxFiles={10}
+										onFileChange={(details) => {
+											setSelectedFiles(details.acceptedFiles);
 										}}
-										data-testid="modal-files-input"
-										p="1"
-									/>
-									{selectedFiles.length > 0 && (
-										<Stack gap="1" mt="2">
-											{selectedFiles.map((file, idx) => (
-												<HStack
-													key={idx}
-													justify="space-between"
-													fontSize="xs"
-													color="gray.600"
-												>
-													<Text truncate maxW="250px">
-														{file.name}
-													</Text>
-													<Text>
-														{(file.size / 1024).toFixed(
-															1,
-														)}{" "}
-														KB
-													</Text>
-												</HStack>
-											))}
-										</Stack>
-									)}
+										data-testid="modal-files-upload"
+									>
+										<FileUpload.HiddenInput data-testid="modal-files-input" />
+										<FileUpload.Trigger asChild>
+											<Button variant="outline" size="sm" w="full">
+												<LuPaperclip />
+												<Text>{t("expenses.attachFiles")}</Text>
+											</Button>
+										</FileUpload.Trigger>
+										<FileUpload.List clearable showSize />
+									</FileUpload.Root>
 									{modalAttachments.length > 0 && (
 										<Box mt="3">
 											<Text
