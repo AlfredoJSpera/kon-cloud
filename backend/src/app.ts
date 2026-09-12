@@ -39,6 +39,14 @@ app.use(
 	cors({
 		origin: FRONTEND_URL,
 		credentials: true,
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"x-csrf-token",
+			"x-session-id",
+		],
+		exposedHeaders: ["x-csrf-token"],
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 	}),
 );
 app.use(loggerHttp);

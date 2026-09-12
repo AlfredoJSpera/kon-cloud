@@ -13,8 +13,8 @@ This directory contains the complete **Bicep** Infrastructure as Code (IaC) temp
                           │   ┌────────────────────────────────────────────────┐   │         ┌────────────────────┐
 ┌──────────┐              │   │ Azure Application Gateway (Standard_v2)        │   │         │                    │
 │          │  HTTPS (443) │   │   • SSL Termination (Port 443 HTTPS Listener)   │   │         │  Azure SQL Server  │
-│ Internet │──────────────┼──►│   • /api/* ──► Backend Pool (Backend Web App)  ├───┼────────►│  & Database (kon)  │
-│          │  HTTP (80)   │   │   • /*     ──► Frontend Pool (Frontend Web App)│   │         │                    │
+│ Internet │──────────────┼──►│   • api.kon-cloud-… ──► Backend Web App        ├───┼────────►│  & Database (kon)  │
+│          │  HTTP (80)   │   │   • app.kon-cloud-… ──► Frontend Web App       │   │         │                    │
 └──────────┘  (301 Redirect)  │   • HTTP 80 ──► Redirect 301 to HTTPS 443     │   │         └────────────────────┘
                           │   └────────────────────────────────────────────────┘   │
                           │                           ▲                            │
@@ -22,11 +22,11 @@ This directory contains the complete **Bicep** Infrastructure as Code (IaC) temp
                           │   ┌───────────────────────┴────────────────────────┐   │
                           │   │ App Service Plan (Linux)                       │   │
                           │   │  ┌──────────────────────────────────────────┐  │   │
-                          │   │  │ Backend Web App                          │  │   │
+                          │   │  │ Backend Web App (api.kon-cloud-…)          │  │   │
                           │   │  │ (ghcr.io/.../backend:latest)             │  │   │
                           │   │  └──────────────────────────────────────────┘  │   │
                           │   │  ┌──────────────────────────────────────────┐  │   │
-                          │   │  │ Frontend Web App                         │  │   │
+                          │   │  │ Frontend Web App (app.kon-cloud-…)         │  │   │
                           │   │  │ (ghcr.io/.../frontend:latest)            │  │   │
                           │   │  └──────────────────────────────────────────┘  │   │
                           │   └────────────────────────────────────────────────┘   │

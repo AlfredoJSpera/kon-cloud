@@ -38,6 +38,8 @@ import type {
 } from "@backend-interfaces/expense";
 import axios, { type AxiosRequestConfig } from "axios";
 
+import { setMemoryCsrfToken } from "./cookieManagement";
+
 declare global {
 	interface Window {
 		__ENV__?: {
@@ -60,6 +62,14 @@ const backendUrl = url.replace(/\/$/, ""); // Remove trailing "/"
 export const api = axios.create({
 	baseURL: backendUrl,
 	withCredentials: true, // For sending cookies
+});
+
+api.interceptors.response.use((response) => {
+	const csrfHeader = response.headers?.["x-csrf-token"];
+	if (typeof csrfHeader === "string" && csrfHeader) {
+		setMemoryCsrfToken(csrfHeader);
+	}
+	return response;
 });
 
 /**

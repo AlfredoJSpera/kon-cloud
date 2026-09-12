@@ -42,8 +42,8 @@ param refreshTokenSecret string
 param csrfTokenSecret string
 
 var appServicePlanName = 'asp-${namePrefix}'
-var backendAppName = 'app-backend-${namePrefix}-${uniqueString(resourceGroup().id)}'
-var frontendAppName = 'app-frontend-${namePrefix}-${uniqueString(resourceGroup().id)}'
+var backendAppName = 'api-${namePrefix}-${uniqueString(resourceGroup().id)}'
+var frontendAppName = 'app-${namePrefix}-${uniqueString(resourceGroup().id)}'
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
@@ -118,7 +118,7 @@ resource backendAppService 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'FRONTEND_URL'
-          value: 'https://${appGatewayPublicIp}'
+          value: 'https://${frontendAppName}.azurewebsites.net'
         }
         {
           name: 'GENERAL_LIMITER_TRUST_PROXY'
@@ -154,7 +154,7 @@ resource frontendAppService 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'VITE_BACKEND_URL'
-          value: 'https://${appGatewayPublicIp}/api'
+          value: 'https://${backendAppName}.azurewebsites.net'
         }
         {
           name: 'DOCKER_REGISTRY_SERVER_URL'

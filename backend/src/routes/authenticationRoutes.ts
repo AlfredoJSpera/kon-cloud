@@ -41,6 +41,7 @@ import cookieParser from "cookie-parser";
 import { KonApiContract } from "@utils/apiContract";
 
 const router = Router();
+const isProduction = process.env.NODE_ENV === "production";
 
 const limiter = rateLimit({
 	windowMs: ms(AUTH_LIMITER_WINDOW as StringValue),
@@ -103,12 +104,14 @@ router.post(
 			const refreshToken = generateRefreshToken(tokenPayload);
 
 			// Cookies
-			generateCsrfToken(req, res); // Generates the x-csrf-token cookie
+			const isProduction = process.env.NODE_ENV === "production";
+			const csrfToken = generateCsrfToken(req, res); // Generates the x-csrf-token cookie
+			res.setHeader("x-csrf-token", csrfToken);
 			res.cookie("refreshToken", refreshToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
+				secure: isProduction,
 				path: "/",
-				sameSite: "strict",
+				sameSite: isProduction ? "none" : "strict",
 				maxAge: COOKIE_MAX_AGE,
 			});
 
@@ -164,11 +167,12 @@ router.get(
 				const newRefreshToken = generateRefreshToken(tokenPayload);
 
 				// Cookies
-				generateCsrfToken(req, res); // Generates the x-csrf-token cookie
+				const csrfToken = generateCsrfToken(req, res); // Generates the x-csrf-token cookie
+				res.setHeader("x-csrf-token", csrfToken);
 				res.cookie("refreshToken", newRefreshToken, {
 					httpOnly: true,
-					secure: process.env.NODE_ENV === "production",
-					sameSite: "strict",
+					secure: isProduction,
+					sameSite: isProduction ? "none" : "strict",
 					path: "/",
 					maxAge: COOKIE_MAX_AGE,
 				});
@@ -193,7 +197,7 @@ router.post(
 			path: "/",
 			httpOnly: true,
 			secure: isProduction,
-			sameSite: "strict",
+			sameSite: isProduction ? "none" : "strict",
 		});
 		res.clearCookie(
 			isProduction ? "__Host-psifi.x-csrf-token" : "psifi.x-csrf-token",
@@ -201,7 +205,7 @@ router.post(
 				path: "/",
 				httpOnly: false,
 				secure: isProduction,
-				sameSite: "strict",
+				sameSite: isProduction ? "none" : "strict",
 			},
 		);
 		res.status(200).json({ message: "Logged out successfully" });

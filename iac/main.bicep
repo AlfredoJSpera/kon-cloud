@@ -117,5 +117,7 @@ output applicationGatewayPublicIp string = vnetModule.outputs.publicIpAddress
 output applicationGatewayFqdn string = vnetModule.outputs.publicIpFqdn
 output applicationGatewayUrl string = 'https://${vnetModule.outputs.publicIpAddress}'
 output backendAppServiceFqdn string = appServiceModule.outputs.backendAppServiceFqdn
+output backendAppServiceUrl string = 'https://${appServiceModule.outputs.backendAppServiceFqdn}'
 output frontendAppServiceFqdn string = appServiceModule.outputs.frontendAppServiceFqdn
+output frontendAppServiceUrl string = 'https://${appServiceModule.outputs.frontendAppServiceFqdn}'
 output sqlServerFqdn string = sqlModule.outputs.sqlServerFqdn
