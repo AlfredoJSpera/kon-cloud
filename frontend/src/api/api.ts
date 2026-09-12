@@ -34,6 +34,7 @@ import type {
 	IExpenseOutput,
 	IExpenseUpdateInput,
 	ICashBalanceOutput,
+	IExpenseAttachmentOutput,
 } from "@backend-interfaces/expense";
 import axios, { type AxiosRequestConfig } from "axios";
 

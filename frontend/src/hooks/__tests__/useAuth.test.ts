@@ -32,6 +32,7 @@ describe("useAuth", () => {
 			isSessionRestoring: false,
 			login: vi.fn(),
 			logout: vi.fn(),
+			updateProfile: vi.fn(),
 		};
 
 		const wrapper = ({ children }: { children: React.ReactNode }) =>

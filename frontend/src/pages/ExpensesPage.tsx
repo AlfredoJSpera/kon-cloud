@@ -26,11 +26,9 @@ import {
 	LuWallet,
 	LuTrendingUp,
 	LuTrendingDown,
-	LuFilter,
 	LuPaperclip,
 	LuDownload,
 	LuTrash2,
-	LuFileText,
 } from "react-icons/lu";
 import { DashboardContainer } from "@/components/dashboard-container/DashboardContainer";
 import { NoCondominiumSelected } from "@/components/condominiums/NoCondominiumSelected";
@@ -44,7 +42,6 @@ import type {
 } from "@backend-interfaces/expense";
 import { makeApiRequest } from "@/api/api";
 import { toaster } from "@/components/chakraui/toaster";
-import { useNavigate } from "react-router-dom";
 
 const CATEGORY_COLOR_MAP: Record<ExpenseCategory, string> = {
 	Utilities: "blue",
@@ -57,7 +54,6 @@ const CATEGORY_COLOR_MAP: Record<ExpenseCategory, string> = {
 export function ExpensesPage() {
 	const { t } = useTranslation();
 	const { selectedCondominium } = useCondominium();
-	const navigate = useNavigate();
 
 	const [expenses, setExpenses] = useState<IExpenseOutput[]>([]);
 	const [cashBalanceInfo, setCashBalanceInfo] =

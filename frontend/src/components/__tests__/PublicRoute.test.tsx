@@ -20,6 +20,7 @@ describe("PublicRoutes", () => {
 			setToken: vi.fn(),
 			login: vi.fn(),
 			logout: vi.fn(),
+			updateProfile: vi.fn(),
 		});
 
 		render(
@@ -56,6 +57,7 @@ describe("PublicRoutes", () => {
 			setToken: vi.fn(),
 			login: vi.fn(),
 			logout: vi.fn(),
+			updateProfile: vi.fn(),
 		});
 
 		render(
@@ -88,6 +90,7 @@ describe("PublicRoutes", () => {
 			setToken: vi.fn(),
 			login: vi.fn(),
 			logout: vi.fn(),
+			updateProfile: vi.fn(),
 		});
 
 		render(
@@ -116,6 +119,7 @@ describe("PublicRoutes", () => {
 			setToken: vi.fn(),
 			login: vi.fn(),
 			logout: vi.fn(),
+			updateProfile: vi.fn(),
 		});
 
 		render(
