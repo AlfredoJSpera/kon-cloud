@@ -7,6 +7,8 @@ import type { AdministratorBasicInfo } from "@backend-interfaces/common";
 import type {
 	IAdministratorRegisterInput,
 	IAdministratorRegisterOutput,
+	IAdministratorUpdateInput,
+	IAdministratorUpdateOutput,
 } from "@backend-interfaces/administrator";
 import type {
 	ICondominiumCreateInput,
@@ -66,6 +68,15 @@ export const makeApiRequest = {
 	administrators: {
 		me: (options?: AxiosRequestConfig) =>
 			api.get<AdministratorBasicInfo>("/administrators/me", options),
+		updateMe: (
+			data: IAdministratorUpdateInput,
+			options?: AxiosRequestConfig,
+		) =>
+			api.put<IAdministratorUpdateOutput>(
+				"/administrators/me",
+				data,
+				options,
+			),
 		register: (
 			credentials: IAdministratorRegisterInput,
 			options?: AxiosRequestConfig,

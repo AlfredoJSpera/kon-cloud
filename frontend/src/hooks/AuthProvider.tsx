@@ -3,6 +3,7 @@ import { AuthContext } from "@/contexts/AuthContext";
 import { toaster } from "@/components/chakraui/toaster";
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
 import type { IAuthLoginInput } from "@backend-interfaces/auth";
+import type { IAdministratorUpdateInput } from "@backend-interfaces/administrator";
 import getApiErrorMessage from "@/api/apiErrorMessages";
 import { AxiosError, isAxiosError } from "axios";
 import { api, makeApiRequest } from "@/api/api";
@@ -199,6 +200,25 @@ export default function AuthProvider(props: { children: ReactNode }) {
 		}
 	};
 
+	const updateProfile = async (data: IAdministratorUpdateInput) => {
+		try {
+			const res = await makeApiRequest.administrators.updateMe(data);
+			setUser(res.data);
+			return res.data;
+		} catch (err: unknown) {
+			let errorCode = "UNKNOWN";
+			if (isAxiosError(err)) {
+				errorCode = err.response?.data.errorCode || err.code || "";
+			}
+			toaster.create({
+				title: "Update failed",
+				description: getApiErrorMessage(errorCode),
+				type: "error",
+			});
+			throw err;
+		}
+	};
+
 	return (
 		<AuthContext.Provider
 			value={{
@@ -214,6 +234,7 @@ export default function AuthProvider(props: { children: ReactNode }) {
 				isSessionRestoring,
 				login,
 				logout,
+				updateProfile,
 			}}
 		>
 			{props.children}
