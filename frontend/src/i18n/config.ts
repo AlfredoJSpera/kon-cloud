@@ -77,6 +77,9 @@ export const resources = {
 				newPasswordPlaceholder: "New password",
 				cancel: "Cancel",
 				saveChanges: "Save changes",
+				updatedSuccess: "Profile updated successfully.",
+				currentPasswordRequired:
+					"Current password is required to set a new password.",
 			},
 			dashboard: {
 				welcome: "Welcome back, {{name}}",
@@ -353,6 +356,9 @@ export const resources = {
 				newPasswordPlaceholder: "Nuova password",
 				cancel: "Annulla",
 				saveChanges: "Salva modifiche",
+				updatedSuccess: "Profilo aggiornato con successo.",
+				currentPasswordRequired:
+					"La password attuale è richiesta per impostare una nuova password.",
 			},
 			dashboard: {
 				welcome: "Bentornato, {{name}}",

@@ -81,15 +81,6 @@ export function DashboardPage() {
 		}
 	}, [selectedCondominium, fetchDashboardData]);
 
-	// Calculate breakdown per category
-	const categoryBreakdown = recentExpenses.reduce(
-		(acc, exp) => {
-			acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
-			return acc;
-		},
-		{} as Record<ExpenseCategory, number>,
-	);
-
 	return (
 		<DashboardContainer
 			sidebarBrandName="Kon-Cloud"

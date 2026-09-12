@@ -1,5 +1,6 @@
 import type { AdministratorBasicInfo } from "@backend-interfaces/common";
 import type { IAuthLoginInput } from "@backend-interfaces/auth";
+import type { IAdministratorUpdateInput } from "@backend-interfaces/administrator";
 import { createContext } from "react";
 
 export interface IAuthContext {
@@ -14,6 +15,9 @@ export interface IAuthContext {
 
 	login: (credentials: IAuthLoginInput) => Promise<void>;
 	logout: () => Promise<void>;
+	updateProfile: (
+		data: IAdministratorUpdateInput,
+	) => Promise<AdministratorBasicInfo>;
 }
 
 /** Context to access authentication state. Must be used within an `AuthProvider`. */

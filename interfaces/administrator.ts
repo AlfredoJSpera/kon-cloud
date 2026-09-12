@@ -12,3 +12,14 @@ export interface IAdministratorRegisterOutput {
 }
 
 export interface IAdministratorMeOutput extends AdministratorBasicInfo {}
+
+export interface IAdministratorUpdateInput {
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+	currentPassword?: string;
+	newPassword?: string;
+}
+
+export interface IAdministratorUpdateOutput extends AdministratorBasicInfo {}
+

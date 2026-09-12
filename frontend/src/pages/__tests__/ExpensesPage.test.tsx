@@ -31,6 +31,7 @@ describe("ExpensesPage", () => {
 			condominiums: selectedCondo ? [selectedCondo] : [],
 			selectedCondominium: selectedCondo,
 			loading: false,
+			isFetched: true,
 			error: null,
 			setSelectedCondominium: vi.fn(),
 			fetchCondominiums: vi.fn(),
