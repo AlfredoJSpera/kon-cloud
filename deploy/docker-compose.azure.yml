@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/alfredojspera/kon-cloud/backend:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-1433}
+      - DB_NAME=${DB_NAME:-kon}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ENCRYPT=${DB_ENCRYPT:-true}
+      - DB_TRUST_SERVER_CERTIFICATE=${DB_TRUST_SERVER_CERTIFICATE:-false}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING}
+      - AZURE_STORAGE_CONTAINER_NAME=${AZURE_STORAGE_CONTAINER_NAME:-expense-attachments}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - CSRF_TOKEN_SECRET=${CSRF_TOKEN_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - GENERAL_LIMITER_TRUST_PROXY=true
+
+  frontend:
+    image: ghcr.io/alfredojspera/kon-cloud/frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+    depends_on:
+      - backend
